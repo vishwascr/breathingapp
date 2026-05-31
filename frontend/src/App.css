@@ -1,0 +1,22 @@
+/* App.css is now largely redundant due to Tailwind migration */
+/* Keeping only necessary keyframes or complex non-utility animations */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Elegant layered glow for the breath indicator */
+.breath-glow {
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 
+    0 0 15px 2px var(--indicator-color),
+    0 0 50px 8px var(--indicator-color),
+    inset 0 0 10px rgba(255, 255, 255, 0.1);
+  backdrop-blur: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
