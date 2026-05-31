@@ -1,12 +1,30 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, ChevronDown, Clock, BookOpen, Quote } from 'lucide-react';
+import { Play, ChevronDown, Clock, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 
 function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [activeStatIndex, setActiveStatIndex] = useState(0);
+
   const lastSession = history.length > 0 ? history[0] : null;
+  
+  // Calculate Stats
+  const stats = [
+    {
+      label: 'Overall Focus Time',
+      total: history.reduce((total, session) => total + session.duration, 0),
+      color: 'text-text'
+    },
+    ...Object.entries(methods).map(([key, method]) => ({
+      label: `${method.name} Total`,
+      total: history
+        .filter(session => session.pattern === method.name)
+        .reduce((total, session) => total + session.duration, 0),
+      color: key === 'box' ? 'text-accent' : 'text-text'
+    }))
+  ].filter(stat => stat.total > 0 || stat.label === 'Overall Focus Time');
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -32,6 +50,9 @@ function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
       setIsDropdownOpen(!isDropdownOpen);
     }
   };
+
+  const nextStat = () => setActiveStatIndex((prev) => (prev + 1) % stats.length);
+  const prevStat = () => setActiveStatIndex((prev) => (prev - 1 + stats.length) % stats.length);
 
   const greeting = getGreeting();
 
@@ -124,12 +145,52 @@ function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
           </section>
         )}
 
-        <section className="bg-white/5 backdrop-blur-2xl border border-white/5 rounded-squircle-lg p-8 md:p-10 lg:col-span-2">
+        <section className="relative bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-xl flex flex-col justify-between hover:bg-white/10 transition-all duration-300 min-h-[220px]">
+          <button 
+            onClick={prevStat}
+            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all z-20"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <button 
+            onClick={nextStat}
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all z-20"
+          >
+            <ChevronRight size={24} />
+          </button>
+
+          <div className="px-8 flex flex-col items-center text-center h-full justify-center">
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">{stats[activeStatIndex].label}</h3>
+            </div>
+            <div className="flex items-baseline justify-center gap-3">
+              <span className={`text-5xl md:text-6xl font-thin tracking-tighter ${stats[activeStatIndex].color}`}>
+                {stats[activeStatIndex].total}
+              </span>
+              <span className="text-lg md:text-xl font-light text-dim uppercase tracking-widest">seconds</span>
+            </div>
+            
+            {/* Pagination Dots */}
+            <div className="flex gap-2 mt-8">
+              {stats.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveStatIndex(i)}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                    activeStatIndex === i ? 'bg-accent w-4' : 'bg-white/20'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white/5 backdrop-blur-2xl border border-white/5 rounded-squircle-lg p-8 md:p-10 flex flex-col h-full">
           <div className="flex items-center gap-2 mb-4">
             <BookOpen size={16} className="text-dim" />
             <h3 className="text-sm uppercase tracking-widest text-dim font-medium">Why Breathe?</h3>
           </div>
-          <p className="text-base md:text-lg font-light text-text/70 leading-relaxed max-w-3xl">
+          <p className="text-base md:text-lg font-light text-text/70 leading-relaxed">
             Controlled breathing helps regulate your nervous system, reduces cortisol levels, and improves focus. Just 5 minutes can transform your day and restore your inner balance.
           </p>
         </section>

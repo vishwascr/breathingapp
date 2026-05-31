@@ -10,6 +10,11 @@ function Settings({ methods, updateBoxDuration, currentTheme, setTheme, themes }
   };
 
   const handleSave = () => {
+    const val = boxPattern[0];
+    if (val < 4 || val > 6) {
+      alert('Box breathing duration must be between 4 and 6 seconds.');
+      return;
+    }
     updateBoxDuration(boxPattern);
     alert('Box breathing duration updated!');
   };
@@ -50,12 +55,13 @@ function Settings({ methods, updateBoxDuration, currentTheme, setTheme, themes }
           </div>
           <div className="flex items-end gap-3 md:gap-6">
             <div className="flex flex-col gap-2 flex-1 min-w-0">
-              <label className="text-[0.65rem] md:text-sm font-light text-dim/80 ml-1 uppercase tracking-wider truncate">Seconds per phase</label>
+              <label className="text-[0.65rem] md:text-sm font-light text-dim/80 ml-1 uppercase tracking-wider truncate">Seconds per phase (4-6s)</label>
               <input 
                 type="number" 
                 value={boxPattern[0]} 
                 onChange={(e) => handleChange(e.target.value)}
-                min="0"
+                min="4"
+                max="6"
                 className="w-full bg-white/5 border border-white/10 rounded-squircle-sm px-4 text-text text-center text-xl font-light focus:outline-none focus:border-accent transition-all h-[60px]"
               />
             </div>
