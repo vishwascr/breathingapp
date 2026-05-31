@@ -73,10 +73,6 @@ function History({ history }) {
                   <p className="text-dim/40 text-sm font-light italic">No notes for this session.</p>
                 )}
               </div>
-              
-              <div className="flex items-center justify-center w-12 h-12 rounded-full border border-white/5 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
-                <ChevronRight size={20} className="text-dim" />
-              </div>
             </div>
           </div>
         ))}

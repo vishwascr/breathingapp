@@ -94,6 +94,10 @@ function App() {
     root.style.setProperty('--color-text', colors.text);
     root.style.setProperty('--color-secondary', colors.secondary);
     root.style.setProperty('--color-dim', colors.dim);
+
+    // Force background to black for Safari's browser chrome
+    root.style.backgroundColor = '#000000';
+    document.body.style.backgroundColor = '#000000';
   }, [theme]);
 
   const updateTheme = async (newTheme) => {
@@ -151,7 +155,7 @@ function App() {
   );
 
   return (
-    <div className="w-screen h-screen bg-bg text-text overflow-hidden transition-colors duration-500 relative isolate">
+    <div className="w-screen h-[100dvh] bg-bg text-text overflow-hidden transition-colors duration-500 relative isolate">
       {/* UI Layer */}
       <div className="flex flex-col-reverse md:flex-row w-full h-full relative z-10">
         <Sidebar 
@@ -178,7 +182,7 @@ function App() {
             </div>
           )}
           
-          <main className="w-full h-full overflow-y-auto p-6 md:p-12 flex justify-center items-start relative z-10 pb-24 md:pb-12">
+          <main className="w-full h-full overflow-y-auto p-6 md:p-12 flex justify-center items-start relative z-10 pb-28 md:pb-12">
             <Routes>
               <Route path="/" element={
                 <Dashboard 

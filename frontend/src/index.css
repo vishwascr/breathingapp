@@ -58,6 +58,6 @@
   }
 
   input:not(.tailwind-ignore) {
-    @apply bg-white/5 backdrop-blur-sm border border-white/20 text-text p-2 rounded-squircle-sm m-2 w-20 text-center text-base focus:outline-none focus:border-text;
+    @apply bg-white/5 backdrop-blur-sm border border-white/20 text-text p-2 rounded-squircle-sm text-center text-base focus:outline-none focus:border-text;
   }
 }
