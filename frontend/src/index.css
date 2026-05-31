@@ -41,7 +41,7 @@
 
 @layer base {
   body {
-    @apply bg-bg text-text m-0 min-h-screen overflow-x-hidden;
+    @apply bg-bg text-text m-0 min-h-screen;
     transition: background-color 0.5s ease;
   }
 

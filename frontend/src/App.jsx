@@ -155,9 +155,9 @@ function App() {
   );
 
   return (
-    <div className="w-screen h-[100dvh] bg-bg text-text overflow-hidden transition-colors duration-500 relative isolate">
+    <div className="min-h-screen bg-bg text-text transition-colors duration-500 relative isolate">
       {/* UI Layer */}
-      <div className="flex flex-col-reverse md:flex-row w-full h-full relative z-10">
+      <div className="flex flex-col md:flex-row w-full min-h-screen relative z-10">
         <Sidebar 
           methods={methods} 
           selectedMethod={selectedMethod} 
@@ -166,10 +166,10 @@ function App() {
           onNavigateAttempt={(path) => setPendingNav(path)}
         />
         
-        <div className="flex-1 relative isolate h-full overflow-hidden">
-          {/* Subtle Vertical Stripes Background */}
+        <div className="flex-1 relative isolate min-h-screen">
+          {/* Subtle Vertical Stripes Background - Fixed to stay behind scrolling content */}
           {showStripes && (
-            <div className="absolute inset-0 flex pointer-events-none z-0">
+            <div className="fixed inset-0 flex pointer-events-none z-0">
               {[...Array(8)].map((_, i) => (
                 <div 
                   key={i} 
@@ -182,7 +182,7 @@ function App() {
             </div>
           )}
           
-          <main className="w-full h-full overflow-y-auto p-6 md:p-12 flex justify-center items-start relative z-10 pb-28 md:pb-12">
+          <main className="w-full min-h-screen p-6 md:p-12 flex justify-center items-start relative z-10 pb-32 md:pb-12">
             <Routes>
               <Route path="/" element={
                 <Dashboard 
