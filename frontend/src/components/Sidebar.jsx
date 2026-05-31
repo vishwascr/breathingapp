@@ -42,81 +42,75 @@ function Sidebar({ methods, selectedMethod, onMethodChange, isSessionActive, onN
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden md:flex md:flex-col md:relative md:w-72 md:min-w-[280px] md:h-full bg-white/5 backdrop-blur-3xl border-r border-white/10 py-10 px-6 z-50">
+      <div className="hidden md:flex md:flex-col md:fixed md:top-0 md:left-0 md:w-72 md:min-w-[280px] md:h-screen bg-white/5 backdrop-blur-3xl border-r border-white/10 py-10 px-6 z-50">
         <div className="flex flex-col items-center mb-14 gap-4">
           <h2 className="font-extralight tracking-widest text-2xl text-text uppercase">The Breath App</h2>
-          <a 
-            href="https://github.com/vishwascr/breathingapp" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-dim hover:text-accent transition-colors duration-300 flex items-center gap-2"
-          >
-            <Github size={16} />
-            <span className="text-[0.65rem] uppercase tracking-widest">v1.0.0</span>
-          </a>
         </div>
         
-        <div className="w-full">
-          <h3 className="text-[0.75rem] uppercase tracking-[2px] text-dim mb-5 pl-2 font-medium">Menu</h3>
-          <ul className="flex flex-col gap-2 list-none p-0 m-0 w-full">
-            <li>
-              <NavLink to="/" className={linkClass} onClick={(e) => handleNavClick(e, '/')}>
-                <LayoutDashboard size={20} />
-                <span>Dashboard</span>
-              </NavLink>
-            </li>
-            
-            <li className="relative">
-              <button 
-                className={`w-full text-left border border-transparent p-4 rounded-squircle-md cursor-pointer transition-all duration-300 text-base flex items-center justify-between ${isBreatheActive ? activeClass : inactiveClass}`}
-                onClick={handleBreatheClick}
-              >
-                <div className="flex items-center gap-4">
-                  <Wind size={20} />
-                  <span>Breathing Techniques</span>
-                </div>
-                {methodsExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-              </button>
+        <div className="w-full flex-1 flex flex-col justify-between">
+          <div>
+            <h3 className="text-[0.75rem] uppercase tracking-[2px] text-dim mb-5 pl-2 font-medium">Menu</h3>
+            <ul className="flex flex-col gap-2 list-none p-0 m-0 w-full">
+              <li>
+                <NavLink to="/" className={linkClass} onClick={(e) => handleNavClick(e, '/')}>
+                  <LayoutDashboard size={20} />
+                  <span>Dashboard</span>
+                </NavLink>
+              </li>
               
-              {methodsExpanded && (
-                <ul className="flex list-none p-2 pl-4 m-0 flex-col gap-2 mt-1">
-                  {Object.entries(methods).map(([key, method]) => (
-                    <li key={key}>
-                      <button 
-                        className={`w-full text-left bg-transparent border border-transparent p-3 rounded-squircle-md transition-all duration-300 text-sm ${
-                          selectedMethod === key 
-                          ? 'text-white font-medium opacity-100' 
-                          : 'text-text opacity-50 hover:bg-white/5 hover:opacity-100'
-                        }`}
-                        onClick={() => {
-                          if (isSessionActive) {
-                            onNavigateAttempt('/practice');
-                            return;
-                          }
-                          onMethodChange(key);
-                        }}
-                      >
-                        {method.name}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
+              <li className="relative">
+                <button 
+                  className={`w-full text-left border border-transparent p-4 rounded-squircle-md cursor-pointer transition-all duration-300 text-base flex items-center justify-between ${isBreatheActive ? activeClass : inactiveClass}`}
+                  onClick={handleBreatheClick}
+                >
+                  <div className="flex items-center gap-4">
+                    <Wind size={20} />
+                    <span>Breathing Techniques</span>
+                  </div>
+                  {methodsExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+                
+                {methodsExpanded && (
+                  <ul className="flex list-none p-2 pl-4 m-0 flex-col gap-2 mt-1">
+                    {Object.entries(methods).map(([key, method]) => (
+                      <li key={key}>
+                        <button 
+                          className={`w-full text-left bg-transparent border border-transparent p-3 rounded-squircle-md transition-all duration-300 text-sm ${
+                            selectedMethod === key 
+                            ? 'text-white font-medium opacity-100' 
+                            : 'text-text opacity-50 hover:bg-white/5 hover:opacity-100'
+                          }`}
+                          onClick={() => {
+                            if (isSessionActive) {
+                              onNavigateAttempt('/practice');
+                              return;
+                            }
+                            onMethodChange(key);
+                          }}
+                        >
+                          {method.name}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
 
-            <li>
-              <NavLink to="/history" className={linkClass} onClick={(e) => handleNavClick(e, '/history')}>
-                <HistoryIcon size={20} />
-                <span>History</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/settings" className={linkClass} onClick={(e) => handleNavClick(e, '/settings')}>
-                <Settings size={20} />
-                <span>Settings</span>
-              </NavLink>
-            </li>
-          </ul>
+              <li>
+                <NavLink to="/history" className={linkClass} onClick={(e) => handleNavClick(e, '/history')}>
+                  <HistoryIcon size={20} />
+                  <span>History</span>
+                </NavLink>
+              </li>
+            </ul>
+          </div>
+
+          <div className="mt-auto pt-4 border-t border-white/5">
+            <NavLink to="/settings" className={linkClass} onClick={(e) => handleNavClick(e, '/settings')}>
+              <Settings size={20} />
+              <span>Settings</span>
+            </NavLink>
+          </div>
         </div>
       </div>
 

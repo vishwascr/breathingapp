@@ -4,6 +4,12 @@ import { Play, Square, Save, X, Info, CheckCircle2 } from 'lucide-react'
 
 const PHASES = ['Inhale', 'Hold', 'Exhale', 'Hold'];
 
+const GUIDANCE = {
+  'Inhale': 'Breathe in through your nose deeply.',
+  'Hold': 'Maintain the breath gently.',
+  'Exhale': 'Release the breath slowly through your mouth.'
+};
+
 function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) {
   const navigate = useNavigate();
   
@@ -17,6 +23,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const [showSummary, setShowSummary] = useState(false);
   const [lastSession, setLastSession] = useState(null);
   const [currentNote, setCurrentNote] = useState('');
+  const [guidanceVisible, setGuidanceVisible] = useState(true);
 
   const sessionTimerRef = useRef(null);
   const pathLength = 1716;
@@ -73,13 +80,19 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
         nextIndex = (nextIndex + 1) % 4;
       }
 
-      if (nextIndex <= phaseState.index || currentPattern[nextIndex] === 0) {
-        setPhaseState({ index: phaseState.index, resetting: true });
-      } else {
-        setTimeLeft(currentPattern[nextIndex]);
-        setPhaseState({ index: nextIndex, resetting: false });
-      }
-    }, currentDur * 1000);
+      // Start fade out slightly before transition
+      setGuidanceVisible(false);
+
+      setTimeout(() => {
+        if (nextIndex <= phaseState.index || currentPattern[nextIndex] === 0) {
+          setPhaseState({ index: phaseState.index, resetting: true });
+        } else {
+          setTimeLeft(currentPattern[nextIndex]);
+          setPhaseState({ index: nextIndex, resetting: false });
+        }
+        setGuidanceVisible(true);
+      }, 300); // Wait for fade out
+    }, (currentDur * 1000) - 300);
 
     return () => {
       clearInterval(textInterval);
@@ -190,7 +203,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
         <h2 className="text-[1.8rem] md:text-[2.5rem] font-thin mb-4 text-text">{methods[selectedMethod].name}</h2>
       </div>
 
-      <div className="m-auto flex flex-col items-center justify-center gap-8 md:gap-12 w-full pt-20 md:pt-0">
+      <div className="m-auto flex flex-col items-center justify-center gap-8 md:gap-12 w-full pt-32 md:pt-20">
         <div className="relative w-[300px] h-[300px] md:w-[450px] md:h-[450px] flex justify-center items-center">
           <div 
             className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-2xl border border-white/10 rounded-squircle-lg shadow-2xl transition-opacity duration-500"
@@ -223,7 +236,18 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
             {isActive ? <Square size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
             {isActive ? 'Stop Session' : 'Begin Journey'}
           </button>
-          {isActive && <div className="text-dim font-light tracking-wide">Session: {sessionTime}s</div>}
+          {isActive && (
+            <div className="flex flex-col items-center gap-2">
+              <div className="text-dim font-light tracking-wide">Session: {sessionTime}s</div>
+              <div 
+                className={`text-accent font-light tracking-wider text-sm md:text-base text-center max-w-xs transition-all duration-500 filter drop-shadow-[0_0_8px_var(--color-accent)] ${
+                  guidanceVisible ? 'opacity-80 translate-y-0' : 'opacity-0 translate-y-2'
+                }`}
+              >
+                {GUIDANCE[currentPhase]}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

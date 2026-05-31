@@ -11,7 +11,7 @@ import Methods from './components/Methods'
 
 const INITIAL_METHODS = {
   box: { name: 'Box Breathing', pattern: [4, 4, 4, 4] },
-  deepBelly: { name: 'Deep Belly Breathing', pattern: [5, 0, 5, 0] },
+  deepBelly: { name: 'Diaphragmatic Breathing', pattern: [5, 0, 5, 0] },
   '478': { name: '4-7-8 Breathing', pattern: [4, 7, 8, 0] }
 };
 
@@ -166,7 +166,7 @@ function App() {
           onNavigateAttempt={(path) => setPendingNav(path)}
         />
         
-        <div className="flex-1 relative isolate min-h-screen">
+        <div className="flex-1 relative isolate min-h-screen md:ml-72">
           {/* Subtle Vertical Stripes Background - Fixed to stay behind scrolling content */}
           {showStripes && (
             <div className="fixed inset-0 flex pointer-events-none z-0">
