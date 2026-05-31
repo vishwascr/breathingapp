@@ -17,17 +17,19 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const initialTime = (selectedMethod && methods[selectedMethod]) ? methods[selectedMethod].pattern[0] : 4;
 
   const [isActive, setIsActive] = useState(false);
-  const [phaseState, setPhaseState] = useState({ index: 0, resetting: false });
+  const [phaseState, setPhaseState] = useState({ index: 0, cumulativeIndex: 0 });
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [sessionTime, setSessionTime] = useState(0);
+  const [prevCumulativeIndex, setPrevCumulativeIndex] = useState(0);
+  const [headPosition, setHeadPosition] = useState({ x: 225, y: 2 });
   const [showSummary, setShowSummary] = useState(false);
   const [lastSession, setLastSession] = useState(null);
   const [currentNote, setCurrentNote] = useState('');
   const [guidanceVisible, setGuidanceVisible] = useState(true);
 
   const sessionTimerRef = useRef(null);
-  const pathLength = 1716;
-  const step = pathLength / 4;
+  const pathRef = useRef(null);
+  const animationRef = useRef(null);
 
   // Sync with global session state
   useEffect(() => {
@@ -54,18 +56,37 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
     return () => clearInterval(sessionTimerRef.current);
   }, [isActive]);
 
+  // Animation for the head position
+  useEffect(() => {
+    if (!isActive || selectedMethod !== 'box' || !pathRef.current) return;
+
+    let start = null;
+    const duration = methods[selectedMethod].pattern[phaseState.index] * 1000;
+    const startLen = (phaseState.cumulativeIndex - 1) * 25;
+
+    const step = (timestamp) => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      
+      const currentLen = (startLen + (progress * 25)) % 100;
+      
+      const totalPixelLength = pathRef.current.getTotalLength();
+      const pixelPoint = pathRef.current.getPointAtLength((currentLen / 100) * totalPixelLength);
+      
+      setHeadPosition({ x: pixelPoint.x, y: pixelPoint.y });
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(step);
+      }
+    };
+
+    animationRef.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animationRef.current);
+  }, [isActive, phaseState, selectedMethod, methods]);
+
   // Core breathing logic
   useEffect(() => {
     if (!isActive || !selectedMethod || !methods[selectedMethod]) return;
-
-    if (phaseState.resetting) {
-      const resetTimeout = setTimeout(() => {
-        const currentPattern = methods[selectedMethod].pattern;
-        setTimeLeft(currentPattern[0]);
-        setPhaseState({ index: 0, resetting: false });
-      }, 50);
-      return () => clearTimeout(resetTimeout);
-    }
 
     const currentPattern = methods[selectedMethod].pattern;
     const currentDur = currentPattern[phaseState.index];
@@ -84,12 +105,14 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       setGuidanceVisible(false);
 
       setTimeout(() => {
-        if (nextIndex <= phaseState.index || currentPattern[nextIndex] === 0) {
-          setPhaseState({ index: phaseState.index, resetting: true });
-        } else {
-          setTimeLeft(currentPattern[nextIndex]);
-          setPhaseState({ index: nextIndex, resetting: false });
-        }
+        setTimeLeft(currentPattern[nextIndex]);
+        setPhaseState(prev => {
+          setPrevCumulativeIndex(prev.cumulativeIndex);
+          return { 
+            index: nextIndex, 
+            cumulativeIndex: prev.cumulativeIndex + 1 
+          };
+        });
         setGuidanceVisible(true);
       }, 300); // Wait for fade out
     }, (currentDur * 1000) - 300);
@@ -98,7 +121,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       clearInterval(textInterval);
       clearTimeout(phaseTimeout);
     };
-  }, [isActive, phaseState, selectedMethod, methods]);
+  }, [isActive, phaseState.index, selectedMethod, methods]);
 
   if (!selectedMethod || !methods[selectedMethod]) {
     return (
@@ -117,7 +140,9 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       setShowSummary(true);
     } else {
       setSessionTime(0);
-      setPhaseState({ index: 0, resetting: false });
+      setPrevCumulativeIndex(0);
+      setHeadPosition({ x: 0, y: 0 });
+      setPhaseState({ index: 0, cumulativeIndex: 1 });
       setTimeLeft(methods[selectedMethod].pattern[0]);
       setIsActive(true);
       setCurrentNote('');
@@ -129,40 +154,22 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
     setShowSummary(false);
   };
 
-  const getStrokeStyle = () => {
+  const getStrokeStyle = (targetCumulativeIndex, isPrev = false) => {
     if (!isActive || selectedMethod !== 'box') {
-      return {
-        strokeDasharray: `0 ${pathLength}`,
-        strokeDashoffset: 0,
-        opacity: 0,
-        transition: 'none'
-      };
-    }
-
-    if (phaseState.resetting) {
-      return {
-        strokeDasharray: `0 ${pathLength}`,
-        strokeDashoffset: 0,
-        opacity: 0,
-        transition: 'none'
-      };
+      return { opacity: 0 };
     }
 
     const currentPattern = methods[selectedMethod].pattern;
     const currentDur = currentPattern[phaseState.index];
     
-    const offsets = [
-      0,               // Phase 0: Grows in place
-      -step,           // Phase 1: Travels
-      -2 * step,       // Phase 2: Travels
-      -3 * step        // Phase 3: Travels
-    ];
+    // Each phase starts 25% further along
+    const offset = -(targetCumulativeIndex - 1) * 25;
     
     return {
-      strokeDasharray: `${phaseState.index === 0 ? step : step} ${pathLength}`,
-      strokeDashoffset: offsets[phaseState.index],
-      opacity: 1,
-      transition: `stroke-dashoffset ${currentDur}s linear, stroke-dasharray ${currentDur}s linear`
+      strokeDashoffset: offset,
+      animationDuration: isPrev ? '1s' : `${currentDur}s`,
+      stroke: `url(#grad-${(targetCumulativeIndex - 1) % 4})`,
+      opacity: 1
     };
   };
 
@@ -172,13 +179,6 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
         transform: 'scale(1)',
         transition: 'transform 0.5s ease-out'
       };
-    }
-
-    if (phaseState.resetting) {
-       return {
-         transform: 'scale(1)',
-         transition: 'none'
-       };
     }
 
     const currentPattern = methods[selectedMethod].pattern;
@@ -210,17 +210,72 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
             className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-2xl border border-white/10 rounded-squircle-lg shadow-2xl transition-opacity duration-500"
             style={{ opacity: selectedMethod === 'box' ? 1 : 0 }}
           ></div>
-          <div className="absolute top-[-50px] md:top-[-80px] text-[1.2rem] md:text-[2.2rem] font-thin text-text uppercase tracking-[0.6rem] md:tracking-[1.2rem] whitespace-nowrap">
+          <div className="absolute top-[-60px] md:top-[-100px] text-[1.2rem] md:text-[2.2rem] font-thin text-text uppercase tracking-[0.8rem] md:tracking-[1.5rem] whitespace-nowrap">
             {isActive ? currentPhase : ''}
           </div>
           
           {selectedMethod === 'box' && (
-            <svg className="absolute inset-[-4px] md:inset-[-6px] w-[calc(100%+8px)] md:w-[calc(100%+12px)] h-[calc(100%+8px)] md:h-[calc(100%+12px)] z-[5] pointer-events-none overflow-visible" viewBox="0 0 450 450">
+            <svg className="absolute inset-0 w-full h-full z-[5] pointer-events-none overflow-visible" viewBox="0 0 450 450">
+              <defs>
+                <filter id="head-glow-filter" x="-200%" y="-200%" width="500%" height="500%">
+                  <feGaussianBlur stdDeviation="5" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+
+                <linearGradient id="grad-0" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="var(--color-text)" stopOpacity="0" />
+                  <stop offset="100%" stopColor="var(--color-text)" stopOpacity="1" />
+                </linearGradient>
+                <linearGradient id="grad-1" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="var(--color-text)" stopOpacity="0" />
+                  <stop offset="100%" stopColor="var(--color-text)" stopOpacity="1" />
+                </linearGradient>
+                <linearGradient id="grad-2" x1="100%" y1="0%" x2="0%" y2="0%">
+                  <stop offset="0%" stopColor="var(--color-text)" stopOpacity="0" />
+                  <stop offset="100%" stopColor="var(--color-text)" stopOpacity="1" />
+                </linearGradient>
+                <linearGradient id="grad-3" x1="0%" y1="100%" x2="0%" y2="0%">
+                  <stop offset="0%" stopColor="var(--color-text)" stopOpacity="0" />
+                  <stop offset="100%" stopColor="var(--color-text)" stopOpacity="1" />
+                </linearGradient>
+              </defs>
+
               <rect 
-                x="2" y="2" width="446" height="446" rx="40"
-                className="fill-none stroke-text stroke-[5px] stroke-linecap-round filter drop-shadow-[0_0_15px_var(--indicator-color)]"
-                style={getStrokeStyle()}
+                ref={pathRef}
+                x="0" y="0" width="450" height="450" rx="46"
+                className="fill-none stroke-none"
               />
+
+              {prevCumulativeIndex > 0 && (
+                <rect 
+                  key={`stroke-prev-${prevCumulativeIndex}`}
+                  x="0" y="0" width="450" height="450" rx="46" pathLength="100"
+                  className="fill-none stroke-[6px] stroke-linecap-round fading-stroke"
+                  style={getStrokeStyle(prevCumulativeIndex, true)}
+                />
+              )}
+              
+              <rect 
+                key={`stroke-curr-${phaseState.cumulativeIndex}`}
+                x="0" y="0" width="450" height="450" rx="46" pathLength="100"
+                className={`fill-none stroke-[6px] stroke-linecap-round ${isActive ? 'growing-stroke' : 'opacity-0'}`}
+                style={getStrokeStyle(phaseState.cumulativeIndex)}
+              />
+
+              {isActive && (
+                <circle 
+                  cx={headPosition.x} 
+                  cy={headPosition.y} 
+                  r="4" 
+                  className="fill-accent"
+                  filter="url(#head-glow-filter)"
+                  style={{ transition: 'none' }}
+                />
+              )}
             </svg>
           )}
 
