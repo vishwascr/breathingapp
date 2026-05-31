@@ -30,7 +30,7 @@ const THEMES = {
   mint: {
     name: 'Mint (Fresh)',
     colors: {
-      bg: '#000000',
+      bg: '#051410',
       accent: '#42f5ad',
       indicator: '#00ffa3',
       glass: '#0D1412',
@@ -45,7 +45,9 @@ function App() {
   const [methods, setMethods] = useState(INITIAL_METHODS);
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [history, setHistory] = useState([]);
-  const [theme, setTheme] = useState(null); // No default theme in frontend
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('breath-theme') || null;
+  });
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [pendingNav, setPendingNav] = useState(null);
   const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
@@ -77,18 +79,22 @@ function App() {
         // Load Theme
         const themeRes = await fetch('/api/settings/theme');
         const themeData = await themeRes.json();
-        if (isMounted) setTheme(themeData.theme);
+        if (isMounted) {
+          setTheme(themeData.theme);
+          localStorage.setItem('breath-theme', themeData.theme);
+        }
       } catch (err) {
         console.error('Failed to fetch initial data:', err);
-        if (isMounted) setTheme('noir'); // Fallback if DB fails
+        if (isMounted && !theme) setTheme('noir'); // Only fallback if no cached theme
       }
     };
     loadInitialData();
     return () => { isMounted = false; };
-  }, []);
+  }, []); // Run once on mount
 
   useEffect(() => {
     if (!theme) return;
+    localStorage.setItem('breath-theme', theme);
     const root = document.documentElement;
     const colors = THEMES[theme].colors;
     root.style.setProperty('--color-bg', colors.bg);
@@ -98,11 +104,25 @@ function App() {
     root.style.setProperty('--color-text', colors.text);
     root.style.setProperty('--color-secondary', colors.secondary);
     root.style.setProperty('--color-dim', colors.dim);
+
+    // Update meta theme-color for mobile browser chrome
+    const updateMeta = (content) => {
+      let meta = document.querySelector('meta[name="theme-color"]');
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute('name', 'theme-color');
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', content);
+    };
+    
+    updateMeta(colors.bg);
   }, [theme]);
 
   const updateTheme = async (newTheme) => {
     try {
       setTheme(newTheme);
+      localStorage.setItem('breath-theme', newTheme);
       await fetch('/api/settings/theme', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -149,15 +169,15 @@ function App() {
   };
 
   if (!theme) return (
-    <div className="w-screen h-screen bg-[#000000] flex items-center justify-center">
+    <div className="w-screen h-dvh bg-[var(--color-bg,#000000)] flex items-center justify-center">
       <div className="w-12 h-12 border-4 border-white/10 border-t-white rounded-full animate-spin"></div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-bg text-text transition-colors duration-500 relative isolate">
+    <div className="min-h-dvh text-text transition-colors duration-500 relative isolate">
       {/* UI Layer */}
-      <div className="flex flex-col md:flex-row w-full min-h-screen relative z-10">
+      <div className="flex flex-col md:flex-row w-full min-h-dvh relative z-10">
         <Sidebar 
           isSessionActive={isSessionActive}
           onNavigateAttempt={(path) => setPendingNav(path)}
@@ -165,7 +185,7 @@ function App() {
           isMethodModalOpen={isMethodModalOpen}
         />
         
-        <div className="flex-1 relative isolate min-h-screen md:ml-72">
+        <div className="flex-1 relative isolate min-h-dvh md:ml-72">
           {/* Subtle Vertical Stripes Background - Fixed to stay behind scrolling content */}
           {showStripes && (
             <div className="fixed inset-0 flex pointer-events-none z-0">
@@ -181,7 +201,7 @@ function App() {
             </div>
           )}
           
-          <main className="w-full min-h-screen p-6 md:p-12 flex justify-center items-start relative z-10 pb-32 md:pb-12">
+          <main className="w-full min-h-dvh p-6 md:p-12 flex justify-center items-start relative z-10 pb-32 md:pb-12">
             <Routes>
               <Route path="/" element={
                 <Dashboard 

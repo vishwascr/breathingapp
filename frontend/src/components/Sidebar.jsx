@@ -33,7 +33,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden md:flex md:flex-col md:fixed md:top-0 md:left-0 md:w-72 md:min-w-[280px] md:h-screen bg-white/5 backdrop-blur-3xl border-r border-white/10 py-10 px-6 z-50">
+      <div className="hidden md:flex md:flex-col md:fixed md:top-0 md:left-0 md:w-72 md:min-w-[280px] md:h-dvh bg-white/5 backdrop-blur-3xl border-r border-white/10 py-10 px-6 z-50">
         <div className="flex flex-col items-center mb-14 gap-4">
           <h2 className="font-extralight tracking-widest text-2xl text-text uppercase">The Breath App</h2>
         </div>

@@ -7,7 +7,7 @@ const PHASES = ['Inhale', 'Hold', 'Exhale', 'Hold'];
 const GUIDANCE = {
   'Inhale': 'Breathe in through your nose deeply.',
   'Hold': 'Maintain the breath gently.',
-  'Exhale': 'Release the breath slowly through your mouth.'
+  'Exhale': 'Exhale slowly through your mouth.'
 };
 
 function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) {
@@ -102,7 +102,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
 
   if (!selectedMethod || !methods[selectedMethod]) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
+      <div className="w-full h-dvh flex items-center justify-center">
         <div className="text-dim font-light tracking-widest animate-pulse uppercase text-sm">Redirecting...</div>
       </div>
     );
@@ -132,8 +132,8 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const getStrokeStyle = () => {
     if (!isActive || selectedMethod !== 'box') {
       return {
-        strokeDasharray: pathLength,
-        strokeDashoffset: pathLength,
+        strokeDasharray: `0 ${pathLength}`,
+        strokeDashoffset: 0,
         opacity: 0,
         transition: 'none'
       };
@@ -141,8 +141,8 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
 
     if (phaseState.resetting) {
       return {
-        strokeDasharray: pathLength,
-        strokeDashoffset: pathLength,
+        strokeDasharray: `0 ${pathLength}`,
+        strokeDashoffset: 0,
         opacity: 0,
         transition: 'none'
       };
@@ -151,18 +151,18 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
     const currentPattern = methods[selectedMethod].pattern;
     const currentDur = currentPattern[phaseState.index];
     
-    const targets = [
-      pathLength - step,
-      pathLength - (step * 2),
-      pathLength - (step * 3),
-      0
+    const offsets = [
+      0,               // Phase 0: Grows in place
+      -step,           // Phase 1: Travels
+      -2 * step,       // Phase 2: Travels
+      -3 * step        // Phase 3: Travels
     ];
     
     return {
-      strokeDasharray: pathLength,
-      strokeDashoffset: targets[phaseState.index],
-      opacity: (phaseState.index === 3) ? 0 : 1,
-      transition: `stroke-dashoffset ${currentDur}s linear, opacity ${currentDur}s ease-in`
+      strokeDasharray: `${phaseState.index === 0 ? step : step} ${pathLength}`,
+      strokeDashoffset: offsets[phaseState.index],
+      opacity: 1,
+      transition: `stroke-dashoffset ${currentDur}s linear, stroke-dasharray ${currentDur}s linear`
     };
   };
 
@@ -199,18 +199,18 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const currentPhase = PHASES[phaseState.index];
 
   return (
-    <div className="w-full h-full flex flex-col relative">
-      <div className="absolute top-0 left-0 z-[5] w-full px-2">
-        <h2 className="text-[1.8rem] md:text-[2.5rem] font-thin mb-4 text-text">{methods[selectedMethod].name}</h2>
-      </div>
+    <div className="w-full min-h-dvh flex flex-col py-8 px-6 md:py-12 relative">
+      <header className="mb-2 md:mb-4">
+        <h2 className="text-[1.8rem] md:text-[3rem] font-thin tracking-tight text-text text-left">{methods[selectedMethod].name}</h2>
+      </header>
 
-      <div className="m-auto flex flex-col items-center justify-center gap-8 md:gap-12 w-full pt-32 md:pt-20">
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 md:gap-6 w-full">
         <div className="relative w-[300px] h-[300px] md:w-[450px] md:h-[450px] flex justify-center items-center">
           <div 
             className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-2xl border border-white/10 rounded-squircle-lg shadow-2xl transition-opacity duration-500"
             style={{ opacity: selectedMethod === 'box' ? 1 : 0 }}
           ></div>
-          <div className="absolute top-[-50px] md:top-[-80px] text-[1.2rem] md:text-[2.2rem] font-thin text-text uppercase tracking-[0.3rem] md:tracking-[0.8rem] whitespace-nowrap">
+          <div className="absolute top-[-50px] md:top-[-80px] text-[1.2rem] md:text-[2.2rem] font-thin text-text uppercase tracking-[0.6rem] md:tracking-[1.2rem] whitespace-nowrap">
             {isActive ? currentPhase : ''}
           </div>
           
@@ -232,23 +232,21 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 min-h-[120px] md:min-h-[160px]">
           <button onClick={handleStartStop} className="btn-primary text-xl font-light tracking-widest flex items-center gap-3">
             {isActive ? <Square size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
             {isActive ? 'Stop Session' : 'Begin Journey'}
           </button>
-          {isActive && (
-            <div className="flex flex-col items-center gap-2">
-              <div className="text-dim font-light tracking-wide">Session: {sessionTime}s</div>
-              <div 
-                className={`text-accent font-light tracking-wider text-sm md:text-base text-center max-w-xs transition-all duration-500 filter drop-shadow-[0_0_8px_var(--color-accent)] ${
-                  guidanceVisible ? 'opacity-80 translate-y-0' : 'opacity-0 translate-y-2'
-                }`}
-              >
-                {GUIDANCE[currentPhase]}
-              </div>
+          <div className={`flex flex-col items-center gap-2 transition-all duration-500 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="text-dim font-light tracking-wide">Session: {sessionTime}s</div>
+            <div 
+              className={`text-accent font-light tracking-wider text-sm md:text-base text-center max-w-xs transition-all duration-500 filter drop-shadow-[0_0_8px_var(--color-accent)] ${
+                guidanceVisible ? 'opacity-80 translate-y-0' : 'opacity-0 translate-y-2'
+              }`}
+            >
+              {GUIDANCE[currentPhase] || ' '}
             </div>
-          )}
+          </div>
         </div>
       </div>
 
