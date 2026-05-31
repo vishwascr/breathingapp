@@ -19,6 +19,7 @@ mongoose.connect(process.env.MONGODB_URI)
 const historySchema = new mongoose.Schema({
   duration: { type: Number, required: true },
   pattern: { type: String, required: true },
+  phaseDuration: { type: Number },
   notes: { type: String, default: '' },
   timestamp: { type: Date, default: Date.now }
 });
@@ -74,6 +75,7 @@ app.post('/api/history', async (req, res) => {
   const historyItem = new History({
     duration: req.body.duration,
     pattern: req.body.pattern,
+    phaseDuration: req.body.phaseDuration,
     notes: req.body.notes || ''
   });
 

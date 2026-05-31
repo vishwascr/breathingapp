@@ -1,10 +1,7 @@
-import { useState } from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Wind, History as HistoryIcon, Settings, ChevronDown, ChevronRight, BookOpen, Github } from 'lucide-react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { LayoutDashboard, Wind, History as HistoryIcon, Settings } from 'lucide-react';
 
-function Sidebar({ methods, selectedMethod, onMethodChange, isSessionActive, onNavigateAttempt }) {
-  const [methodsExpanded, setMethodsExpanded] = useState(false);
-  const navigate = useNavigate();
+function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethodModalOpen }) {
   const location = useLocation();
 
   const activeClass = 'bg-accent text-bg font-medium opacity-100 shadow-lg shadow-accent/20';
@@ -15,7 +12,7 @@ function Sidebar({ methods, selectedMethod, onMethodChange, isSessionActive, onN
       isActive ? activeClass : inactiveClass
     }`;
 
-  const isBreatheActive = location.pathname === '/methods' || location.pathname === '/practice';
+  const isBreatheActive = isMethodModalOpen || location.pathname === '/practice';
 
   const handleNavClick = (e, path) => {
     if (isSessionActive) {
@@ -25,18 +22,12 @@ function Sidebar({ methods, selectedMethod, onMethodChange, isSessionActive, onN
   };
 
   const handleBreatheClick = (e) => {
+    e.preventDefault();
     if (isSessionActive) {
-      e.preventDefault();
-      onNavigateAttempt(window.innerWidth < 768 ? '/methods' : location.pathname);
+      onNavigateAttempt('MODAL');
       return;
     }
-
-    if (window.innerWidth < 768) {
-      e.preventDefault();
-      navigate('/methods');
-    } else {
-      setMethodsExpanded(!methodsExpanded);
-    }
+    openMethodModal();
   };
 
   return (
@@ -67,30 +58,7 @@ function Sidebar({ methods, selectedMethod, onMethodChange, isSessionActive, onN
                     <Wind size={20} />
                     <span>Breathing Techniques</span>
                   </div>
-                  {methodsExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 </button>
-                
-                {methodsExpanded && (
-                  <ul className="flex list-none p-2 pl-4 m-0 flex-col gap-2 mt-1">
-                    {Object.entries(methods).map(([key, method]) => (
-                      <li key={key}>
-                        <button 
-                          className="w-full text-left bg-transparent border border-transparent p-3 rounded-squircle-md transition-all duration-300 text-sm text-text opacity-50 hover:bg-white/5 hover:opacity-100"
-                          onClick={() => {
-                            if (isSessionActive) {
-                              onNavigateAttempt('/practice');
-                              return;
-                            }
-                            onMethodChange(key);
-                          }}
-                        >
-                          {method.name}
-                        </button>
-                      </li>
-                    ))}
-
-                  </ul>
-                )}
               </li>
 
               <li>

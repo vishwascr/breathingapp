@@ -1,11 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Play, ChevronDown, Clock, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { Play, Clock, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 
-function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
-  const navigate = useNavigate();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
+function Dashboard({ history, methods, openMethodModal }) {
   const [activeStatIndex, setActiveStatIndex] = useState(0);
 
   const lastSession = history.length > 0 ? history[0] : null;
@@ -17,7 +13,7 @@ function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
       total: history.reduce((total, session) => total + session.duration, 0),
       color: 'text-text'
     },
-    ...Object.entries(methods).map(([key, method]) => ({
+    ...Object.entries(methods).map(([, method]) => ({
       label: `${method.name} Total`,
       total: history
         .filter(session => session.pattern === method.name)
@@ -33,22 +29,8 @@ function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
     return 'Good Evening';
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const handleBeginClick = () => {
-    if (window.innerWidth < 768) {
-      navigate('/methods');
-    } else {
-      setIsDropdownOpen(!isDropdownOpen);
-    }
+    openMethodModal();
   };
 
   const nextStat = () => setActiveStatIndex((prev) => (prev + 1) % stats.length);
@@ -64,7 +46,7 @@ function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
-        <section className={`relative bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-2xl transition-all duration-500 ${isDropdownOpen ? 'z-30' : 'z-10'}`}>
+        <section className="relative bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-2xl transition-all duration-500 z-10">
           <div className="relative z-10 flex flex-col h-full justify-between">
             <div>
               <h2 className="text-3xl md:text-4xl font-light mb-4 tracking-tight">Ready to Begin?</h2>
@@ -73,36 +55,14 @@ function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
               </p>
             </div>
             
-            <div className="mt-8 flex relative" ref={dropdownRef}>
+            <div className="mt-8 flex relative">
               <button 
                 className="btn-primary min-w-[200px] md:min-w-[240px] flex items-center justify-center gap-2"
                 onClick={handleBeginClick}
               >
                 <Play size={18} fill="currentColor" />
                 Begin Breathing
-                <ChevronDown size={18} className="hidden md:inline-block ml-1" />
               </button>
-
-              {isDropdownOpen && (
-                <div className="absolute top-full left-0 mt-3 w-72 bg-[#1A1A17] border border-white/10 rounded-squircle-md shadow-2xl z-50 overflow-hidden animate-fadeIn origin-top hidden md:block">
-                  <div className="p-2 flex flex-col gap-1">
-                    <div className="px-4 py-2 text-[0.65rem] uppercase tracking-widest text-dim border-b border-white/5 mb-1 font-medium">Select Technique</div>
-                    {Object.entries(methods).map(([key, method]) => (
-                      <button
-                        key={key}
-                        className="w-full text-left p-4 rounded-squircle-md transition-all duration-200 text-sm text-text hover:bg-white/5"
-                        onClick={() => {
-                          onMethodChange(key);
-                          setIsDropdownOpen(false);
-                          navigate('/practice');
-                        }}
-                      >
-                        {method.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </section>
@@ -114,10 +74,17 @@ function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
                 <Clock size={16} className="text-dim" />
                 <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Last Session</h3>
               </div>
-              <div className="flex gap-12 mb-8">
+              <div className="flex flex-wrap gap-8 md:gap-12 mb-8">
                 <div>
                   <span className="block text-[0.65rem] uppercase tracking-widest text-dim mb-1">Method</span>
-                  <span className="text-xl md:text-2xl font-light">{lastSession.pattern}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl md:text-2xl font-light">{lastSession.pattern}</span>
+                    {lastSession.phaseDuration && (
+                      <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-dim/60 uppercase tracking-tighter">
+                        {lastSession.phaseDuration}s
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <span className="block text-[0.65rem] uppercase tracking-widest text-dim mb-1">Duration</span>

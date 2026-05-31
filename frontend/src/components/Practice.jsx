@@ -111,7 +111,8 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const handleStartStop = () => {
     if (isActive) {
       const methodName = methods[selectedMethod].name;
-      setLastSession({ duration: sessionTime, pattern: methodName });
+      const phaseDuration = selectedMethod === 'box' ? methods.box.pattern[0] : null;
+      setLastSession({ duration: sessionTime, pattern: methodName, phaseDuration });
       setIsActive(false);
       setShowSummary(true);
     } else {
@@ -124,7 +125,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   };
 
   const handleSaveSession = () => {
-    saveHistory(lastSession.duration, lastSession.pattern, currentNote);
+    saveHistory(lastSession.duration, lastSession.pattern, currentNote, lastSession.phaseDuration);
     setShowSummary(false);
   };
 

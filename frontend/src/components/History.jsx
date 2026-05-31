@@ -49,10 +49,15 @@ function History({ history }) {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex-1">
                 <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 mb-4 md:mb-2">
-                  <div className="flex">
+                  <div className="flex gap-2">
                     <span className="px-3 py-1 rounded-full bg-accent/20 text-accent text-[0.7rem] uppercase tracking-widest font-medium">
                       {item.pattern}
                     </span>
+                    {item.phaseDuration && (
+                      <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-dim text-[0.7rem] uppercase tracking-widest font-medium">
+                        {item.phaseDuration}s Phase
+                      </span>
+                    )}
                   </div>
                   <span className="text-dim text-sm font-light">
                     {formatDate(item.timestamp)} • {formatTime(item.timestamp)}

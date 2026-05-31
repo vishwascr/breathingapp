@@ -7,7 +7,6 @@ import Dashboard from './components/Dashboard'
 import Practice from './components/Practice'
 import History from './components/History'
 import Settings from './components/Settings'
-import Methods from './components/Methods'
 
 const INITIAL_METHODS = {
   box: { name: 'Box Breathing', pattern: [4, 4, 4, 4] },
@@ -49,6 +48,7 @@ function App() {
   const [theme, setTheme] = useState(null); // No default theme in frontend
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [pendingNav, setPendingNav] = useState(null);
+  const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -58,7 +58,11 @@ function App() {
     const target = pendingNav;
     setPendingNav(null);
     setIsSessionActive(false);
-    navigate(target);
+    if (target === 'MODAL') {
+      setIsMethodModalOpen(true);
+    } else {
+      navigate(target);
+    }
   };
 
   useEffect(() => {
@@ -119,12 +123,12 @@ function App() {
     }
   };
 
-  const saveHistory = async (duration, patternName, notes) => {
+  const saveHistory = async (duration, patternName, notes, phaseDuration) => {
     try {
       await fetch('/api/history', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ duration, pattern: patternName, notes })
+        body: JSON.stringify({ duration, pattern: patternName, notes, phaseDuration })
       });
       fetchHistory();
     } catch (err) {
@@ -155,11 +159,10 @@ function App() {
       {/* UI Layer */}
       <div className="flex flex-col md:flex-row w-full min-h-screen relative z-10">
         <Sidebar 
-          methods={methods} 
-          selectedMethod={selectedMethod} 
-          onMethodChange={handleMethodChange} 
           isSessionActive={isSessionActive}
           onNavigateAttempt={(path) => setPendingNav(path)}
+          openMethodModal={() => setIsMethodModalOpen(true)}
+          isMethodModalOpen={isMethodModalOpen}
         />
         
         <div className="flex-1 relative isolate min-h-screen md:ml-72">
@@ -184,8 +187,7 @@ function App() {
                 <Dashboard 
                   history={history} 
                   methods={methods}
-                  selectedMethod={selectedMethod}
-                  onMethodChange={handleMethodChange}
+                  openMethodModal={() => setIsMethodModalOpen(true)}
                 />
               } />
               <Route 
@@ -212,7 +214,6 @@ function App() {
                   />
                 } 
               />
-              <Route path="/methods" element={<Methods methods={methods} selectedMethod={selectedMethod} onMethodChange={handleMethodChange} />} />
             </Routes>
           </main>
         </div>
@@ -238,6 +239,38 @@ function App() {
                 className="flex-1 bg-accent text-bg py-3 rounded-squircle-md font-medium hover:bg-indicator transition-all duration-300"
               >
                 End Session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Global Method Selection Modal */}
+      {isMethodModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-6">
+          <div className="w-full max-w-sm bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 shadow-2xl animate-fadeIn text-center">
+            <h3 className="text-2xl font-light mb-4">Select Technique</h3>
+            <p className="text-dim font-light mb-8 leading-relaxed">
+              Choose a breathing method to begin your session.
+            </p>
+            <div className="flex flex-col gap-3">
+              {Object.entries(methods).map(([key, method]) => (
+                <button
+                  key={key}
+                  className="w-full border border-white/10 py-4 rounded-squircle-md font-light hover:bg-white/5 transition-all duration-300"
+                  onClick={() => {
+                    handleMethodChange(key);
+                    setIsMethodModalOpen(false);
+                  }}
+                >
+                  {method.name}
+                </button>
+              ))}
+              <button 
+                onClick={() => setIsMethodModalOpen(false)} 
+                className="mt-2 w-full bg-white/5 py-3 rounded-squircle-md font-light hover:bg-white/10 transition-all duration-300 text-dim"
+              >
+                Cancel
               </button>
             </div>
           </div>
