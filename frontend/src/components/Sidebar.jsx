@@ -112,13 +112,6 @@ function Sidebar({ methods, selectedMethod, onMethodChange, isSessionActive, onN
               <span className="md:hidden">History</span>
             </NavLink>
           </li>
-          <li className="hidden md:block">
-            <NavLink to="/belly-breathing-guide" className={linkClass} onClick={(e) => handleNavClick(e, '/belly-breathing-guide')}>
-              <BookOpen size={20} />
-              <span className="hidden md:inline">Breathing Guide</span>
-              <span className="md:hidden">Guide</span>
-            </NavLink>
-          </li>
           <li>
             <NavLink to="/settings" className={linkClass} onClick={(e) => handleNavClick(e, '/settings')}>
               <Settings size={20} />

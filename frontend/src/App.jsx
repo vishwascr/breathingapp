@@ -7,7 +7,6 @@ import Dashboard from './components/Dashboard'
 import Practice from './components/Practice'
 import History from './components/History'
 import Settings from './components/Settings'
-import BellyBreathingGuide from './components/BellyBreathingGuide'
 import Methods from './components/Methods'
 
 const INITIAL_METHODS = {
@@ -53,7 +52,7 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const showStripes = ['/', '/history', '/settings', '/belly-breathing-guide'].includes(location.pathname);
+  const showStripes = ['/', '/history', '/settings'].includes(location.pathname);
 
   const confirmEndSession = () => {
     const target = pendingNav;
@@ -213,7 +212,6 @@ function App() {
                   />
                 } 
               />
-              <Route path="/belly-breathing-guide" element={<BellyBreathingGuide />} />
               <Route path="/methods" element={<Methods methods={methods} selectedMethod={selectedMethod} onMethodChange={handleMethodChange} />} />
             </Routes>
           </main>

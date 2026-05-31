@@ -48,10 +48,12 @@ function History({ history }) {
           >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="px-3 py-1 rounded-full bg-accent/20 text-accent text-[0.7rem] uppercase tracking-widest font-medium">
-                    {item.pattern}
-                  </span>
+                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 mb-4 md:mb-2">
+                  <div className="flex">
+                    <span className="px-3 py-1 rounded-full bg-accent/20 text-accent text-[0.7rem] uppercase tracking-widest font-medium">
+                      {item.pattern}
+                    </span>
+                  </div>
                   <span className="text-dim text-sm font-light">
                     {formatDate(item.timestamp)} • {formatTime(item.timestamp)}
                   </span>
