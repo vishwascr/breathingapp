@@ -26,23 +26,23 @@
   to { stroke-dasharray: 25 75; }
 }
 
-@keyframes fade-out-stroke {
-  from { opacity: 1; }
-  to { opacity: 0; }
+@keyframes retract-stroke {
+  from { stroke-dasharray: 25 75; }
+  to { stroke-dasharray: 0 100; }
 }
 
 .growing-stroke {
   animation: grow-stroke linear forwards;
 }
 
-.fading-stroke {
-  animation: fade-out-stroke 1s ease-out forwards;
-  stroke-dasharray: 25 75;
+.retracting-stroke {
+  animation: retract-stroke linear forwards;
 }
 
 .glowing-head {
   /* Glow is now handled via SVG filter for better results */
 }
+
 
 
 

@@ -154,25 +154,6 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
     setShowSummary(false);
   };
 
-  const getStrokeStyle = (targetCumulativeIndex, isPrev = false) => {
-    if (!isActive || selectedMethod !== 'box') {
-      return { opacity: 0 };
-    }
-
-    const currentPattern = methods[selectedMethod].pattern;
-    const currentDur = currentPattern[phaseState.index];
-    
-    // Each phase starts 25% further along
-    const offset = -(targetCumulativeIndex - 1) * 25;
-    
-    return {
-      strokeDashoffset: offset,
-      animationDuration: isPrev ? '1s' : `${currentDur}s`,
-      stroke: `url(#grad-${(targetCumulativeIndex - 1) % 4})`,
-      opacity: 1
-    };
-  };
-
   const getCircleStyle = () => {
     if (!isActive) {
       return {
@@ -225,23 +206,6 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
                     <feMergeNode in="SourceGraphic" />
                   </feMerge>
                 </filter>
-
-                <linearGradient id="grad-0" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="var(--color-text)" stopOpacity="0" />
-                  <stop offset="100%" stopColor="var(--color-text)" stopOpacity="1" />
-                </linearGradient>
-                <linearGradient id="grad-1" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="var(--color-text)" stopOpacity="0" />
-                  <stop offset="100%" stopColor="var(--color-text)" stopOpacity="1" />
-                </linearGradient>
-                <linearGradient id="grad-2" x1="100%" y1="0%" x2="0%" y2="0%">
-                  <stop offset="0%" stopColor="var(--color-text)" stopOpacity="0" />
-                  <stop offset="100%" stopColor="var(--color-text)" stopOpacity="1" />
-                </linearGradient>
-                <linearGradient id="grad-3" x1="0%" y1="100%" x2="0%" y2="0%">
-                  <stop offset="0%" stopColor="var(--color-text)" stopOpacity="0" />
-                  <stop offset="100%" stopColor="var(--color-text)" stopOpacity="1" />
-                </linearGradient>
               </defs>
 
               <rect 
@@ -250,31 +214,55 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
                 className="fill-none stroke-none"
               />
 
-              {prevCumulativeIndex > 0 && (
-                <rect 
-                  key={`stroke-prev-${prevCumulativeIndex}`}
-                  x="0" y="0" width="450" height="450" rx="46" pathLength="100"
-                  className="fill-none stroke-[6px] stroke-linecap-round fading-stroke"
-                  style={getStrokeStyle(prevCumulativeIndex, true)}
-                />
-              )}
-              
-              <rect 
-                key={`stroke-curr-${phaseState.cumulativeIndex}`}
-                x="0" y="0" width="450" height="450" rx="46" pathLength="100"
-                className={`fill-none stroke-[6px] stroke-linecap-round ${isActive ? 'growing-stroke' : 'opacity-0'}`}
-                style={getStrokeStyle(phaseState.cumulativeIndex)}
-              />
-
               {isActive && (
-                <circle 
-                  cx={headPosition.x} 
-                  cy={headPosition.y} 
-                  r="4" 
-                  className="fill-accent"
-                  filter="url(#head-glow-filter)"
-                  style={{ transition: 'none' }}
-                />
+                <>
+                  {[...Array(phaseState.cumulativeIndex + 1)].map((_, i) => {
+                    const cum = i;
+                    if (cum === 0 || cum < phaseState.cumulativeIndex - 1) return null;
+
+                    const isCurrent = cum === phaseState.cumulativeIndex;
+                    const isPrev = cum === phaseState.cumulativeIndex - 1;
+                    const currentDur = (selectedMethod && methods[selectedMethod]) ? methods[selectedMethod].pattern[phaseState.index] : 4;
+
+                    let style = { opacity: 0 };
+                    let className = "fill-none stroke-[6px] stroke-linecap-round stroke-text";
+
+                    if (isCurrent) {
+                      style = {
+                        strokeDashoffset: -(cum - 1) * 25,
+                        animationDuration: `${currentDur}s`,
+                        opacity: 1
+                      };
+                      className += " growing-stroke";
+                    } else if (isPrev) {
+                      style = {
+                        strokeDashoffset: -cum * 25,
+                        transition: `stroke-dashoffset ${currentDur}s linear`,
+                        animationDuration: `${currentDur}s`,
+                        opacity: 1
+                      };
+                      className += " retracting-stroke";
+                    }
+
+                    return (
+                      <rect 
+                        key={`stroke-${cum}`}
+                        x="0" y="0" width="450" height="450" rx="46" pathLength="100"
+                        className={className}
+                        style={style}
+                      />
+                    );
+                  })}
+
+                  <circle 
+                    cx={headPosition.x} 
+                    cy={headPosition.y} 
+                    r="4" 
+                    className="fill-accent"
+                    filter="url(#head-glow-filter)"
+                    style={{ transition: 'none' }}
+                  />
+                </>
               )}
             </svg>
           )}
