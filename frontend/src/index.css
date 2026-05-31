@@ -39,9 +39,15 @@
   font-family: var(--font-main);
 }
 
+html {
+  background-color: #000000;
+  height: 100%;
+}
+
 @layer base {
   body {
     @apply bg-bg text-text m-0 min-h-screen;
+    background-color: #000000;
     transition: background-color 0.5s ease;
   }
 

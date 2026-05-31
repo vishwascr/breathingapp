@@ -94,10 +94,6 @@ function App() {
     root.style.setProperty('--color-text', colors.text);
     root.style.setProperty('--color-secondary', colors.secondary);
     root.style.setProperty('--color-dim', colors.dim);
-
-    // Force background to black for Safari's browser chrome
-    root.style.backgroundColor = '#000000';
-    document.body.style.backgroundColor = '#000000';
   }, [theme]);
 
   const updateTheme = async (newTheme) => {

@@ -22,7 +22,7 @@ function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
       total: history
         .filter(session => session.pattern === method.name)
         .reduce((total, session) => total + session.duration, 0),
-      color: key === 'box' ? 'text-accent' : 'text-text'
+      color: 'text-text'
     }))
   ].filter(stat => stat.total > 0 || stat.label === 'Overall Focus Time');
 
