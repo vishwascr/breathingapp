@@ -58,7 +58,7 @@ function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
                 onClick={handleBeginClick}
               >
                 <Play size={18} fill="currentColor" />
-                {selectedMethod && methods[selectedMethod] ? methods[selectedMethod].name : 'Begin Breathing'}
+                Begin Breathing
                 <ChevronDown size={18} className="hidden md:inline-block ml-1" />
               </button>
 
@@ -69,11 +69,7 @@ function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
                     {Object.entries(methods).map(([key, method]) => (
                       <button
                         key={key}
-                        className={`w-full text-left p-4 rounded-squircle-md transition-all duration-200 text-sm flex items-center justify-between ${
-                          selectedMethod === key 
-                          ? 'bg-accent text-bg font-medium' 
-                          : 'text-text hover:bg-white/5'
-                        }`}
+                        className="w-full text-left p-4 rounded-squircle-md transition-all duration-200 text-sm text-text hover:bg-white/5"
                         onClick={() => {
                           onMethodChange(key);
                           setIsDropdownOpen(false);
@@ -81,7 +77,6 @@ function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
                         }}
                       >
                         {method.name}
-                        {selectedMethod === key && <div className="w-1.5 h-1.5 bg-bg rounded-full"></div>}
                       </button>
                     ))}
                   </div>
@@ -91,7 +86,7 @@ function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
           </div>
         </section>
 
-        {lastSession && (
+        {lastSession ? (
           <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-xl flex flex-col justify-between hover:bg-white/10 transition-all duration-300">
             <div>
               <div className="flex items-center gap-2 mb-6">
@@ -119,18 +114,26 @@ function Dashboard({ history, methods, selectedMethod, onMethodChange }) {
               <div className="text-dim/30 font-light italic text-sm">No notes from your last session.</div>
             )}
           </section>
+        ) : (
+          <section className="bg-white/5 backdrop-blur-3xl border border-white/10 border-dashed rounded-squircle-lg p-8 md:p-10 flex flex-col items-center justify-center text-center opacity-60">
+            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4">
+              <Clock size={20} className="text-dim" />
+            </div>
+            <h3 className="text-sm uppercase tracking-widest text-dim font-medium mb-2">No History</h3>
+            <p className="text-sm font-light text-text/60 max-w-[200px]">Complete your first session to see your stats here.</p>
+          </section>
         )}
-      </div>
 
-      <section className="mt-12 md:mt-16 bg-white/5 backdrop-blur-2xl border border-white/5 rounded-squircle-lg p-8 md:p-10 max-w-3xl">
-        <div className="flex items-center gap-2 mb-4">
-          <BookOpen size={16} className="text-dim" />
-          <h3 className="text-sm uppercase tracking-widest text-dim font-medium">Why Breathe?</h3>
-        </div>
-        <p className="text-base md:text-lg font-light text-text/70 leading-relaxed">
-          Controlled breathing helps regulate your nervous system, reduces cortisol levels, and improves focus. Just 5 minutes can transform your day and restore your inner balance.
-        </p>
-      </section>
+        <section className="bg-white/5 backdrop-blur-2xl border border-white/5 rounded-squircle-lg p-8 md:p-10 lg:col-span-2">
+          <div className="flex items-center gap-2 mb-4">
+            <BookOpen size={16} className="text-dim" />
+            <h3 className="text-sm uppercase tracking-widest text-dim font-medium">Why Breathe?</h3>
+          </div>
+          <p className="text-base md:text-lg font-light text-text/70 leading-relaxed max-w-3xl">
+            Controlled breathing helps regulate your nervous system, reduces cortisol levels, and improves focus. Just 5 minutes can transform your day and restore your inner balance.
+          </p>
+        </section>
+      </div>
     </div>
   );
 }

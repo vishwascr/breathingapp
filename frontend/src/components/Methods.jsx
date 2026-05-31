@@ -15,11 +15,7 @@ function Methods({ methods, selectedMethod, onMethodChange }) {
         {Object.entries(methods).map(([key, method]) => (
           <button
             key={key}
-            className={`w-full text-left p-6 rounded-squircle-lg border transition-all duration-300 flex items-center justify-between ${
-              selectedMethod === key 
-              ? 'bg-accent border-accent text-bg shadow-xl scale-[1.02]' 
-              : 'bg-white/5 border-white/10 text-text hover:bg-white/10'
-            }`}
+            className="w-full text-left p-6 rounded-squircle-lg border bg-white/5 border-white/10 text-text hover:bg-white/10 transition-all duration-300"
             onClick={() => {
               onMethodChange(key);
               navigate('/practice');
@@ -27,15 +23,10 @@ function Methods({ methods, selectedMethod, onMethodChange }) {
           >
             <div>
               <h3 className="text-xl font-medium mb-1">{method.name}</h3>
-              <p className={`text-sm ${selectedMethod === key ? 'text-bg/70' : 'text-dim'}`}>
+              <p className="text-sm text-dim">
                 Pattern: {method.pattern.join('-')}
               </p>
             </div>
-            {selectedMethod === key ? (
-              <CheckCircle2 size={24} className="text-bg" />
-            ) : (
-              <Circle size={24} className="text-white/20" />
-            )}
           </button>
         ))}
       </div>

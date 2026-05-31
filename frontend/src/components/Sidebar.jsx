@@ -75,11 +75,7 @@ function Sidebar({ methods, selectedMethod, onMethodChange, isSessionActive, onN
                     {Object.entries(methods).map(([key, method]) => (
                       <li key={key}>
                         <button 
-                          className={`w-full text-left bg-transparent border border-transparent p-3 rounded-squircle-md transition-all duration-300 text-sm ${
-                            selectedMethod === key 
-                            ? 'text-white font-medium opacity-100' 
-                            : 'text-text opacity-50 hover:bg-white/5 hover:opacity-100'
-                          }`}
+                          className="w-full text-left bg-transparent border border-transparent p-3 rounded-squircle-md transition-all duration-300 text-sm text-text opacity-50 hover:bg-white/5 hover:opacity-100"
                           onClick={() => {
                             if (isSessionActive) {
                               onNavigateAttempt('/practice');
@@ -92,6 +88,7 @@ function Sidebar({ methods, selectedMethod, onMethodChange, isSessionActive, onN
                         </button>
                       </li>
                     ))}
+
                   </ul>
                 )}
               </li>
