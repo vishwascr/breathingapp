@@ -30,6 +30,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const sessionTimerRef = useRef(null);
   const pathRef = useRef(null);
   const animationRef = useRef(null);
+  const phaseStartTimeRef = useRef(null);
 
   // Sync with global session state
   useEffect(() => {
@@ -90,10 +91,15 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
 
     const currentPattern = methods[selectedMethod].pattern;
     const currentDur = currentPattern[phaseState.index];
+    const startTime = Date.now();
+    phaseStartTimeRef.current = startTime;
     
+    // Use a more precise countdown based on elapsed time
     const textInterval = setInterval(() => {
-      setTimeLeft(prev => Math.max(1, prev - 1));
-    }, 1000);
+      const elapsed = (Date.now() - startTime) / 1000;
+      const remaining = Math.max(1, Math.ceil(currentDur - elapsed));
+      setTimeLeft(remaining);
+    }, 50);
 
     const phaseTimeout = setTimeout(() => {
       let nextIndex = (phaseState.index + 1) % 4;
