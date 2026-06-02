@@ -26,6 +26,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const [lastSession, setLastSession] = useState(null);
   const [currentNote, setCurrentNote] = useState('');
   const [guidanceVisible, setGuidanceVisible] = useState(true);
+  const [completedCycles, setCompletedCycles] = useState(0);
 
   const sessionTimerRef = useRef(null);
   const pathRef = useRef(null);
@@ -114,6 +115,9 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
         setTimeLeft(currentPattern[nextIndex]);
         setPhaseState(prev => {
           setPrevCumulativeIndex(prev.cumulativeIndex);
+          if (nextIndex === 0) {
+            setCompletedCycles(c => c + 1);
+          }
           return { 
             index: nextIndex, 
             cumulativeIndex: prev.cumulativeIndex + 1 
@@ -140,8 +144,8 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const handleStartStop = () => {
     if (isActive) {
       const methodName = methods[selectedMethod].name;
-      const phaseDuration = selectedMethod === 'box' ? methods.box.pattern[0] : null;
-      setLastSession({ duration: sessionTime, pattern: methodName, phaseDuration });
+      const phaseDuration = (selectedMethod === 'box' || selectedMethod === 'aum') ? methods[selectedMethod].pattern[0] : null;
+      setLastSession({ duration: sessionTime, pattern: methodName, phaseDuration, cycles: completedCycles });
       setIsActive(false);
       setShowSummary(true);
     } else {
@@ -150,20 +154,21 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       setHeadPosition({ x: 0, y: 0 });
       setPhaseState({ index: 0, cumulativeIndex: 1 });
       setTimeLeft(methods[selectedMethod].pattern[0]);
+      setCompletedCycles(0);
       setIsActive(true);
       setCurrentNote('');
     }
   };
 
   const handleSaveSession = () => {
-    saveHistory(lastSession.duration, lastSession.pattern, currentNote, lastSession.phaseDuration);
+    saveHistory(lastSession.duration, lastSession.pattern, currentNote, lastSession.phaseDuration, lastSession.cycles);
     setShowSummary(false);
   };
 
   const getCircleStyle = () => {
     if (!isActive) {
       return {
-        transform: 'scale(1)',
+        transform: selectedMethod === 'aum' ? 'scale(2.5)' : 'scale(1)',
         transition: 'transform 0.5s ease-out'
       };
     }
@@ -172,10 +177,22 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
     const currentDur = currentPattern[phaseState.index];
 
     let targetScale = 1;
-    if (phaseState.index === 0) targetScale = 2.5; 
-    else if (phaseState.index === 1) targetScale = 2.5; 
-    else if (phaseState.index === 2) targetScale = 1; 
-    else if (phaseState.index === 3) targetScale = 1; 
+    if (selectedMethod === 'aum') {
+      // Aum: Continual deflation from 2.5 to 1.0 across phases 0, 1, 2
+      // Then inflation from 1.0 to 2.5 during phase 3
+      if (phaseState.index === 3) {
+        targetScale = 2.5; 
+      } else {
+        const totalExhale = currentPattern[0] + currentPattern[1] + currentPattern[2];
+        const elapsedExhale = currentPattern.slice(0, phaseState.index + 1).reduce((a, b) => a + b, 0);
+        // Calculate target scale for the END of the current phase
+        targetScale = 2.5 - (1.5 * (elapsedExhale / totalExhale));
+      }
+    } else {
+      // Default: 0=Inhale, 1=Hold, 2=Exhale, 3=Hold
+      if (phaseState.index === 0 || phaseState.index === 1) targetScale = 2.5; 
+      else targetScale = 1;
+    }
 
     return {
       transform: `scale(${targetScale})`,
@@ -183,7 +200,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
     };
   };
 
-  const currentPhase = PHASES[phaseState.index];
+  const currentPhase = (methods[selectedMethod].phases && methods[selectedMethod].phases[phaseState.index]) || PHASES[phaseState.index];
 
   return (
     <div className="w-full min-h-dvh flex flex-col py-8 px-6 md:py-12 relative">
@@ -293,7 +310,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
                 guidanceVisible ? 'opacity-80 translate-y-0' : 'opacity-0 translate-y-2'
               }`}
             >
-              {GUIDANCE[currentPhase] || ' '}
+              {methods[selectedMethod].guidance ? methods[selectedMethod].guidance[phaseState.index] : (GUIDANCE[currentPhase] || ' ')}
             </div>
           </div>
         </div>
@@ -316,6 +333,12 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
                 <p className="text-xs uppercase tracking-widest text-dim mb-1">Method</p>
                 <p className="text-2xl font-light">{lastSession.pattern}</p>
               </div>
+              {selectedMethod === 'aum' && (
+                <div className="text-center">
+                  <p className="text-xs uppercase tracking-widest text-dim mb-1">Total AUMs</p>
+                  <p className="text-2xl font-light">{lastSession.cycles}</p>
+                </div>
+              )}
             </div>
             
             <div className="mb-6 md:mb-8">

@@ -11,14 +11,24 @@ function Dashboard({ history, methods, openMethodModal }) {
     {
       label: 'Overall Focus Time',
       total: history.reduce((total, session) => total + session.duration, 0),
-      color: 'text-text'
+      color: 'text-text',
+      unit: 'seconds'
+    },
+    {
+      label: 'Total AUMs',
+      total: history
+        .filter(session => session.pattern === 'Aum Chanting')
+        .reduce((total, session) => total + (session.cycles || 0), 0),
+      color: 'text-accent',
+      unit: 'chants'
     },
     ...Object.entries(methods).map(([, method]) => ({
       label: `${method.name} Total`,
       total: history
         .filter(session => session.pattern === method.name)
         .reduce((total, session) => total + session.duration, 0),
-      color: 'text-text'
+      color: 'text-text',
+      unit: 'seconds'
     }))
   ].filter(stat => stat.total > 0 || stat.label === 'Overall Focus Time');
 
@@ -134,7 +144,7 @@ function Dashboard({ history, methods, openMethodModal }) {
               <span className={`text-5xl md:text-6xl font-thin tracking-tighter ${stats[activeStatIndex].color}`}>
                 {stats[activeStatIndex].total}
               </span>
-              <span className="text-lg md:text-xl font-light text-dim uppercase tracking-widest">seconds</span>
+              <span className="text-lg md:text-xl font-light text-dim uppercase tracking-widest">{stats[activeStatIndex].unit}</span>
             </div>
             
             {/* Pagination Dots */}

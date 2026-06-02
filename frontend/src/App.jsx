@@ -11,7 +11,19 @@ import Settings from './components/Settings'
 const INITIAL_METHODS = {
   box: { name: 'Box Breathing', pattern: [4, 4, 4, 4] },
   deepBelly: { name: 'Diaphragmatic Breathing', pattern: [5, 0, 5, 0] },
-  '478': { name: '4-7-8 Breathing', pattern: [4, 7, 8, 0] }
+  '478': { name: '4-7-8 Breathing', pattern: [4, 7, 8, 0] },
+  aum: { 
+    name: 'Aum Chanting', 
+    pattern: [4, 4, 4, 4],
+    isNew: true,
+    phases: ['Aaa', 'Uuu', 'Mmmm', 'Inhale'],
+    guidance: [
+      'Creates vibrations in your stomach and chest.',
+      'Creates vibrations in your throat.',
+      'Creates vibrations in your brain and nasal cavity.',
+      'Breathe in deeply through your nose.'
+    ]
+  }
 };
 
 const THEMES = {
@@ -143,12 +155,12 @@ function App() {
     }
   };
 
-  const saveHistory = async (duration, patternName, notes, phaseDuration) => {
+  const saveHistory = async (duration, patternName, notes, phaseDuration, cycles) => {
     try {
       await fetch('/api/history', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ duration, pattern: patternName, notes, phaseDuration })
+        body: JSON.stringify({ duration, pattern: patternName, notes, phaseDuration, cycles })
       });
       fetchHistory();
     } catch (err) {
@@ -160,6 +172,14 @@ function App() {
     setMethods(prev => ({
       ...prev,
       box: { ...prev.box, pattern: newPattern }
+    }));
+  };
+
+  const updateAumDuration = (baseDuration) => {
+    const val = parseInt(baseDuration);
+    setMethods(prev => ({
+      ...prev,
+      aum: { ...prev.aum, pattern: [val, val, val, val] }
     }));
   };
 
@@ -223,17 +243,18 @@ function App() {
               />
               <Route path="/history" element={<History history={history} />} />
               <Route 
-                path="/settings" 
+                path="/settings"
                 element={
-                  <Settings 
-                    methods={methods} 
+                  <Settings
+                    methods={methods}
                     updateBoxDuration={updateBoxDuration}
+                    updateAumDuration={updateAumDuration}
                     currentTheme={theme}
                     setTheme={updateTheme}
                     themes={THEMES}
                   />
-                } 
-              />
+                }
+                />
             </Routes>
           </main>
         </div>
@@ -277,13 +298,16 @@ function App() {
               {Object.entries(methods).map(([key, method]) => (
                 <button
                   key={key}
-                  className="w-full border border-white/10 py-4 rounded-squircle-md font-light hover:bg-white/5 transition-all duration-300"
+                  className="w-full border border-white/10 py-4 rounded-squircle-md font-light hover:bg-white/5 transition-all duration-300 relative"
                   onClick={() => {
                     handleMethodChange(key);
                     setIsMethodModalOpen(false);
                   }}
                 >
                   {method.name}
+                  {method.isNew && (
+                    <span className="absolute top-1/2 -translate-y-1/2 right-4 text-[0.6rem] bg-accent text-bg px-2 py-1 rounded-full font-medium tracking-widest">NEW</span>
+                  )}
                 </button>
               ))}
               <button 

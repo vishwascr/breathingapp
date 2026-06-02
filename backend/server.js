@@ -20,6 +20,7 @@ const historySchema = new mongoose.Schema({
   duration: { type: Number, required: true },
   pattern: { type: String, required: true },
   phaseDuration: { type: Number },
+  cycles: { type: Number },
   notes: { type: String, default: '' },
   timestamp: { type: Date, default: Date.now }
 });
@@ -76,6 +77,7 @@ app.post('/api/history', async (req, res) => {
     duration: req.body.duration,
     pattern: req.body.pattern,
     phaseDuration: req.body.phaseDuration,
+    cycles: req.body.cycles,
     notes: req.body.notes || ''
   });
 
