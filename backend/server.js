@@ -96,6 +96,7 @@ app.get('/api/history', async (req, res) => {
 
 app.get('/api/history/stats', async (req, res) => {
   try {
+    const timezone = req.headers['x-timezone'] || 'UTC';
     const totalStats = await History.aggregate([
       {
         $facet: {
@@ -125,6 +126,15 @@ app.get('/api/history/stats', async (req, res) => {
           lastSession: [
             { $sort: { timestamp: -1 } },
             { $limit: 1 }
+          ],
+          practicedDates: [
+            {
+              $group: {
+                _id: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp", timezone } },
+                totalDuration: { $sum: "$duration" }
+              }
+            },
+            { $sort: { _id: 1 } }
           ]
         }
       }
@@ -137,13 +147,19 @@ app.get('/api/history/stats', async (req, res) => {
       return acc;
     }, {});
 
+    const practicedDates = stats.practicedDates.reduce((acc, curr) => {
+      acc[curr._id] = curr.totalDuration;
+      return acc;
+    }, {});
+
     res.json({
       totalSeconds: overall.totalSeconds,
       totalAums: overall.totalAums,
       overallDuration: overall.overallDuration,
       totalSessions: overall.totalSessions,
       methodTotals,
-      lastSession: stats.lastSession[0] || null
+      lastSession: stats.lastSession[0] || null,
+      practicedDates
     });
   } catch (err) {
     console.error('Error fetching stats:', err);
@@ -236,6 +252,20 @@ app.post('/api/history', async (req, res) => {
   } catch (err) {
     console.error('Error saving history:', err);
     res.status(500).json({ message: 'Internal server error while saving history.' });
+  }
+});
+
+app.delete('/api/history/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await History.findByIdAndDelete(id);
+    if (!result) {
+      return res.status(404).json({ message: 'History item not found.' });
+    }
+    res.json({ message: 'History item deleted successfully.' });
+  } catch (err) {
+    console.error('Error deleting history item:', err);
+    res.status(500).json({ message: 'Internal server error while deleting history item.' });
   }
 });
 

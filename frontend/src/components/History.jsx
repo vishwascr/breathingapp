@@ -1,4 +1,6 @@
-function History({ history, hasMore, loadMore }) {
+import { Trash2 } from 'lucide-react';
+
+function History({ history, hasMore, loadMore, onDelete }) {
   const formatDuration = (seconds) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
@@ -43,6 +45,17 @@ function History({ history, hasMore, loadMore }) {
             key={item._id} 
             className="group relative bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-8 transition-all duration-300 hover:bg-white/10 hover:border-white/20 shadow-xl"
           >
+            <button 
+              onClick={() => {
+                if (window.confirm('Are you sure you want to delete this session?')) {
+                  onDelete(item._id);
+                }
+              }}
+              className="absolute top-4 right-4 p-2 text-dim/20 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-all md:opacity-0 md:group-hover:opacity-100"
+              title="Delete Session"
+            >
+              <Trash2 size={18} />
+            </button>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex-1">
                 <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 mb-4 md:mb-2">

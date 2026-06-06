@@ -39,7 +39,8 @@ function App() {
     overallDuration: 0,
     totalSessions: 0,
     methodTotals: {},
-    lastSession: null
+    lastSession: null,
+    practicedDates: {}
   });
   const [hasMoreHistory, setHasMoreHistory] = useState(false);
   const [historyPage, setHistoryPage] = useState(1);
@@ -137,12 +138,10 @@ function App() {
 
         if (isMounted) {
           // Process Stats
-          setHistoryStats(statsData);
+          fetchHistoryStats();
 
           // Process History
-          setHistory(historyData.data);
-          setHasMoreHistory(historyData.hasMore);
-          setHistoryPage(1);
+          fetchHistory(1, false);
 
           // Process Theme
           const loadedTheme = themeData.theme;
@@ -215,7 +214,10 @@ function App() {
 
   const fetchHistoryStats = async () => {
     try {
-      const response = await fetch('/api/history/stats');
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const response = await fetch('/api/history/stats', {
+        headers: { 'x-timezone': timezone }
+      });
       const data = await response.json();
       setHistoryStats(data);
       return data;
@@ -248,9 +250,13 @@ function App() {
 
   const saveHistory = async (duration, patternName, notes, phaseDuration, cycles) => {
     try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       await fetch('/api/history', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-timezone': timezone
+        },
         body: JSON.stringify({ duration, pattern: patternName, notes, phaseDuration, cycles })
       });
       
@@ -268,6 +274,20 @@ function App() {
     }
   };
 
+  const deleteHistoryItem = async (id) => {
+    try {
+      const res = await fetch(`/api/history/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setHistory(prev => prev.filter(item => item._id !== id));
+        fetchHistoryStats();
+      }
+    } catch (err) {
+      console.error('Failed to delete history item:', err);
+    }
+  };
+
   const startChallenge = async () => {
     try {
       const res = await fetch('/api/challenge/start', { method: 'POST' });
@@ -279,7 +299,8 @@ function App() {
           overallDuration: 0,
           totalSessions: 0,
           methodTotals: {},
-          lastSession: null
+          lastSession: null,
+          practicedDates: {}
         });
         setChallengeActive(true);
         setChallengeStartDate(new Date().toISOString());
@@ -300,7 +321,8 @@ function App() {
           overallDuration: 0,
           totalSessions: 0,
           methodTotals: {},
-          lastSession: null
+          lastSession: null,
+          practicedDates: {}
         });
         setChallengeActive(false);
         setChallengeStartDate(null);
@@ -399,6 +421,7 @@ function App() {
                     history={history} 
                     hasMore={hasMoreHistory} 
                     loadMore={loadMoreHistory} 
+                    onDelete={deleteHistoryItem}
                   />
                 } />
                 <Route 
