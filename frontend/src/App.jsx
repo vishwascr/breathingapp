@@ -361,7 +361,11 @@ function App() {
             </div>
           )}
           
-          <main className="w-full min-h-dvh p-6 md:p-12 flex justify-center items-start relative z-10 pb-32 md:pb-12">
+          <main className={`w-full flex justify-center relative z-10 ${
+            location.pathname === '/practice' 
+              ? 'h-dvh overflow-hidden p-6 md:p-12' 
+              : 'min-h-dvh p-6 md:p-12 pb-32 md:pb-12 items-start'
+          }`}>
             <Suspense fallback={
               <div className="flex md:hidden items-center justify-center p-20">
                 <Wind size={40} className="text-accent animate-pulse" />

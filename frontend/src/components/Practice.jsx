@@ -275,10 +275,10 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const currentPhase = (methods[selectedMethod].phases && methods[selectedMethod].phases[phaseState.index]) || PHASES[phaseState.index];
 
   return (
-    <div ref={containerRef} className="w-full min-h-dvh flex flex-col pt-4 pb-8 px-6 md:pt-8 md:pb-12 relative bg-[var(--color-bg)]">
-      <header className="mb-4 md:mb-20 flex justify-between items-start shrink-0">
+    <div ref={containerRef} className="w-full h-full flex flex-col pt-4 pb-8 px-6 md:pt-12 md:pb-12 relative bg-[var(--color-bg)]">
+      <header className="w-full max-w-5xl mx-auto mb-4 md:mb-6 flex justify-between items-start shrink-0">
         <div className="flex items-center gap-3">
-          <h2 className="text-[1.1rem] md:text-[2.5rem] font-thin uppercase tracking-widest text-text text-left opacity-60">
+          <h2 className="text-[1.1rem] uppercase tracking-widest opacity-60 md:text-4xl md:font-extralight md:tracking-tight md:opacity-100 md:normal-case text-text text-left">
             {methods[selectedMethod].name}
           </h2>
           <button 
@@ -298,15 +298,13 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
         </button>
       </header>
 
-      <div ref={focusAreaRef} className="flex-1 flex flex-col items-center justify-center gap-6 md:gap-8 w-full min-h-0">
+      <div ref={focusAreaRef} className="flex-1 flex flex-col items-center justify-center gap-10 md:gap-14 w-full max-w-5xl mx-auto min-h-0">
+
         <div className="relative w-[250px] h-[250px] md:w-[450px] md:h-[450px] flex justify-center items-center shrink-0">
           <div 
             className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-2xl border border-white/10 rounded-squircle-lg shadow-2xl transition-opacity duration-500"
             style={{ opacity: selectedMethod === 'box' ? 1 : 0 }}
           ></div>
-          <div className="absolute top-[-40px] md:top-[-90px] text-[1rem] md:text-[2.2rem] font-thin text-text uppercase tracking-[0.6rem] md:tracking-[1.5rem] whitespace-nowrap">
-            {isActive ? currentPhase : ''}
-          </div>
           
           {selectedMethod === 'box' && (
             <svg className="absolute inset-0 w-full h-full z-[5] pointer-events-none overflow-visible" viewBox="0 0 450 450">
@@ -388,34 +386,40 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-4 shrink-0">
-          <button onClick={handleStartStop} className="btn-primary text-lg md:text-xl font-light tracking-widest flex items-center gap-3">
-            {isActive ? <Square size={18} md:size={20} fill="currentColor" /> : <Play size={18} md:size={20} fill="currentColor" />}
-            {isActive ? 'Stop Session' : 'Begin Journey'}
-          </button>
-          
-          {/* Counter - Subtle & Static */}
-          <div className={`transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="text-dim font-light tracking-wide text-sm md:text-base">
+        <div className="flex flex-col items-center w-full max-w-xs mx-auto gap-8 md:gap-10">
+          {/* Unified Vertical Stack - Space Reserved */}
+          <div className={`flex flex-col items-center text-center gap-2 transition-all duration-500 min-h-[120px] md:min-h-[160px] justify-center ${isActive ? 'opacity-100' : 'opacity-0 invisible'}`}>
+            {/* 1. Phase Text */}
+            <div className="text-[1.2rem] md:text-[1.8rem] font-thin text-text uppercase tracking-[0.6rem] md:tracking-[1rem] whitespace-nowrap mb-1">
+              {currentPhase}
+            </div>
+            
+            {/* 2. Detailed Guidance */}
+            <div 
+              className={`text-accent font-light tracking-wider text-sm md:text-base filter drop-shadow-[0_0_8px_var(--color-accent)] transition-opacity duration-500 ${
+                guidanceVisible ? 'opacity-80' : 'opacity-0'
+              }`}
+            >
+              {methods[selectedMethod].guidance ? methods[selectedMethod].guidance[phaseState.index] : (GUIDANCE[currentPhase] || ' ')}
+            </div>
+
+            {/* 3. Cycles/Chants Stat */}
+            <div className="text-dim font-light tracking-wide text-xs md:text-sm mt-1">
               {selectedMethod === 'aum' ? 'Chants' : 'Cycles'}: {completedCycles}
             </div>
           </div>
+
+          {/* 4. Action Button */}
+          <button onClick={handleStartStop} className="btn-primary text-lg md:text-xl font-light tracking-widest flex items-center gap-3 shrink-0">
+            {isActive || countdown !== null ? <Square size={18} md:size={20} fill="currentColor" /> : <Play size={18} md:size={20} fill="currentColor" />}
+            {isActive || countdown !== null ? 'Stop Session' : 'Begin Journey'}
+          </button>
         </div>
       </div>
 
-      {/* Pinned Guidance - Absolute bottom for stability */}
-      <div className="absolute bottom-8 left-0 right-0 px-6 flex justify-center pointer-events-none md:relative md:bottom-auto md:mt-8 shrink-0">
-        <div 
-          className={`text-accent font-light tracking-wider text-sm md:text-base text-center max-w-xs transition-opacity duration-500 filter drop-shadow-[0_0_8px_var(--color-accent)] ${
-            guidanceVisible ? 'opacity-80' : 'opacity-0'
-          }`}
-        >
-          {methods[selectedMethod].guidance ? methods[selectedMethod].guidance[phaseState.index] : (GUIDANCE[currentPhase] || ' ')}
-        </div>
-      </div>
-
+      {/* Summary Modal */}
       {showSummary && lastSession && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-6">
+        <div className="absolute inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-6">
           <div className="w-full max-w-sm bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-2xl animate-fadeIn overflow-y-auto max-h-[90vh]">
             <div className="flex flex-col items-center mb-6 md:mb-8 text-center">
               <CheckCircle2 size={32} className="text-accent mb-3" />
