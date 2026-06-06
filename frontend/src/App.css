@@ -48,6 +48,23 @@
   animation: trophy-glow 3s ease-in-out infinite;
 }
 
+@keyframes cooldown-glow {
+  0%, 100% { 
+    box-shadow: 0 0 15px 2px var(--color-cooldown), 0 0 50px 8px var(--color-cooldown);
+  }
+  50% { 
+    box-shadow: 0 0 40px 10px var(--color-cooldown), 0 0 90px 20px var(--color-cooldown);
+  }
+}
+
+.cooldown-active {
+  animation: cooldown-glow 4s ease-in-out infinite;
+  animation-delay: 1.5s; /* Wait for the 1.5s scale transition to finish */
+  border-color: var(--color-cooldown);
+  box-shadow: 0 0 15px 2px var(--color-cooldown), 0 0 50px 8px var(--color-cooldown);
+}
+
+
 
 
 

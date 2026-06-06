@@ -176,6 +176,9 @@ function App() {
     root.style.setProperty('--color-secondary', colors.secondary);
     root.style.setProperty('--color-dim', colors.dim);
     
+    // Cooldown Specific Color (Scalable approach using theme constant)
+    root.style.setProperty('--color-cooldown', colors.cooldown || colors.accent);
+    
     // Sidebar & Navigation Specifics (for removing glass effects)
     root.style.setProperty('--sidebar-bg', colors.sidebarBg);
     root.style.setProperty('--sidebar-blur', colors.sidebarBlur);

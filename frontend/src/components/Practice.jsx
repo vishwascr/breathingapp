@@ -30,6 +30,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const [completedCycles, setCompletedCycles] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [countdown, setCountdown] = useState(null);
+  const [isCooldown, setIsCooldown] = useState(false);
 
   const sessionTimerRef = useRef(null);
   const pathRef = useRef(null);
@@ -83,6 +84,20 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
     }
     return () => clearInterval(sessionTimerRef.current);
   }, [isActive]);
+
+  useEffect(() => {
+    if (!isActive || !isCooldown) return;
+
+    let startTime = Date.now();
+    let intervalId = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      if (timeDisplayRef.current) {
+        timeDisplayRef.current.innerText = elapsed.toString();
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [isActive, isCooldown]);
 
   // Animation for the head position
   useEffect(() => {
@@ -141,7 +156,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
 
   // Core breathing logic
   useEffect(() => {
-    if (!isActive || !selectedMethod || !methods[selectedMethod]) return;
+    if (!isActive || isCooldown || !selectedMethod || !methods[selectedMethod]) return;
 
     const currentPattern = methods[selectedMethod].pattern;
     const currentDur = currentPattern[phaseState.index];
@@ -209,11 +224,13 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       setLastSession({ duration: sessionTime, pattern: methodName, phaseDuration, cycles: completedCycles });
       setIsActive(false);
       setCountdown(null);
+      setIsCooldown(false);
       if (isActive) setShowSummary(true);
     } else {
       setCountdown(3);
       setCurrentNote('');
       setShowNotesInput(false);
+      setIsCooldown(false);
     }
   };
 
@@ -238,7 +255,13 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
     let timingFunction = 'ease-out';
 
     // 3. Scale & Timing Logic
-    if (countdown !== null) {
+    if (isCooldown) {
+      targetScale = 1;
+      backgroundColor = 'var(--color-cooldown)';
+      color = 'var(--color-bg)';
+      transitionDuration = 1.5;
+      timingFunction = 'ease-in-out';
+    } else if (countdown !== null) {
       targetScale = 1;
       transitionDuration = 0.3;
     } else if (!isActive) {
@@ -267,11 +290,11 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       backgroundColor,
       color,
       transform: `scale(${targetScale})`,
-      transition: `transform ${transitionDuration}s ${timingFunction}, background-color 1s ease, color 1s ease`
+      transition: `transform ${transitionDuration}s ${timingFunction}, background-color ${transitionDuration}s ease, color ${transitionDuration}s ease, box-shadow ${transitionDuration}s ease`
     };
   };
 
-  const currentPhase = (methods[selectedMethod].phases && methods[selectedMethod].phases[phaseState.index]) || PHASES[phaseState.index];
+  const currentPhase = isCooldown ? 'Cooldown' : ((methods[selectedMethod].phases && methods[selectedMethod].phases[phaseState.index]) || PHASES[phaseState.index]);
 
   return (
     <div ref={containerRef} className="w-full h-full flex flex-col pt-4 pb-24 px-6 md:pt-12 md:pb-12 relative bg-[var(--color-bg)]">
@@ -378,7 +401,14 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
           )}
 
           <div 
-            className="absolute w-20 h-20 md:w-40 md:h-40 breath-glow rounded-full z-[2] flex justify-center items-center text-[2.5rem] md:text-[3.5rem] font-light"
+            onClick={() => {
+              if (selectedMethod === 'resonance' && isActive && !isCooldown) {
+                setIsCooldown(true);
+              } else if (isCooldown) {
+                handleStartStop();
+              }
+            }}
+            className={`absolute w-20 h-20 md:w-40 md:h-40 breath-glow rounded-full z-[2] flex justify-center items-center text-[2.5rem] md:text-[3.5rem] font-light cursor-pointer transition-all duration-1000 ${isCooldown ? 'cooldown-active' : ''}`}
             style={getCircleStyle()}
           >
             {countdown !== null ? countdown : (isActive ? <span ref={timeDisplayRef}>{timeLeft}</span> : '')}
@@ -399,7 +429,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
                 guidanceVisible ? 'opacity-80' : 'opacity-0'
               }`}
             >
-              {methods[selectedMethod].guidance ? methods[selectedMethod].guidance[phaseState.index] : (GUIDANCE[currentPhase] || ' ')}
+              {isCooldown ? 'Hold your breath as long as comfortable.' : (methods[selectedMethod].guidance ? methods[selectedMethod].guidance[phaseState.index] : (GUIDANCE[currentPhase] || ' '))}
             </div>
 
             {/* 3. Cycles/Chants Stat */}
