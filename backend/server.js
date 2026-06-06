@@ -55,7 +55,7 @@ app.post('/api/settings/theme', async (req, res) => {
     let themeSetting = await Settings.findOneAndUpdate(
       { key: 'currentTheme' },
       { value: theme },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
     res.json({ theme: themeSetting.value });
   } catch (err) {
@@ -94,12 +94,12 @@ app.post('/api/challenge/start', async (req, res) => {
     await Settings.findOneAndUpdate(
       { key: 'challengeActive' },
       { value: true },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
     await Settings.findOneAndUpdate(
       { key: 'challengeStartDate' },
       { value: new Date().toISOString() },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
     
     res.json({ message: 'Challenge started' });
@@ -113,12 +113,12 @@ app.post('/api/challenge/reset', async (req, res) => {
     await Settings.findOneAndUpdate(
       { key: 'challengeActive' },
       { value: false },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
     await Settings.findOneAndUpdate(
       { key: 'challengeStartDate' },
       { value: null },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
     res.json({ message: 'Challenge reset' });
   } catch (err) {

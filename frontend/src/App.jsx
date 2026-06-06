@@ -37,7 +37,13 @@ const THEMES = {
       glass: '#1A1A17',
       text: '#E8E9E0',
       secondary: '#21211B',
-      dim: '#BDBEA5'
+      dim: '#BDBEA5',
+      sidebarBg: 'rgba(255, 255, 255, 0.05)',
+      sidebarBlur: '64px',
+      sidebarBorder: 'rgba(255, 255, 255, 0.1)',
+      mobileNavBg: 'rgba(255, 255, 255, 0.08)',
+      mobileNavBlur: '24px',
+      mobileNavBorder: 'rgba(255, 255, 255, 0.1)'
     }
   },
   mint: {
@@ -49,19 +55,31 @@ const THEMES = {
       glass: '#0D1412',
       text: '#E0FFF4',
       secondary: '#101a15',
-      dim: '#80A396'
+      dim: '#80A396',
+      sidebarBg: 'rgba(255, 255, 255, 0.05)',
+      sidebarBlur: '64px',
+      sidebarBorder: 'rgba(255, 255, 255, 0.1)',
+      mobileNavBg: 'rgba(255, 255, 255, 0.08)',
+      mobileNavBlur: '24px',
+      mobileNavBorder: 'rgba(255, 255, 255, 0.1)'
     }
   },
   coder: {
     name: 'Coder (Synth)',
     colors: {
-      bg: '#212337',
-      accent: '#C099FF',
-      indicator: '#7AF8CA',
-      glass: '#1C1E30',
+      bg: '#11121C',
+      accent: '#FF98A4',
+      indicator: '#C099FF',
+      glass: '#1A1C29',
       text: '#FFFFFF',
       secondary: '#2D304A',
-      dim: '#65BCFF'
+      dim: '#65BCFF',
+      sidebarBg: '#1A1C29',
+      sidebarBlur: '0px',
+      sidebarBorder: '#2D304A',
+      mobileNavBg: '#1A1C29',
+      mobileNavBlur: '0px',
+      mobileNavBorder: '#2D304A'
     }
   }
 };
@@ -196,6 +214,14 @@ function App() {
     root.style.setProperty('--color-text', colors.text);
     root.style.setProperty('--color-secondary', colors.secondary);
     root.style.setProperty('--color-dim', colors.dim);
+    
+    // Sidebar & Navigation Specifics (for removing glass effects)
+    root.style.setProperty('--sidebar-bg', colors.sidebarBg);
+    root.style.setProperty('--sidebar-blur', colors.sidebarBlur);
+    root.style.setProperty('--sidebar-border', colors.sidebarBorder);
+    root.style.setProperty('--mobile-nav-bg', colors.mobileNavBg);
+    root.style.setProperty('--mobile-nav-blur', colors.mobileNavBlur);
+    root.style.setProperty('--mobile-nav-border', colors.mobileNavBorder);
 
     // Update meta theme-color for mobile browser chrome
     const updateMeta = (content) => {

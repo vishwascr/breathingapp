@@ -33,7 +33,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden md:flex md:flex-col md:fixed md:top-0 md:left-0 md:w-72 md:min-w-[280px] md:h-dvh bg-white/5 backdrop-blur-3xl border-r border-white/10 py-10 px-6 z-50">
+      <div className="hidden md:flex md:flex-col md:fixed md:top-0 md:left-0 md:w-72 md:min-w-[280px] md:h-dvh bg-[var(--sidebar-bg)] backdrop-blur-[var(--sidebar-blur)] border-r border-[color:var(--sidebar-border)] py-10 px-6 z-50">
         <div className="flex flex-col items-center mb-14 gap-4">
           <h2 className="font-extralight tracking-widest text-2xl text-text uppercase">The Breath App</h2>
         </div>
@@ -83,7 +83,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
 
       {/* Mobile Pill Navigation (iOS App Dock Style) */}
       <div 
-        className="fixed bottom-[env(safe-area-inset-bottom,0.5rem)] left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] h-16 bg-white/[0.08] backdrop-blur-[24px] border border-white/10 flex md:hidden flex-row items-center justify-around px-2 z-[100] rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+        className="fixed bottom-[env(safe-area-inset-bottom,0.5rem)] left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] h-16 bg-[var(--mobile-nav-bg)] backdrop-blur-[var(--mobile-nav-blur)] border border-[color:var(--mobile-nav-border)] flex md:hidden flex-row items-center justify-around px-2 z-[100] rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
       >
         <ul className="flex flex-row justify-around items-center w-full list-none p-0 m-0">
           <li className="flex-1 flex justify-center">
