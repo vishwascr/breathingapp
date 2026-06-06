@@ -177,7 +177,6 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       setShowSummary(true);
     } else {
       setSessionTime(0);
-      setHeadPosition({ x: 0, y: 0 });
       setPhaseState({ index: 0, cumulativeIndex: 1 });
       setTimeLeft(methods[selectedMethod].pattern[0]);
       setCompletedCycles(0);

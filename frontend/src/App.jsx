@@ -48,10 +48,11 @@ function App() {
   const [completionStats, setCompletionStats] = useState(null);
   const [hasDismissedExpiration, setHasDismissedExpiration] = useState(false);
 
-  const getChallengeStats = useCallback(() => {
+  const getChallengeStats = useCallback((statsOverride = null) => {
     if (!challengeActive || !challengeStartDate) return null;
 
-    const totalHours = (historyStats.totalSeconds / 3600).toFixed(2);
+    const statsToUse = statsOverride || historyStats;
+    const totalHours = (statsToUse.totalSeconds / 3600).toFixed(2);
 
     const start = new Date(challengeStartDate);
     const now = new Date();
@@ -59,7 +60,7 @@ function App() {
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
     // Calculate Most Practiced Method from stats
-    const favoriteMethod = Object.entries(historyStats.methodTotals)
+    const favoriteMethod = Object.entries(statsToUse.methodTotals)
       .sort((a, b) => b[1] - a[1])[0]?.[0] || 'None';
 
     return {
@@ -68,12 +69,12 @@ function App() {
       rawDays: diffDays,
       sessions: '—', // We don't have total sessions count easily without extra backend work, using placeholder
       favoriteMethod,
-      totalAums: historyStats.totalAums
+      totalAums: statsToUse.totalAums
     };
   }, [challengeActive, challengeStartDate, historyStats]);
 
-  const calculateChallengeCompletion = useCallback(() => {
-    const stats = getChallengeStats();
+  const calculateChallengeCompletion = useCallback((statsOverride = null) => {
+    const stats = getChallengeStats(statsOverride);
     if (stats && parseFloat(stats.hours) >= 30) {
       return stats;
     }
@@ -256,7 +257,7 @@ function App() {
       const newStats = await fetchHistoryStats();
       fetchHistory(1, false);
 
-      const compStats = calculateChallengeCompletion();
+      const compStats = calculateChallengeCompletion(newStats);
       if (compStats) {
         setCompletionStats(compStats);
         setShowCompletionModal(true);
