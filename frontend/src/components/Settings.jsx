@@ -80,10 +80,17 @@ function MethodSettings({ methodKey, method, onSave }) {
     setLocalPattern(newPattern);
   };
 
+  const handleAumChange = (val) => {
+    const newPattern = [val, val, val, val + 1];
+    setLocalPattern(newPattern);
+  };
+
   const handleSave = () => {
     onSave(methodKey, localPattern);
     alert(`${method.name} settings updated!`);
   };
+
+  const isAum = methodKey === 'aum';
 
   return (
     <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-8 shadow-xl">
@@ -99,7 +106,22 @@ function MethodSettings({ methodKey, method, onSave }) {
       )}
 
       <div className="flex flex-col gap-6">
-        {isUniform ? (
+        {isAum ? (
+          <div className="flex flex-col sm:flex-row items-end gap-4">
+            <DurationPicker 
+              value={localPattern[0]} 
+              onChange={handleAumChange}
+              label="Inhale Duration (seconds)"
+            />
+            <button 
+              onClick={handleSave} 
+              className="btn-primary tracking-wide h-[60px] flex items-center justify-center gap-2 px-10 whitespace-nowrap w-full sm:w-auto shrink-0"
+            >
+              <Save size={18} />
+              <span>Save</span>
+            </button>
+          </div>
+        ) : isUniform ? (
           <div className="flex flex-col sm:flex-row items-end gap-4">
             <DurationPicker 
               value={uniformValue} 
@@ -138,6 +160,11 @@ function MethodSettings({ methodKey, method, onSave }) {
           </div>
         )}
       </div>
+      {isAum && (
+        <p className="mt-4 text-[0.65rem] text-dim/50 uppercase tracking-wider">
+          Chanting phases (Aaa, Uuu, Mmmm) are autocalculated.
+        </p>
+      )}
     </section>
   );
 }
@@ -228,7 +255,9 @@ function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes
             <Timer size={18} className="text-dim" />
             <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Breathing Techniques</h3>
           </div>
-          {Object.entries(methods).map(([key, method]) => (
+          {Object.entries(methods)
+            .filter(([key]) => !['478', 'completeBreath'].includes(key))
+            .map(([key, method]) => (
             <MethodSettings 
               key={key} 
               methodKey={key} 
