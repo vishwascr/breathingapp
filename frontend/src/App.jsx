@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import { Trophy, Clock, Calendar, Activity, CheckCircle2, Star, Target, Zap, RefreshCcw } from 'lucide-react'
+import { Trophy, Clock, Calendar, Activity, CheckCircle2, Star, Target, Zap, RefreshCcw, Wind } from 'lucide-react'
 import './App.css'
 
 import Sidebar from './components/Sidebar'
@@ -227,6 +227,7 @@ function App() {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('breath-theme') || null;
   });
+  const [isAppLoading, setIsAppLoading] = useState(true);
 
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [pendingNav, setPendingNav] = useState(null);
@@ -307,6 +308,11 @@ function App() {
         }
       } catch (err) {
         console.error('Failed to fetch initial data:', err);
+      } finally {
+        if (isMounted) {
+          // Quick delay to allow the loading screen animation to be seen
+          setTimeout(() => setIsAppLoading(false), 800);
+        }
       }
     };
     loadInitialData();
@@ -480,9 +486,20 @@ function App() {
     navigate('/practice');
   };
 
-  if (!theme) return (
-    <div className="w-screen h-dvh bg-[var(--color-bg,#000000)] flex items-center justify-center">
-      <div className="w-12 h-12 border-4 border-white/10 border-t-white rounded-full animate-spin"></div>
+  if (isAppLoading || !theme) return (
+    <div className="w-screen h-dvh bg-[var(--color-bg,#000000)] flex items-center justify-center overflow-hidden">
+      <div className="relative flex items-center justify-center">
+        {/* Ambient background glow */}
+        <div className="absolute w-64 h-64 bg-accent/10 rounded-full blur-[100px] animate-pulse"></div>
+        
+        {/* The Icon */}
+        <Wind 
+          size={80} 
+          strokeWidth={1.2}
+          className="text-accent animate-pulse"
+          style={{ filter: 'drop-shadow(0 0 20px var(--color-accent))' }}
+        />
+      </div>
     </div>
   );
 

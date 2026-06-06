@@ -9,10 +9,80 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script>
       (function() {
-        const theme = localStorage.getItem('breath-theme') || 'noir';
-        const bg = theme === 'mint' ? '#051410' : '#000000';
-        document.documentElement.style.setProperty('--color-bg', bg);
-        document.querySelector('meta[name="theme-color"]').setAttribute('content', bg);
+        const THEMES = {
+          noir: {
+            bg: '#000000',
+            accent: '#91936A',
+            indicator: '#D3D4C2',
+            glass: '#1A1A17',
+            text: '#E8E9E0',
+            secondary: '#21211B',
+            dim: '#BDBEA5',
+            sidebarBg: 'rgba(255, 255, 255, 0.05)',
+            sidebarBlur: '64px',
+            sidebarBorder: 'rgba(255, 255, 255, 0.1)',
+            mobileNavBg: 'rgba(255, 255, 255, 0.08)',
+            mobileNavBlur: '24px',
+            mobileNavBorder: 'rgba(255, 255, 255, 0.1)'
+          },
+          mint: {
+            bg: '#051410',
+            accent: '#42f5ad',
+            indicator: '#00ffa3',
+            glass: '#0D1412',
+            text: '#E0FFF4',
+            secondary: '#101a15',
+            dim: '#80A396',
+            sidebarBg: 'rgba(255, 255, 255, 0.05)',
+            sidebarBlur: '64px',
+            sidebarBorder: 'rgba(255, 255, 255, 0.1)',
+            mobileNavBg: 'rgba(255, 255, 255, 0.08)',
+            mobileNavBlur: '24px',
+            mobileNavBorder: 'rgba(255, 255, 255, 0.1)'
+          },
+          coder: {
+            bg: '#11121C',
+            accent: '#FF98A4',
+            indicator: '#C099FF',
+            glass: '#1A1C29',
+            text: '#FFFFFF',
+            secondary: '#2D304A',
+            dim: '#65BCFF',
+            sidebarBg: '#1A1C29',
+            sidebarBlur: '0px',
+            sidebarBorder: '#2D304A',
+            mobileNavBg: '#1A1C29',
+            mobileNavBlur: '0px',
+            mobileNavBorder: '#2D304A'
+          }
+        };
+        const themeName = localStorage.getItem('breath-theme') || 'noir';
+        const colors = THEMES[themeName] || THEMES.noir;
+        const root = document.documentElement;
+        
+        root.style.setProperty('--color-bg', colors.bg);
+        root.style.setProperty('--color-accent', colors.accent);
+        root.style.setProperty('--indicator-color', colors.indicator);
+        root.style.setProperty('--glass-color', colors.glass);
+        root.style.setProperty('--color-text', colors.text);
+        root.style.setProperty('--color-secondary', colors.secondary);
+        root.style.setProperty('--color-dim', colors.dim);
+        root.style.setProperty('--sidebar-bg', colors.sidebarBg);
+        root.style.setProperty('--sidebar-blur', colors.sidebarBlur);
+        root.style.setProperty('--sidebar-border', colors.sidebarBorder);
+        root.style.setProperty('--mobile-nav-bg', colors.mobileNavBg);
+        root.style.setProperty('--mobile-nav-blur', colors.mobileNavBlur);
+        root.style.setProperty('--mobile-nav-border', colors.mobileNavBorder);
+
+        const updateMeta = () => {
+          let meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', colors.bg);
+        };
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', updateMeta);
+        } else {
+          updateMeta();
+        }
       })();
     </script>
     <title>The Breath App</title>
