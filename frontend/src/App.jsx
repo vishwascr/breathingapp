@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import { Trophy, Award, Clock, Calendar, Activity, Flame, CheckCircle2, Star, Target, Zap, RefreshCcw } from 'lucide-react'
+import { Trophy, Clock, Calendar, Activity, CheckCircle2, Star, Target, Zap, RefreshCcw } from 'lucide-react'
 import './App.css'
 
 import Sidebar from './components/Sidebar'
@@ -285,7 +285,6 @@ function App() {
   const startChallenge = async () => {
     try {
       const res = await fetch('/api/challenge/start', { method: 'POST' });
-      const data = await res.json();
       if (res.ok) {
         setHistory([]);
         setChallengeActive(true);

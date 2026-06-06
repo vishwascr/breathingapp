@@ -36,8 +36,6 @@ function Settings({ methods, updateBoxDuration, updateAumDuration, currentTheme,
     }
   };
 
-  const labels = ['Inhale', 'Hold (Full)', 'Exhale', 'Hold (Empty)'];
-
   return (
     <div className="w-full max-w-4xl mx-auto py-8 px-4">
       <h1 className="text-4xl font-extralight mb-12 tracking-tight">Settings</h1>

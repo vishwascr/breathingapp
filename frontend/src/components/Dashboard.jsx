@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Play, Clock, BookOpen, ChevronLeft, ChevronRight, Trophy, Calendar } from 'lucide-react';
+import { Play, Clock, BookOpen, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 
 function Dashboard({ history, methods, openMethodModal, challengeActive, challengeStartDate, startChallenge }) {
   const [activeStatIndex, setActiveStatIndex] = useState(0);

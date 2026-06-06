@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Square, Save, X, Info, CheckCircle2, Maximize, Minimize } from 'lucide-react'
+import { Play, Square, Save, X, CheckCircle2, Maximize, Minimize } from 'lucide-react'
 
 const PHASES = ['Inhale', 'Hold', 'Exhale', 'Hold'];
 
@@ -20,7 +20,6 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const [phaseState, setPhaseState] = useState({ index: 0, cumulativeIndex: 0 });
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [sessionTime, setSessionTime] = useState(0);
-  const [prevCumulativeIndex, setPrevCumulativeIndex] = useState(0);
   const [headPosition, setHeadPosition] = useState({ x: 225, y: 2 });
   const [showSummary, setShowSummary] = useState(false);
   const [lastSession, setLastSession] = useState(null);
@@ -134,7 +133,6 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       setTimeout(() => {
         setTimeLeft(currentPattern[nextIndex]);
         setPhaseState(prev => {
-          setPrevCumulativeIndex(prev.cumulativeIndex);
           if (nextIndex === 0) {
             setCompletedCycles(c => c + 1);
           }
@@ -170,7 +168,6 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       setShowSummary(true);
     } else {
       setSessionTime(0);
-      setPrevCumulativeIndex(0);
       setHeadPosition({ x: 0, y: 0 });
       setPhaseState({ index: 0, cumulativeIndex: 1 });
       setTimeLeft(methods[selectedMethod].pattern[0]);
@@ -200,7 +197,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
     const currentPattern = methods[selectedMethod].pattern;
     const currentDur = currentPattern[phaseState.index];
 
-    let targetScale = 1;
+    let targetScale;
     if (selectedMethod === 'aum') {
       // Aum: Continual deflation from 2.5 to 1.0 across phases 0, 1, 2
       // Then inflation from 1.0 to 2.5 during phase 3

@@ -1,6 +1,3 @@
-import { useState } from 'react';
-import { ChevronRight, Calendar, Clock } from 'lucide-react';
-
 function History({ history }) {
   const formatDuration = (seconds) => {
     const hrs = Math.floor(seconds / 3600);
