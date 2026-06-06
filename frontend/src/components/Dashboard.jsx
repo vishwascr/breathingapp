@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Play, Clock, BookOpen, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 
-function Dashboard({ history, methods, openMethodModal, challengeActive, challengeStartDate, startChallenge }) {
+function Dashboard({ historyStats, methods, openMethodModal, challengeActive, challengeStartDate, startChallenge }) {
   const [activeStatIndex, setActiveStatIndex] = useState(0);
 
-  const lastSession = history.length > 0 ? history[0] : null;
+  const lastSession = historyStats.lastSession;
 
   const formatTime = (seconds) => {
     if (seconds < 60) return { total: Math.round(seconds), unit: 'seconds' };
@@ -12,66 +12,51 @@ function Dashboard({ history, methods, openMethodModal, challengeActive, challen
     return { total: (seconds / 3600).toFixed(2), unit: 'hours' };
   };
 
-  const calculateChallengeStats = () => {
-    if (!challengeActive || !challengeStartDate) return null;
-    
-    const totalSeconds = history
-      .filter(session => session.pattern !== 'Aum Chanting')
-      .reduce((total, session) => total + session.duration, 0);
+  const calculateDays = () => {
+    if (!challengeActive || !challengeStartDate) return 0;
     
     const start = new Date(challengeStartDate);
     const now = new Date();
     const diffTime = Math.abs(now - start);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    
-    return {
-      totalSeconds,
-      days: Math.min(diffDays, 30)
-    };
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
   };
 
-  const challengeStats = calculateChallengeStats();
+  const challengeDays = calculateDays();
   
-  // Calculate Stats
+  // Calculate Stats using historyStats from backend
   const stats = challengeActive ? [
     {
       label: 'Challenge Progress',
-      ...formatTime(challengeStats.totalSeconds),
+      ...formatTime(historyStats.totalSeconds),
       color: 'text-accent'
     },
     {
       label: 'Challenge Days',
-      total: challengeStats.days,
+      total: Math.min(challengeDays, 30),
       color: 'text-text',
       unit: '/ 30 days'
     },
     {
       label: 'Total AUMs',
-      total: history
-        .filter(session => session.pattern === 'Aum Chanting')
-        .reduce((total, session) => total + (session.cycles || 0), 0),
+      total: historyStats.totalAums,
       color: 'text-accent',
       unit: 'chants'
     }
   ] : [
     {
       label: 'Overall Focus Time',
-      ...formatTime(history.reduce((total, session) => total + session.duration, 0)),
+      ...formatTime(historyStats.overallDuration),
       color: 'text-text'
     },
     {
       label: 'Total AUMs',
-      total: history
-        .filter(session => session.pattern === 'Aum Chanting')
-        .reduce((total, session) => total + (session.cycles || 0), 0),
+      total: historyStats.totalAums,
       color: 'text-accent',
       unit: 'chants'
     },
-    ...Object.entries(methods).map(([, method]) => ({
+    ...Object.entries(methods).map(([key, method]) => ({
       label: `${method.name} Total`,
-      ...formatTime(history
-        .filter(session => session.pattern === method.name)
-        .reduce((total, session) => total + session.duration, 0)),
+      ...formatTime(historyStats.methodTotals[method.name] || 0),
       color: 'text-text'
     }))
   ].filter(stat => stat.total > 0 || stat.label === 'Overall Focus Time');

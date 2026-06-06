@@ -71,11 +71,81 @@ app.post('/api/settings/theme', async (req, res) => {
 
 app.get('/api/history', async (req, res) => {
   try {
-    const history = await History.find().sort({ timestamp: -1 });
-    res.json(history);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const history = await History.find()
+      .sort({ timestamp: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalCount = await History.countDocuments();
+    const hasMore = skip + history.length < totalCount;
+
+    res.json({
+      data: history,
+      hasMore,
+      totalCount
+    });
   } catch (err) {
     console.error('Error fetching history:', err);
     res.status(500).json({ message: 'Internal server error while fetching history.' });
+  }
+});
+
+app.get('/api/history/stats', async (req, res) => {
+  try {
+    const totalStats = await History.aggregate([
+      {
+        $facet: {
+          overall: [
+            {
+              $group: {
+                _id: null,
+                totalSeconds: { 
+                  $sum: { 
+                    $cond: [{ $ne: ["$pattern", "Aum Chanting"] }, "$duration", 0] 
+                  } 
+                },
+                totalAums: { $sum: { $ifNull: ["$cycles", 0] } },
+                overallDuration: { $sum: "$duration" }
+              }
+            }
+          ],
+          byMethod: [
+            {
+              $group: {
+                _id: "$pattern",
+                totalDuration: { $sum: "$duration" }
+              }
+            }
+          ],
+          lastSession: [
+            { $sort: { timestamp: -1 } },
+            { $limit: 1 }
+          ]
+        }
+      }
+    ]);
+
+    const stats = totalStats[0];
+    const overall = stats.overall[0] || { totalSeconds: 0, totalAums: 0, overallDuration: 0 };
+    const methodTotals = stats.byMethod.reduce((acc, curr) => {
+      acc[curr._id] = curr.totalDuration;
+      return acc;
+    }, {});
+
+    res.json({
+      totalSeconds: overall.totalSeconds,
+      totalAums: overall.totalAums,
+      overallDuration: overall.overallDuration,
+      methodTotals,
+      lastSession: stats.lastSession[0] || null
+    });
+  } catch (err) {
+    console.error('Error fetching stats:', err);
+    res.status(500).json({ message: 'Internal server error while fetching stats.' });
   }
 });
 

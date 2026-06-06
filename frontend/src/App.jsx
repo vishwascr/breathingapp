@@ -177,49 +177,47 @@ function App() {
   });
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [history, setHistory] = useState([]);
+  const [historyStats, setHistoryStats] = useState({
+    totalSeconds: 0,
+    totalAums: 0,
+    overallDuration: 0,
+    methodTotals: {},
+    lastSession: null
+  });
+  const [hasMoreHistory, setHasMoreHistory] = useState(false);
+  const [historyPage, setHistoryPage] = useState(1);
   const [challengeActive, setChallengeActive] = useState(false);
   const [challengeStartDate, setChallengeStartDate] = useState(null);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completionStats, setCompletionStats] = useState(null);
   const [hasDismissedExpiration, setHasDismissedExpiration] = useState(false);
 
-  const getChallengeStats = useCallback((currentHistory) => {
+  const getChallengeStats = useCallback(() => {
     if (!challengeActive || !challengeStartDate) return null;
 
-    const totalSeconds = currentHistory
-      .filter(session => session.pattern !== 'Aum Chanting')
-      .reduce((total, session) => total + session.duration, 0);
-    const totalHours = (totalSeconds / 3600).toFixed(2);
+    const totalHours = (historyStats.totalSeconds / 3600).toFixed(2);
 
     const start = new Date(challengeStartDate);
     const now = new Date();
     const diffTime = Math.abs(now - start);
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
-    // Calculate Most Practiced Method
-    const methodCounts = currentHistory.reduce((acc, session) => {
-      acc[session.pattern] = (acc[session.pattern] || 0) + 1;
-      return acc;
-    }, {});
-    const favoriteMethod = Object.entries(methodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'None';
-
-    // Calculate Total AUMs
-    const totalAums = currentHistory
-      .filter(session => session.pattern === 'Aum Chanting')
-      .reduce((total, session) => total + (session.cycles || 0), 0);
+    // Calculate Most Practiced Method from stats
+    const favoriteMethod = Object.entries(historyStats.methodTotals)
+      .sort((a, b) => b[1] - a[1])[0]?.[0] || 'None';
 
     return {
       hours: totalHours,
       days: Math.min(diffDays, 30),
       rawDays: diffDays,
-      sessions: currentHistory.length,
+      sessions: '—', // We don't have total sessions count easily without extra backend work, using placeholder
       favoriteMethod,
-      totalAums
+      totalAums: historyStats.totalAums
     };
-  }, [challengeActive, challengeStartDate]);
+  }, [challengeActive, challengeStartDate, historyStats]);
 
-  const calculateChallengeCompletion = useCallback((currentHistory) => {
-    const stats = getChallengeStats(currentHistory);
+  const calculateChallengeCompletion = useCallback(() => {
+    const stats = getChallengeStats();
     if (stats && parseFloat(stats.hours) >= 30) {
       return stats;
     }
@@ -238,13 +236,13 @@ function App() {
 
   const expirationStats = useMemo(() => {
     if (challengeActive && challengeStartDate && !isSessionActive && !hasDismissedExpiration) {
-      const stats = getChallengeStats(history);
+      const stats = getChallengeStats();
       if (stats && stats.rawDays > 30 && parseFloat(stats.hours) < 30) {
         return stats;
       }
     }
     return null;
-  }, [challengeActive, challengeStartDate, isSessionActive, history, getChallengeStats, hasDismissedExpiration]);
+  }, [challengeActive, challengeStartDate, isSessionActive, getChallengeStats, hasDismissedExpiration]);
 
   const showExpirationModal = !!expirationStats;
 
@@ -265,10 +263,19 @@ function App() {
     let isMounted = true;
     const loadInitialData = async () => {
       try {
-        // Load History
-        const historyRes = await fetch('/api/history');
+        // Load Stats
+        const statsRes = await fetch('/api/history/stats');
+        const statsData = await statsRes.json();
+        if (isMounted) setHistoryStats(statsData);
+
+        // Load Initial History Page
+        const historyRes = await fetch('/api/history?page=1&limit=10');
         const historyData = await historyRes.json();
-        if (isMounted) setHistory(historyData);
+        if (isMounted) {
+          setHistory(historyData.data);
+          setHasMoreHistory(historyData.hasMore);
+          setHistoryPage(1);
+        }
 
         // Load Theme
         let loadedTheme = null;
@@ -355,22 +362,37 @@ function App() {
     }
   };
 
-  const fetchHistory = async (checkCompletion = false) => {
+  const fetchHistoryStats = async () => {
     try {
-      const response = await fetch('/api/history');
+      const response = await fetch('/api/history/stats');
       const data = await response.json();
-      setHistory(data);
+      setHistoryStats(data);
+      return data;
+    } catch (err) {
+      console.error('Failed to fetch history stats:', err);
+    }
+  };
 
-      if (checkCompletion) {
-        const stats = calculateChallengeCompletion(data);
-        if (stats) {
-          setCompletionStats(stats);
-          setShowCompletionModal(true);
-        }
+  const fetchHistory = async (page = 1, append = false) => {
+    try {
+      const response = await fetch(`/api/history?page=${page}&limit=10`);
+      const data = await response.json();
+      
+      if (append) {
+        setHistory(prev => [...prev, ...data.data]);
+      } else {
+        setHistory(data.data);
       }
+      
+      setHasMoreHistory(data.hasMore);
+      setHistoryPage(page);
     } catch (err) {
       console.error('Failed to fetch history:', err);
     }
+  };
+
+  const loadMoreHistory = () => {
+    fetchHistory(historyPage + 1, true);
   };
 
   const saveHistory = async (duration, patternName, notes, phaseDuration, cycles) => {
@@ -380,7 +402,16 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ duration, pattern: patternName, notes, phaseDuration, cycles })
       });
-      fetchHistory(true);
+      
+      // Refresh stats and first page of history
+      const newStats = await fetchHistoryStats();
+      fetchHistory(1, false);
+
+      const compStats = calculateChallengeCompletion();
+      if (compStats) {
+        setCompletionStats(compStats);
+        setShowCompletionModal(true);
+      }
     } catch (err) {
       console.error('Failed to save history:', err);
     }
@@ -391,6 +422,13 @@ function App() {
       const res = await fetch('/api/challenge/start', { method: 'POST' });
       if (res.ok) {
         setHistory([]);
+        setHistoryStats({
+          totalSeconds: 0,
+          totalAums: 0,
+          overallDuration: 0,
+          methodTotals: {},
+          lastSession: null
+        });
         setChallengeActive(true);
         setChallengeStartDate(new Date().toISOString());
       }
@@ -404,6 +442,13 @@ function App() {
       const res = await fetch('/api/challenge/reset', { method: 'POST' });
       if (res.ok) {
         setHistory([]);
+        setHistoryStats({
+          totalSeconds: 0,
+          totalAums: 0,
+          overallDuration: 0,
+          methodTotals: {},
+          lastSession: null
+        });
         setChallengeActive(false);
         setChallengeStartDate(null);
       }
@@ -474,7 +519,7 @@ function App() {
               <Route path="/" element={
                 <Dashboard
                   key={challengeActive}
-                  history={history}
+                  historyStats={historyStats}
                   methods={methods}
                   openMethodModal={() => setIsMethodModalOpen(true)}
                   challengeActive={challengeActive}
@@ -493,7 +538,13 @@ function App() {
                   />
                 } 
               />
-              <Route path="/history" element={<History history={history} />} />
+              <Route path="/history" element={
+                <History 
+                  history={history} 
+                  hasMore={hasMoreHistory} 
+                  loadMore={loadMoreHistory} 
+                />
+              } />
               <Route 
                 path="/settings"
                 element={

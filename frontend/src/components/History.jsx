@@ -1,4 +1,4 @@
-function History({ history }) {
+function History({ history, hasMore, loadMore }) {
   const formatDuration = (seconds) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
@@ -78,6 +78,15 @@ function History({ history }) {
             </div>
           </div>
         ))}
+
+        {hasMore && (
+          <button 
+            onClick={loadMore}
+            className="mt-4 w-full py-6 bg-white/5 border border-white/10 rounded-squircle-lg text-dim hover:text-white hover:bg-white/10 transition-all duration-300 font-light uppercase tracking-widest text-sm"
+          >
+            Load More Sessions
+          </button>
+        )}
       </div>
     </div>
   );
