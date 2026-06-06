@@ -229,7 +229,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
         <h2 className="text-[1.8rem] md:text-[3rem] font-thin tracking-tight text-text text-left">{methods[selectedMethod].name}</h2>
         <button 
           onClick={toggleFullscreen}
-          className="p-3 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all"
+          className="hidden md:flex p-3 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all items-center justify-center"
           title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
         >
           {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}

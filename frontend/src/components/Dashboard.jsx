@@ -104,7 +104,6 @@ function Dashboard({ history, methods, openMethodModal, challengeActive, challen
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
         {!challengeActive && (
           <section className="relative bg-accent/5 backdrop-blur-3xl border border-accent/20 rounded-squircle-lg p-8 md:p-10 shadow-2xl transition-all duration-500 z-10 lg:col-span-2 overflow-hidden group">
-            <div className="absolute -right-20 -top-20 w-64 h-64 bg-accent/10 rounded-full blur-3xl group-hover:bg-accent/20 transition-all duration-700"></div>
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="text-center md:text-left">
                 <div className="flex items-center gap-3 mb-4 justify-center md:justify-start">
