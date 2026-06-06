@@ -140,10 +140,14 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
 
       transitionTimeoutId = setTimeout(() => {
         setTimeLeft(currentPattern[nextIndex]);
+
+        const isAumComplete = selectedMethod === 'aum' && nextIndex === 3;
+        const isStandardComplete = selectedMethod !== 'aum' && nextIndex === 0;
+        if (isAumComplete || isStandardComplete) {
+          setCompletedCycles(c => c + 1);
+        }
+
         setPhaseState(prev => {
-          if (nextIndex === 0) {
-            setCompletedCycles(c => c + 1);
-          }
           return { 
             index: nextIndex, 
             cumulativeIndex: prev.cumulativeIndex + 1 
@@ -349,7 +353,9 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
             {isActive ? 'Stop Session' : 'Begin Journey'}
           </button>
           <div className={`flex flex-col items-center gap-2 transition-all duration-500 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="text-dim font-light tracking-wide">Session: {sessionTime}s</div>
+            <div className="text-dim font-light tracking-wide">
+              {selectedMethod === 'aum' ? 'Chants' : 'Cycles'}: {completedCycles}
+            </div>
             <div 
               className={`text-accent font-light tracking-wider text-sm md:text-base text-center max-w-xs transition-all duration-500 filter drop-shadow-[0_0_8px_var(--color-accent)] ${
                 guidanceVisible ? 'opacity-80 translate-y-0' : 'opacity-0 translate-y-2'
