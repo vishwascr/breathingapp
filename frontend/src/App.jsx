@@ -35,6 +35,7 @@ function App() {
   const [history, setHistory] = useState([]);
   const [historyStats, setHistoryStats] = useState({
     totalSeconds: 0,
+    totalCooldownSeconds: 0,
     totalAums: 0,
     overallDuration: 0,
     totalSessions: 0,
@@ -251,7 +252,7 @@ function App() {
     fetchHistory(historyPage + 1, true);
   };
 
-  const saveHistory = async (duration, patternName, notes, phaseDuration, cycles) => {
+  const saveHistory = async (duration, patternName, notes, phaseDuration, cycles, cooldownSeconds) => {
     try {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       await fetch('/api/history', {
@@ -260,7 +261,7 @@ function App() {
           'Content-Type': 'application/json',
           'x-timezone': timezone
         },
-        body: JSON.stringify({ duration, pattern: patternName, notes, phaseDuration, cycles })
+        body: JSON.stringify({ duration, pattern: patternName, notes, phaseDuration, cycles, cooldownSeconds })
       });
       
       // Refresh stats and first page of history
@@ -298,6 +299,7 @@ function App() {
         setHistory([]);
         setHistoryStats({
           totalSeconds: 0,
+          totalCooldownSeconds: 0,
           totalAums: 0,
           overallDuration: 0,
           totalSessions: 0,
@@ -320,6 +322,7 @@ function App() {
         setHistory([]);
         setHistoryStats({
           totalSeconds: 0,
+          totalCooldownSeconds: 0,
           totalAums: 0,
           overallDuration: 0,
           totalSessions: 0,

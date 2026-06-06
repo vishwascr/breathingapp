@@ -36,6 +36,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const pathRef = useRef(null);
   const animationRef = useRef(null);
   const phaseStartTimeRef = useRef(null);
+  const cooldownStartTimeRef = useRef(null);
   const containerRef = useRef(null);
   const timeDisplayRef = useRef(null);
 
@@ -221,10 +222,23 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
     if (isActive || countdown !== null) {
       const methodName = methods[selectedMethod].name;
       const phaseDuration = (selectedMethod === 'box' || selectedMethod === 'aum') ? methods[selectedMethod].pattern[0] : null;
-      setLastSession({ duration: sessionTime, pattern: methodName, phaseDuration, cycles: completedCycles });
+      
+      let finalCooldownSeconds = 0;
+      if (isCooldown && cooldownStartTimeRef.current) {
+        finalCooldownSeconds = Math.floor((Date.now() - cooldownStartTimeRef.current) / 1000);
+      }
+
+      setLastSession({ 
+        duration: sessionTime, 
+        pattern: methodName, 
+        phaseDuration, 
+        cycles: completedCycles,
+        cooldownSeconds: finalCooldownSeconds 
+      });
       setIsActive(false);
       setCountdown(null);
       setIsCooldown(false);
+      cooldownStartTimeRef.current = null;
       if (isActive) setShowSummary(true);
     } else {
       setCountdown(3);
@@ -235,7 +249,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   };
 
   const handleSaveSession = () => {
-    saveHistory(lastSession.duration, lastSession.pattern, currentNote, lastSession.phaseDuration, lastSession.cycles);
+    saveHistory(lastSession.duration, lastSession.pattern, currentNote, lastSession.phaseDuration, lastSession.cycles, lastSession.cooldownSeconds);
     setShowSummary(false);
     if (document.fullscreenElement) {
       document.exitFullscreen();
@@ -404,6 +418,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
             onClick={() => {
               if (selectedMethod === 'resonance' && isActive && !isCooldown) {
                 setIsCooldown(true);
+                cooldownStartTimeRef.current = Date.now();
               } else if (isCooldown) {
                 handleStartStop();
               }

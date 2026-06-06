@@ -25,6 +25,7 @@ const historySchema = new mongoose.Schema({
   pattern: { type: String, required: true },
   phaseDuration: { type: Number },
   cycles: { type: Number },
+  cooldownSeconds: { type: Number, default: 0 },
   notes: { type: String, default: '' },
   timestamp: { type: Date, default: Date.now }
 });
@@ -105,6 +106,7 @@ app.get('/api/history/stats', async (req, res) => {
               $group: {
                 _id: null,
                 totalSeconds: { $sum: "$duration" },
+                totalCooldownSeconds: { $sum: { $ifNull: ["$cooldownSeconds", 0] } },
                 totalAums: { 
                   $sum: { 
                     $cond: [{ $eq: ["$pattern", "Aum Chanting"] }, { $ifNull: ["$cycles", 0] }, 0] 
@@ -154,6 +156,7 @@ app.get('/api/history/stats', async (req, res) => {
 
     res.json({
       totalSeconds: overall.totalSeconds,
+      totalCooldownSeconds: overall.totalCooldownSeconds,
       totalAums: overall.totalAums,
       overallDuration: overall.overallDuration,
       totalSessions: overall.totalSessions,
@@ -228,7 +231,7 @@ app.post('/api/challenge/reset', async (req, res) => {
 });
 
 app.post('/api/history', async (req, res) => {
-  const { duration, pattern, phaseDuration, cycles, notes } = req.body;
+  const { duration, pattern, phaseDuration, cycles, notes, cooldownSeconds } = req.body;
 
   // Input Validation
   if (typeof duration !== 'number' || isNaN(duration) || duration < 0) {
@@ -243,6 +246,7 @@ app.post('/api/history', async (req, res) => {
     pattern,
     phaseDuration,
     cycles,
+    cooldownSeconds: cooldownSeconds || 0,
     notes: notes || ''
   });
 

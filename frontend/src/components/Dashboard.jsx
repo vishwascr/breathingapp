@@ -38,6 +38,11 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
       unit: '/ 30 days'
     },
     {
+      label: 'Cooldown Time',
+      ...formatTime(historyStats.totalCooldownSeconds || 0),
+      color: 'text-accent'
+    },
+    {
       label: 'Total AUMs',
       total: historyStats.totalAums,
       color: 'text-accent',
@@ -48,6 +53,11 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
       label: 'Overall Focus Time',
       ...formatTime(historyStats.overallDuration),
       color: 'text-text'
+    },
+    {
+      label: 'Breath-Hold Time',
+      ...formatTime(historyStats.totalCooldownSeconds || 0),
+      color: 'text-accent'
     },
     {
       label: 'Total AUMs',
@@ -206,6 +216,12 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
                       <span className="block text-[0.65rem] uppercase tracking-widest text-dim mb-1">Duration</span>
                       <span className="text-xl md:text-2xl font-light">{lastSession.duration}s</span>
                     </div>
+                    {lastSession.cooldownSeconds > 0 && (
+                      <div>
+                        <span className="block text-[0.65rem] uppercase tracking-widest text-dim mb-1">Breath-Hold</span>
+                        <span className="text-xl md:text-2xl font-light text-accent">{lastSession.cooldownSeconds}s</span>
+                      </div>
+                    )}
                   </div>
                   {lastSession.notes && (
                     <div className="pt-6 border-t border-white/5">
