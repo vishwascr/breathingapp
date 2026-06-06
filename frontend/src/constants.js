@@ -1,0 +1,145 @@
+export const INITIAL_METHODS = {
+  box: { 
+    name: 'Box Breathing', 
+    pattern: [4, 4, 4, 4],
+    description: 'A powerful stress-reliever used by Navy SEALs. It involves four equal steps of breathing, holding, and exhaling.',
+    steps: [
+      'Exhale all air from your lungs through your mouth.',
+      'Inhale slowly through your nose for 4 seconds.',
+      'Hold your breath for 4 seconds.',
+      'Exhale slowly through your mouth for 4 seconds.',
+      'Hold your breath again for 4 seconds.'
+    ]
+  },
+  deepBelly: { 
+    name: 'Diaphragmatic Breathing', 
+    pattern: [5, 0, 5, 0],
+    description: 'Also known as belly breathing, this technique helps you use your diaphragm correctly and strengthen your lungs.',
+    steps: [
+      'Sit or lie down in a comfortable position.',
+      'Place one hand on your chest and the other on your abdomen.',
+      'Inhale through your nose, feeling your abdomen rise while your chest remains still.',
+      'Exhale through pursed lips, feeling your abdomen fall.'
+    ]
+  },
+  '478': { 
+    name: '4-7-8 Breathing', 
+    pattern: [4, 7, 8, 0],
+    description: 'A natural tranquilizer for the nervous system. Developed by Dr. Andrew Weil, it is excellent for falling asleep.',
+    steps: [
+      'Exhale completely through your mouth, making a whoosh sound.',
+      'Close your mouth and inhale quietly through your nose for 4 seconds.',
+      'Hold your breath for 7 seconds.',
+      'Exhale completely through your mouth for 8 seconds.'
+    ]
+  },
+  completeBreath: {
+    name: 'The Complete Breath',
+    pattern: [5, 3, 6, 0],
+    isNew: true,
+    description: 'A foundational practice that fills the entire lungs. It involves a smooth sweep from the diaphragm to the collar-bone.',
+    steps: [
+      'Get into position: Stand or sit erect.',
+      'Inhale (5 seconds): Breathing through the nostrils, inhale steadily. First, fill the lower part of the lungs by bringing the diaphragm into play, pushing forward the abdomen.',
+      'Next, fill the middle part of the lungs by pushing out the lower ribs and chest.',
+      'Finally, fill the higher portion of the lungs by protruding the upper chest. Make it one smooth, 5-second sweep.',
+      'Hold (3 seconds): Retain the breath, keeping your chest expanded.',
+      'Exhale (6 seconds): Exhale quite slowly, drawing the abdomen in a little as the air leaves.',
+      'Relax: When the air is entirely exhaled, relax your chest and abdomen completely.'
+    ],
+    guidance: [
+      'Inhale: Fill lower, middle, then higher lungs in one smooth sweep.',
+      'Hold: Retain the breath, keeping your chest expanded.',
+      'Exhale: Release slowly, drawing the abdomen in slightly.',
+      'Relax: Let your chest and abdomen relax completely.'
+    ]
+  },
+  resonance: {
+    name: 'Resonance Breathing',
+    pattern: [5, 0, 5, 0],
+    isNew: true,
+    description: 'Breathing at a rate of 5-6 breaths per minute to balance the autonomic nervous system and reduce anxiety.',
+    steps: [
+      'Inhale for 5 seconds.',
+      'Exhale for 5 seconds.',
+      'Focus on a smooth transition between inhale and exhale.',
+      'Allow your breath to be gentle and effortless.'
+    ]
+  },
+  aum: { 
+    name: 'Aum Chanting', 
+    pattern: [4, 4, 5, 4],
+    phases: ['Aaa', 'Uuu', 'Mmmm', 'Inhale'],
+    description: 'Combines controlled exhalation with sound vibrations to stimulate the vagus nerve and calm the mind.',
+    steps: [
+      'Inhale deeply through your nose.',
+      'Exhale making the "Aaa" sound, feeling vibrations in your stomach.',
+      'Transition to the "Uuu" sound, feeling vibrations in your throat.',
+      'Finish with the "Mmmm" sound, feeling vibrations in your head.',
+      'Inhale and repeat.'
+    ],
+    guidance: [
+      'Creates vibrations in your stomach and chest.',
+      'Creates vibrations in your throat.',
+      'Creates vibrations in your brain and nasal cavity.',
+      'Breathe in deeply through your nose.'
+    ]
+  }
+};
+
+export const THEMES = {
+  noir: {
+    name: 'Noir (Night)',
+    colors: {
+      bg: '#000000',
+      accent: '#91936A',
+      indicator: '#D3D4C2',
+      glass: '#1A1A17',
+      text: '#E8E9E0',
+      secondary: '#21211B',
+      dim: '#BDBEA5',
+      sidebarBg: 'rgba(255, 255, 255, 0.05)',
+      sidebarBlur: '64px',
+      sidebarBorder: 'rgba(255, 255, 255, 0.1)',
+      mobileNavBg: 'rgba(255, 255, 255, 0.08)',
+      mobileNavBlur: '24px',
+      mobileNavBorder: 'rgba(255, 255, 255, 0.1)'
+    }
+  },
+  mint: {
+    name: 'Mint (Fresh)',
+    colors: {
+      bg: '#051410',
+      accent: '#42f5ad',
+      indicator: '#00ffa3',
+      glass: '#0D1412',
+      text: '#E0FFF4',
+      secondary: '#101a15',
+      dim: '#80A396',
+      sidebarBg: 'rgba(255, 255, 255, 0.05)',
+      sidebarBlur: '64px',
+      sidebarBorder: 'rgba(255, 255, 255, 0.1)',
+      mobileNavBg: 'rgba(255, 255, 255, 0.08)',
+      mobileNavBlur: '24px',
+      mobileNavBorder: 'rgba(255, 255, 255, 0.1)'
+    }
+  },
+  coder: {
+    name: 'Coder (Synth)',
+    colors: {
+      bg: '#11121C',
+      accent: '#FF98A4',
+      indicator: '#C099FF',
+      glass: '#1A1C29',
+      text: '#FFFFFF',
+      secondary: '#2D304A',
+      dim: '#65BCFF',
+      sidebarBg: '#1A1C29',
+      sidebarBlur: '0px',
+      sidebarBorder: '#2D304A',
+      mobileNavBg: '#1A1C29',
+      mobileNavBlur: '0px',
+      mobileNavBorder: '#2D304A'
+    }
+  }
+};

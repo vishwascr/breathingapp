@@ -1,159 +1,15 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { Trophy, Clock, Calendar, Activity, CheckCircle2, Star, Target, Zap, RefreshCcw, Wind } from 'lucide-react'
 import './App.css'
 
 import Sidebar from './components/Sidebar'
-import Dashboard from './components/Dashboard'
-import Practice from './components/Practice'
-import History from './components/History'
-import Settings from './components/Settings'
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const Practice = lazy(() => import('./components/Practice'));
+const History = lazy(() => import('./components/History'));
+const Settings = lazy(() => import('./components/Settings'));
 
-const INITIAL_METHODS = {
-  box: { 
-    name: 'Box Breathing', 
-    pattern: [4, 4, 4, 4],
-    description: 'A powerful stress-reliever used by Navy SEALs. It involves four equal steps of breathing, holding, and exhaling.',
-    steps: [
-      'Exhale all air from your lungs through your mouth.',
-      'Inhale slowly through your nose for 4 seconds.',
-      'Hold your breath for 4 seconds.',
-      'Exhale slowly through your mouth for 4 seconds.',
-      'Hold your breath again for 4 seconds.'
-    ]
-  },
-  deepBelly: { 
-    name: 'Diaphragmatic Breathing', 
-    pattern: [5, 0, 5, 0],
-    description: 'Also known as belly breathing, this technique helps you use your diaphragm correctly and strengthen your lungs.',
-    steps: [
-      'Sit or lie down in a comfortable position.',
-      'Place one hand on your chest and the other on your abdomen.',
-      'Inhale through your nose, feeling your abdomen rise while your chest remains still.',
-      'Exhale through pursed lips, feeling your abdomen fall.'
-    ]
-  },
-  '478': { 
-    name: '4-7-8 Breathing', 
-    pattern: [4, 7, 8, 0],
-    description: 'A natural tranquilizer for the nervous system. Developed by Dr. Andrew Weil, it is excellent for falling asleep.',
-    steps: [
-      'Exhale completely through your mouth, making a whoosh sound.',
-      'Close your mouth and inhale quietly through your nose for 4 seconds.',
-      'Hold your breath for 7 seconds.',
-      'Exhale completely through your mouth for 8 seconds.'
-    ]
-  },
-  completeBreath: {
-    name: 'The Complete Breath',
-    pattern: [5, 3, 6, 0],
-    isNew: true,
-    description: 'A foundational practice that fills the entire lungs. It involves a smooth sweep from the diaphragm to the collar-bone.',
-    steps: [
-      'Get into position: Stand or sit erect.',
-      'Inhale (5 seconds): Breathing through the nostrils, inhale steadily. First, fill the lower part of the lungs by bringing the diaphragm into play, pushing forward the abdomen.',
-      'Next, fill the middle part of the lungs by pushing out the lower ribs and chest.',
-      'Finally, fill the higher portion of the lungs by protruding the upper chest. Make it one smooth, 5-second sweep.',
-      'Hold (3 seconds): Retain the breath, keeping your chest expanded.',
-      'Exhale (6 seconds): Exhale quite slowly, drawing the abdomen in a little as the air leaves.',
-      'Relax: When the air is entirely exhaled, relax your chest and abdomen completely.'
-    ],
-    guidance: [
-      'Inhale: Fill lower, middle, then higher lungs in one smooth sweep.',
-      'Hold: Retain the breath, keeping your chest expanded.',
-      'Exhale: Release slowly, drawing the abdomen in slightly.',
-      'Relax: Let your chest and abdomen relax completely.'
-    ]
-  },
-  resonance: {
-    name: 'Resonance Breathing',
-    pattern: [5, 0, 5, 0],
-    isNew: true,
-    description: 'Breathing at a rate of 5-6 breaths per minute to balance the autonomic nervous system and reduce anxiety.',
-    steps: [
-      'Inhale for 5 seconds.',
-      'Exhale for 5 seconds.',
-      'Focus on a smooth transition between inhale and exhale.',
-      'Allow your breath to be gentle and effortless.'
-    ]
-  },
-  aum: { 
-    name: 'Aum Chanting', 
-    pattern: [4, 4, 5, 4],
-    phases: ['Aaa', 'Uuu', 'Mmmm', 'Inhale'],
-    description: 'Combines controlled exhalation with sound vibrations to stimulate the vagus nerve and calm the mind.',
-    steps: [
-      'Inhale deeply through your nose.',
-      'Exhale making the "Aaa" sound, feeling vibrations in your stomach.',
-      'Transition to the "Uuu" sound, feeling vibrations in your throat.',
-      'Finish with the "Mmmm" sound, feeling vibrations in your head.',
-      'Inhale and repeat.'
-    ],
-    guidance: [
-      'Creates vibrations in your stomach and chest.',
-      'Creates vibrations in your throat.',
-      'Creates vibrations in your brain and nasal cavity.',
-      'Breathe in deeply through your nose.'
-    ]
-  }
-};
-
-const THEMES = {
-  noir: {
-    name: 'Noir (Night)',
-    colors: {
-      bg: '#000000',
-      accent: '#91936A',
-      indicator: '#D3D4C2',
-      glass: '#1A1A17',
-      text: '#E8E9E0',
-      secondary: '#21211B',
-      dim: '#BDBEA5',
-      sidebarBg: 'rgba(255, 255, 255, 0.05)',
-      sidebarBlur: '64px',
-      sidebarBorder: 'rgba(255, 255, 255, 0.1)',
-      mobileNavBg: 'rgba(255, 255, 255, 0.08)',
-      mobileNavBlur: '24px',
-      mobileNavBorder: 'rgba(255, 255, 255, 0.1)'
-    }
-  },
-  mint: {
-    name: 'Mint (Fresh)',
-    colors: {
-      bg: '#051410',
-      accent: '#42f5ad',
-      indicator: '#00ffa3',
-      glass: '#0D1412',
-      text: '#E0FFF4',
-      secondary: '#101a15',
-      dim: '#80A396',
-      sidebarBg: 'rgba(255, 255, 255, 0.05)',
-      sidebarBlur: '64px',
-      sidebarBorder: 'rgba(255, 255, 255, 0.1)',
-      mobileNavBg: 'rgba(255, 255, 255, 0.08)',
-      mobileNavBlur: '24px',
-      mobileNavBorder: 'rgba(255, 255, 255, 0.1)'
-    }
-  },
-  coder: {
-    name: 'Coder (Synth)',
-    colors: {
-      bg: '#11121C',
-      accent: '#FF98A4',
-      indicator: '#C099FF',
-      glass: '#1A1C29',
-      text: '#FFFFFF',
-      secondary: '#2D304A',
-      dim: '#65BCFF',
-      sidebarBg: '#1A1C29',
-      sidebarBlur: '0px',
-      sidebarBorder: '#2D304A',
-      mobileNavBg: '#1A1C29',
-      mobileNavBlur: '0px',
-      mobileNavBorder: '#2D304A'
-    }
-  }
-};
+import { INITIAL_METHODS, THEMES } from './constants'
 
 function App() {
   const [methods, setMethods] = useState(() => {
@@ -225,9 +81,8 @@ function App() {
   }, [getChallengeStats]);
 
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('breath-theme') || null;
+    return localStorage.getItem('breath-theme') || 'noir';
   });
-  const [isAppLoading, setIsAppLoading] = useState(true);
 
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [pendingNav, setPendingNav] = useState(null);
@@ -264,55 +119,43 @@ function App() {
     let isMounted = true;
     const loadInitialData = async () => {
       try {
-        // Load Stats
-        const statsRes = await fetch('/api/history/stats');
-        const statsData = await statsRes.json();
-        if (isMounted) setHistoryStats(statsData);
+        const [statsRes, historyRes, themeRes, challengeRes] = await Promise.all([
+          fetch('/api/history/stats'),
+          fetch('/api/history?page=1&limit=10'),
+          fetch('/api/settings/theme'),
+          fetch('/api/challenge/status')
+        ]);
 
-        // Load Initial History Page
-        const historyRes = await fetch('/api/history?page=1&limit=10');
-        const historyData = await historyRes.json();
+        const [statsData, historyData, themeData, challengeData] = await Promise.all([
+          statsRes.json(),
+          historyRes.json(),
+          themeRes.json().catch(() => ({ theme: null })),
+          challengeRes.json()
+        ]);
+
         if (isMounted) {
+          // Process Stats
+          setHistoryStats(statsData);
+
+          // Process History
           setHistory(historyData.data);
           setHasMoreHistory(historyData.hasMore);
           setHistoryPage(1);
-        }
 
-        // Load Theme
-        let loadedTheme = null;
-        try {
-          const themeRes = await fetch('/api/settings/theme');
-          const themeData = await themeRes.json();
-          loadedTheme = themeData.theme;
-        } catch (e) {
-          console.error('Failed to load theme:', e);
-        }
-
-        if (isMounted) {
+          // Process Theme
+          const loadedTheme = themeData.theme;
           if (loadedTheme) {
             setTheme(loadedTheme);
             localStorage.setItem('breath-theme', loadedTheme);
-          } else {
-            // Check localStorage before fallback
-            const cachedTheme = localStorage.getItem('breath-theme');
-            setTheme(cachedTheme || 'noir');
           }
-        }
+          // If no theme from API, we already have it from localStorage or 'noir'
 
-        // Load Challenge Status
-        const challengeRes = await fetch('/api/challenge/status');
-        const challengeData = await challengeRes.json();
-        if (isMounted) {
+          // Process Challenge Status
           setChallengeActive(challengeData.challengeActive);
           setChallengeStartDate(challengeData.challengeStartDate);
         }
       } catch (err) {
         console.error('Failed to fetch initial data:', err);
-      } finally {
-        if (isMounted) {
-          // Quick delay to allow the loading screen animation to be seen
-          setTimeout(() => setIsAppLoading(false), 800);
-        }
       }
     };
     loadInitialData();
@@ -486,23 +329,6 @@ function App() {
     navigate('/practice');
   };
 
-  if (isAppLoading || !theme) return (
-    <div className="w-screen h-dvh bg-[var(--color-bg,#000000)] flex items-center justify-center overflow-hidden">
-      <div className="relative flex items-center justify-center">
-        {/* Ambient background glow */}
-        <div className="absolute w-64 h-64 bg-accent/10 rounded-full blur-[100px] animate-pulse"></div>
-        
-        {/* The Icon */}
-        <Wind 
-          size={80} 
-          strokeWidth={1.2}
-          className="text-accent animate-pulse"
-          style={{ filter: 'drop-shadow(0 0 20px var(--color-accent))' }}
-        />
-      </div>
-    </div>
-  );
-
   return (
     <div className="min-h-dvh text-text transition-colors duration-500 relative isolate">
       {/* UI Layer */}
@@ -532,51 +358,57 @@ function App() {
           )}
           
           <main className="w-full min-h-dvh p-6 md:p-12 flex justify-center items-start relative z-10 pb-32 md:pb-12">
-            <Routes>
-              <Route path="/" element={
-                <Dashboard
-                  key={challengeActive}
-                  historyStats={historyStats}
-                  methods={methods}
-                  openMethodModal={() => setIsMethodModalOpen(true)}
-                  challengeActive={challengeActive}
-                  challengeStartDate={challengeStartDate}
-                  startChallenge={startChallenge}
-                />
-              } />
-              <Route 
-                path="/practice" 
-                element={
-                  <Practice 
-                    selectedMethod={selectedMethod} 
-                    methods={methods} 
-                    saveHistory={saveHistory} 
-                    setIsSessionActive={setIsSessionActive}
-                  />
-                } 
-              />
-              <Route path="/history" element={
-                <History 
-                  history={history} 
-                  hasMore={hasMoreHistory} 
-                  loadMore={loadMoreHistory} 
-                />
-              } />
-              <Route 
-                path="/settings"
-                element={
-                  <Settings
+            <Suspense fallback={
+              <div className="flex items-center justify-center p-20">
+                <Wind size={40} className="text-accent animate-pulse" />
+              </div>
+            }>
+              <Routes>
+                <Route path="/" element={
+                  <Dashboard
+                    key={challengeActive}
+                    historyStats={historyStats}
                     methods={methods}
-                    updateMethodPattern={updateMethodPattern}
-                    currentTheme={theme}
-                    setTheme={updateTheme}
-                    themes={THEMES}
+                    openMethodModal={() => setIsMethodModalOpen(true)}
                     challengeActive={challengeActive}
-                    resetChallenge={resetChallenge}
+                    challengeStartDate={challengeStartDate}
+                    startChallenge={startChallenge}
                   />
-                }
+                } />
+                <Route 
+                  path="/practice" 
+                  element={
+                    <Practice 
+                      selectedMethod={selectedMethod} 
+                      methods={methods} 
+                      saveHistory={saveHistory} 
+                      setIsSessionActive={setIsSessionActive}
+                    />
+                  } 
                 />
-            </Routes>
+                <Route path="/history" element={
+                  <History 
+                    history={history} 
+                    hasMore={hasMoreHistory} 
+                    loadMore={loadMoreHistory} 
+                  />
+                } />
+                <Route 
+                  path="/settings"
+                  element={
+                    <Settings
+                      methods={methods}
+                      updateMethodPattern={updateMethodPattern}
+                      currentTheme={theme}
+                      setTheme={updateTheme}
+                      themes={THEMES}
+                      challengeActive={challengeActive}
+                      resetChallenge={resetChallenge}
+                    />
+                  }
+                  />
+              </Routes>
+            </Suspense>
           </main>
         </div>
       </div>
