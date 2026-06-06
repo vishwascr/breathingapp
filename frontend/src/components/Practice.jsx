@@ -29,6 +29,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const [guidanceVisible, setGuidanceVisible] = useState(true);
   const [completedCycles, setCompletedCycles] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [countdown, setCountdown] = useState(null);
 
   const sessionTimerRef = useRef(null);
   const pathRef = useRef(null);
@@ -36,6 +37,27 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const phaseStartTimeRef = useRef(null);
   const containerRef = useRef(null);
   const timeDisplayRef = useRef(null);
+
+  // Countdown timer logic
+  useEffect(() => {
+    if (countdown === null) return;
+    
+    if (countdown > 1) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (countdown === 1) {
+      const timer = setTimeout(() => {
+        // Start the actual session
+        setSessionTime(0);
+        setPhaseState({ index: 0, cumulativeIndex: 1 });
+        setTimeLeft(methods[selectedMethod].pattern[0]);
+        setCompletedCycles(0);
+        setIsActive(true);
+        setCountdown(null);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown, selectedMethod, methods]);
 
   // Sync with global session state
   useEffect(() => {
@@ -183,18 +205,15 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   }
 
   const handleStartStop = () => {
-    if (isActive) {
+    if (isActive || countdown !== null) {
       const methodName = methods[selectedMethod].name;
       const phaseDuration = (selectedMethod === 'box' || selectedMethod === 'aum') ? methods[selectedMethod].pattern[0] : null;
       setLastSession({ duration: sessionTime, pattern: methodName, phaseDuration, cycles: completedCycles });
       setIsActive(false);
-      setShowSummary(true);
+      setCountdown(null);
+      if (isActive) setShowSummary(true);
     } else {
-      setSessionTime(0);
-      setPhaseState({ index: 0, cumulativeIndex: 1 });
-      setTimeLeft(methods[selectedMethod].pattern[0]);
-      setCompletedCycles(0);
-      setIsActive(true);
+      setCountdown(3);
       setCurrentNote('');
       setShowNotesInput(false);
     }
@@ -210,37 +229,46 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   };
 
   const getCircleStyle = () => {
-    if (!isActive) {
-      return {
-        transform: selectedMethod === 'aum' ? 'scale(2.5)' : 'scale(1)',
-        transition: 'transform 0.5s ease-out'
-      };
-    }
+    // 1. Determine State Flags
+    const isPreparing = countdown !== null || !isActive;
+    
+    // 2. Base Properties
+    let backgroundColor = isPreparing ? '#FFFFFF' : 'var(--color-bg)';
+    let color = isPreparing ? '#000000' : '#FFFFFF';
+    let targetScale = 1;
+    let transitionDuration = 0.5; // Default transition seconds
+    let timingFunction = 'ease-out';
 
-    const currentPattern = methods[selectedMethod].pattern;
-    const currentDur = currentPattern[phaseState.index];
-
-    let targetScale;
-    if (selectedMethod === 'aum') {
-      // Aum: Continual deflation from 2.5 to 1.0 across phases 0, 1, 2
-      // Then inflation from 1.0 to 2.5 during phase 3
-      if (phaseState.index === 3) {
-        targetScale = 2.5; 
-      } else {
-        const totalExhale = currentPattern[0] + currentPattern[1] + currentPattern[2];
-        const elapsedExhale = currentPattern.slice(0, phaseState.index + 1).reduce((a, b) => a + b, 0);
-        // Calculate target scale for the END of the current phase
-        targetScale = 2.5 - (1.5 * (elapsedExhale / totalExhale));
-      }
+    // 3. Scale & Timing Logic
+    if (countdown !== null) {
+      targetScale = 1;
+      transitionDuration = 0.3;
+    } else if (!isActive) {
+      targetScale = selectedMethod === 'aum' ? 2.5 : 1;
     } else {
-      // Default: 0=Inhale, 1=Hold, 2=Exhale, 3=Hold
-      if (phaseState.index === 0 || phaseState.index === 1) targetScale = 2.5; 
-      else targetScale = 1;
+      // Active Session
+      const currentPattern = methods[selectedMethod].pattern;
+      transitionDuration = currentPattern[phaseState.index];
+      timingFunction = 'linear';
+
+      if (selectedMethod === 'aum') {
+        if (phaseState.index === 3) {
+          targetScale = 2.5; 
+        } else {
+          const totalExhale = currentPattern[0] + currentPattern[1] + currentPattern[2];
+          const elapsedExhale = currentPattern.slice(0, phaseState.index + 1).reduce((a, b) => a + b, 0);
+          targetScale = 2.5 - (1.5 * (elapsedExhale / totalExhale));
+        }
+      } else {
+        targetScale = (phaseState.index === 0 || phaseState.index === 1) ? 2.5 : 1;
+      }
     }
 
     return {
+      backgroundColor,
+      color,
       transform: `scale(${targetScale})`,
-      transition: `transform ${currentDur}s linear`
+      transition: `transform ${transitionDuration}s ${timingFunction}, background-color 1s ease, color 1s ease`
     };
   };
 
@@ -353,10 +381,10 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
           )}
 
           <div 
-            className="absolute w-20 h-20 md:w-40 md:h-40 breath-glow rounded-full z-[2] flex justify-center items-center text-[2rem] md:text-[3.5rem] font-light text-white"
+            className="absolute w-20 h-20 md:w-40 md:h-40 breath-glow rounded-full z-[2] flex justify-center items-center text-[2.5rem] md:text-[3.5rem] font-light"
             style={getCircleStyle()}
           >
-            {isActive ? <span ref={timeDisplayRef}>{timeLeft}</span> : ''}
+            {countdown !== null ? countdown : (isActive ? <span ref={timeDisplayRef}>{timeLeft}</span> : '')}
           </div>
         </div>
 
