@@ -1,35 +1,109 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Palette, Timer, Info, Save, Github, Trophy, RefreshCcw } from 'lucide-react';
 
-function Settings({ methods, updateBoxDuration, updateAumDuration, currentTheme, setTheme, themes, challengeActive, resetChallenge }) {
-  const [boxPattern, setBoxPattern] = useState(methods.box.pattern);
-  const [aumBase, setAumBase] = useState(methods.aum.pattern[0]);
+const PHASE_LABELS = ['Inhale', 'Hold', 'Exhale', 'Hold'];
 
-  const handleChange = (value) => {
-    const val = parseInt(value) || 0;
-    setBoxPattern([val, val, val, val]);
+function MethodSettings({ methodKey, method, onSave }) {
+  const [localPattern, setLocalPattern] = useState(method.pattern);
+
+  // Check if pattern is uniform (all non-zero phases are equal)
+  const nonZeroPhases = method.pattern.filter(v => v > 0);
+  const isUniform = nonZeroPhases.every(v => v === nonZeroPhases[0]);
+
+  const [uniformValue, setUniformValue] = useState(nonZeroPhases[0] || 4);
+
+  useEffect(() => {
+    setLocalPattern(method.pattern);
+    const nz = method.pattern.filter(v => v > 0);
+    setUniformValue(nz[0] || 4);
+  }, [method]);
+
+  const handleUniformChange = (val) => {
+    const num = parseInt(val) || 0;
+    setUniformValue(num);
+    const newPattern = method.pattern.map(v => v > 0 ? num : 0);
+    setLocalPattern(newPattern);
+  };
+
+  const handlePhaseChange = (idx, val) => {
+    const num = parseInt(val) || 0;
+    const newPattern = [...localPattern];
+    newPattern[idx] = num;
+    setLocalPattern(newPattern);
   };
 
   const handleSave = () => {
-    const val = boxPattern[0];
-    if (val < 4 || val > 6) {
-      alert('Box breathing duration must be between 4 and 6 seconds.');
-      return;
-    }
-    updateBoxDuration(boxPattern);
-    alert('Box breathing duration updated!');
+    onSave(methodKey, localPattern);
+    alert(`${method.name} settings updated!`);
   };
 
-  const handleAumSave = () => {
-    const val = parseInt(aumBase);
-    if (val < 2 || val > 6) {
-      alert('Aum chanting base duration must be between 2 and 6 seconds.');
-      return;
-    }
-    updateAumDuration(val);
-    alert('Aum chanting duration updated!');
-  };
+  return (
+    <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-8 shadow-xl">
+      <div className="flex items-center gap-3 mb-4">
+        <Timer size={18} className="text-dim" />
+        <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">{method.name}</h3>
+      </div>
+      
+      {method.description && (
+        <p className="text-sm font-light text-dim/80 mb-8 leading-relaxed">
+          {method.description}
+        </p>
+      )}
 
+      <div className="flex flex-col gap-6">
+        {isUniform ? (
+          <div className="flex flex-col gap-2">
+            <label className="text-[0.65rem] md:text-sm font-light text-dim/80 ml-1 uppercase tracking-wider">Duration per phase (seconds)</label>
+            <div className="flex gap-4">
+              <input 
+                type="number" 
+                value={uniformValue} 
+                onChange={(e) => handleUniformChange(e.target.value)}
+                className="flex-1 bg-white/5 border border-white/10 rounded-squircle-sm px-4 text-text text-center text-xl font-light focus:outline-none focus:border-accent transition-all h-[60px]"
+              />
+              <button 
+                onClick={handleSave} 
+                className="btn-primary tracking-wide h-[60px] flex items-center justify-center gap-2 px-6 md:px-10 whitespace-nowrap"
+              >
+                <Save size={18} />
+                <span>Save</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {localPattern.map((val, idx) => (
+                val > 0 || method.pattern[idx] > 0 ? (
+                  <div key={idx} className="flex flex-col gap-2">
+                    <label className="text-[0.65rem] font-light text-dim/80 ml-1 uppercase tracking-wider">
+                      {(method.phases && method.phases[idx]) || PHASE_LABELS[idx]}
+                    </label>
+                    <input 
+                      type="number" 
+                      value={val} 
+                      onChange={(e) => handlePhaseChange(idx, e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-squircle-sm px-4 text-text text-center text-lg font-light focus:outline-none focus:border-accent transition-all h-[50px]"
+                    />
+                  </div>
+                ) : null
+              ))}
+            </div>
+            <button 
+              onClick={handleSave} 
+              className="btn-primary tracking-wide h-[60px] flex items-center justify-center gap-2 w-full shadow-lg"
+            >
+              <Save size={18} />
+              <span>Save Pattern</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes, challengeActive, resetChallenge }) {
   const handleResetChallenge = () => {
     if (window.confirm('Are you sure you want to reset your 30-day challenge? This will remove your challenge progress and return you to the standard dashboard.')) {
       resetChallenge();
@@ -89,61 +163,20 @@ function Settings({ methods, updateBoxDuration, updateAumDuration, currentTheme,
           </section>
         )}
 
-        <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-8 shadow-xl">
-          <div className="flex items-center gap-3 mb-8">
+        <div className="flex flex-col gap-8">
+          <div className="flex items-center gap-3 px-2">
             <Timer size={18} className="text-dim" />
-            <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Box Breathing Durations (seconds)</h3>
+            <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Breathing Techniques</h3>
           </div>
-          <div className="flex items-end gap-3 md:gap-6">
-            <div className="flex flex-col gap-2 flex-1 min-w-0">
-              <label className="text-[0.65rem] md:text-sm font-light text-dim/80 ml-1 uppercase tracking-wider truncate">Seconds per phase (4-6s)</label>
-              <input 
-                type="number" 
-                value={boxPattern[0]} 
-                onChange={(e) => handleChange(e.target.value)}
-                min="4"
-                max="6"
-                className="w-full bg-white/5 border border-white/10 rounded-squircle-sm px-4 text-text text-center text-xl font-light focus:outline-none focus:border-accent transition-all h-[60px]"
-              />
-            </div>
-            <button 
-              onClick={handleSave} 
-              className="btn-primary tracking-wide h-[60px] flex items-center justify-center gap-2 text-sm md:text-base px-6 md:px-10 whitespace-nowrap"
-            >
-              <Save size={18} className="flex-shrink-0" />
-              <span className="hidden sm:inline">Save Pattern</span>
-              <span className="sm:hidden">Save</span>
-            </button>
-          </div>
-        </section>
-
-        <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-8 shadow-xl">
-          <div className="flex items-center gap-3 mb-8">
-            <Timer size={18} className="text-dim" />
-            <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Aum Chanting Durations (seconds)</h3>
-          </div>
-          <div className="flex items-end gap-3 md:gap-6">
-            <div className="flex flex-col gap-2 flex-1 min-w-0">
-              <label className="text-[0.65rem] md:text-sm font-light text-dim/80 ml-1 uppercase tracking-wider truncate">Base seconds (Aaa/Uuu length)</label>
-              <input 
-                type="number" 
-                value={aumBase} 
-                onChange={(e) => setAumBase(e.target.value)}
-                min="2"
-                max="6"
-                className="w-full bg-white/5 border border-white/10 rounded-squircle-sm px-4 text-text text-center text-xl font-light focus:outline-none focus:border-accent transition-all h-[60px]"
-              />
-            </div>
-            <button 
-              onClick={handleAumSave} 
-              className="btn-primary tracking-wide h-[60px] flex items-center justify-center gap-2 text-sm md:text-base px-6 md:px-10 whitespace-nowrap"
-            >
-              <Save size={18} className="flex-shrink-0" />
-              <span className="hidden sm:inline">Save Pattern</span>
-              <span className="sm:hidden">Save</span>
-            </button>
-          </div>
-        </section>
+          {Object.entries(methods).map(([key, method]) => (
+            <MethodSettings 
+              key={key} 
+              methodKey={key} 
+              method={method} 
+              onSave={updateMethodPattern} 
+            />
+          ))}
+        </div>
 
         <section className="bg-white/5 border border-white/5 rounded-squircle-lg p-6 md:p-8">
           <div className="flex items-center gap-3 mb-4">

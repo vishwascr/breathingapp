@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Square, Save, X, CheckCircle2, Maximize, Minimize } from 'lucide-react'
+import { Play, Square, Save, X, CheckCircle2, Maximize, Minimize, Info } from 'lucide-react'
 
 const PHASES = ['Inhale', 'Hold', 'Exhale', 'Hold'];
 
@@ -22,6 +22,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const [sessionTime, setSessionTime] = useState(0);
   const [headPosition, setHeadPosition] = useState({ x: 225, y: 2 });
   const [showSummary, setShowSummary] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const [lastSession, setLastSession] = useState(null);
   const [currentNote, setCurrentNote] = useState('');
   const [guidanceVisible, setGuidanceVisible] = useState(true);
@@ -226,7 +227,16 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   return (
     <div ref={containerRef} className="w-full min-h-dvh flex flex-col py-8 px-6 md:py-12 relative bg-[var(--color-bg)]">
       <header className="mb-2 md:mb-4 flex justify-between items-start">
-        <h2 className="text-[1.8rem] md:text-[3rem] font-thin tracking-tight text-text text-left">{methods[selectedMethod].name}</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-[1.8rem] md:text-[3rem] font-thin tracking-tight text-text text-left">{methods[selectedMethod].name}</h2>
+          <button 
+            onClick={() => setShowInfo(true)}
+            className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all"
+            title="Technique Details"
+          >
+            <Info size={24} />
+          </button>
+        </div>
         <button 
           onClick={toggleFullscreen}
           className="hidden md:flex p-3 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all items-center justify-center"
@@ -395,6 +405,52 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
                 Save & Continue
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Technique Info Modal */}
+      {showInfo && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-6">
+          <div className="w-full max-w-2xl bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-10 shadow-2xl animate-fadeIn overflow-y-auto max-h-[90vh]">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-thin tracking-tight">{methods[selectedMethod].name}</h2>
+              <button onClick={() => setShowInfo(false)} className="p-2 hover:bg-white/10 rounded-full transition-all">
+                <X size={24} className="text-dim" />
+              </button>
+            </div>
+
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-xs uppercase tracking-[0.2rem] text-accent font-medium mb-3">About</h3>
+                <p className="text-lg font-light text-text/80 leading-relaxed">
+                  {methods[selectedMethod].description}
+                </p>
+              </div>
+
+              {methods[selectedMethod].steps && (
+                <div>
+                  <h3 className="text-xs uppercase tracking-[0.2rem] text-accent font-medium mb-4">Steps</h3>
+                  <div className="space-y-4">
+                    {methods[selectedMethod].steps.map((step, idx) => (
+                      <div key={idx} className="flex gap-4 items-start">
+                        <span className="w-6 h-6 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs flex-shrink-0 mt-1">
+                          {idx + 1}
+                        </span>
+                        <p className="text-text/70 font-light leading-relaxed">{step}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button 
+              onClick={() => setShowInfo(false)}
+              className="mt-10 w-full py-4 bg-white/5 border border-white/10 rounded-squircle-md font-light hover:bg-white/10 transition-all text-dim uppercase tracking-widest text-xs"
+            >
+              Close Details
+            </button>
           </div>
         </div>
       )}
