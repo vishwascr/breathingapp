@@ -314,6 +314,7 @@ function App() {
     try {
       const res = await fetch('/api/challenge/reset', { method: 'POST' });
       if (res.ok) {
+        setHistory([]);
         setChallengeActive(false);
         setChallengeStartDate(null);
       }

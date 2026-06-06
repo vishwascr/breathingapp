@@ -110,6 +110,9 @@ app.post('/api/challenge/start', async (req, res) => {
 
 app.post('/api/challenge/reset', async (req, res) => {
   try {
+    // Hard delete history
+    await History.deleteMany({});
+    
     await Settings.findOneAndUpdate(
       { key: 'challengeActive' },
       { value: false },
