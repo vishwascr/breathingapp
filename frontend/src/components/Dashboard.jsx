@@ -38,7 +38,7 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
       unit: '/ 30 days'
     },
     {
-      label: 'Cooldown Time',
+      label: 'COOLDOWN TIME',
       ...formatTime(historyStats.totalCooldownSeconds || 0),
       color: 'text-accent'
     },
@@ -55,15 +55,15 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
       color: 'text-text'
     },
     {
-      label: 'Breath-Hold Time',
-      ...formatTime(historyStats.totalCooldownSeconds || 0),
-      color: 'text-accent'
-    },
-    {
       label: 'Total AUMs',
       total: historyStats.totalAums,
       color: 'text-accent',
       unit: 'chants'
+    },
+    {
+      label: 'COOLDOWN TIME',
+      ...formatTime(historyStats.totalCooldownSeconds || 0),
+      color: 'text-accent'
     },
     ...Object.entries(methods).map(([key, method]) => ({
       label: `${method.name} Total`,

@@ -106,7 +106,7 @@ app.get('/api/history/stats', async (req, res) => {
               $group: {
                 _id: null,
                 totalSeconds: { $sum: "$duration" },
-                totalCooldownSeconds: { $sum: { $ifNull: ["$cooldownSeconds", 0] } },
+                totalCooldownSeconds: { $sum: "$cooldownSeconds" },
                 totalAums: { 
                   $sum: { 
                     $cond: [{ $eq: ["$pattern", "Aum Chanting"] }, { $ifNull: ["$cycles", 0] }, 0] 
@@ -143,7 +143,7 @@ app.get('/api/history/stats', async (req, res) => {
     ]);
 
     const stats = totalStats[0];
-    const overall = stats.overall[0] || { totalSeconds: 0, totalAums: 0, overallDuration: 0, totalSessions: 0 };
+    const overall = stats.overall[0] || { totalSeconds: 0, totalCooldownSeconds: 0, totalAums: 0, overallDuration: 0, totalSessions: 0 };
     const methodTotals = stats.byMethod.reduce((acc, curr) => {
       acc[curr._id] = curr.totalDuration;
       return acc;

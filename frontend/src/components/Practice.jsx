@@ -225,14 +225,14 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       
       let finalCooldownSeconds = 0;
       if (isCooldown && cooldownStartTimeRef.current) {
-        finalCooldownSeconds = Math.floor((Date.now() - cooldownStartTimeRef.current) / 1000);
+        finalCooldownSeconds = Number(Math.floor((Date.now() - cooldownStartTimeRef.current) / 1000));
       }
 
       setLastSession({ 
-        duration: sessionTime, 
+        duration: Number(sessionTime), 
         pattern: methodName, 
         phaseDuration, 
-        cycles: completedCycles,
+        cycles: Number(completedCycles),
         cooldownSeconds: finalCooldownSeconds 
       });
       setIsActive(false);
