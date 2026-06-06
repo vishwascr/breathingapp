@@ -274,7 +274,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const currentPhase = (methods[selectedMethod].phases && methods[selectedMethod].phases[phaseState.index]) || PHASES[phaseState.index];
 
   return (
-    <div ref={containerRef} className="w-full h-full flex flex-col pt-4 pb-8 px-6 md:pt-12 md:pb-12 relative bg-[var(--color-bg)]">
+    <div ref={containerRef} className="w-full h-full flex flex-col pt-4 pb-24 px-6 md:pt-12 md:pb-12 relative bg-[var(--color-bg)]">
       <header className="w-full max-w-5xl mx-auto mb-4 md:mb-6 flex justify-between items-start shrink-0">
         <div className="flex items-center gap-3">
           <h2 className="text-[1.1rem] uppercase tracking-widest opacity-60 md:text-4xl md:font-extralight md:tracking-tight md:opacity-100 md:normal-case text-text text-left">
@@ -297,7 +297,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
         </button>
       </header>
 
-      <div ref={focusAreaRef} className="flex-1 flex flex-col items-center justify-center gap-10 md:gap-14 w-full max-w-5xl mx-auto min-h-0">
+      <div ref={focusAreaRef} className="flex-1 flex flex-col items-center justify-center gap-4 md:gap-14 w-full max-w-5xl mx-auto min-h-0 pt-12 md:pt-0">
 
         <div className="relative w-[250px] h-[250px] md:w-[450px] md:h-[450px] flex justify-center items-center shrink-0">
           <div 
@@ -385,7 +385,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
           </div>
         </div>
 
-        <div className="flex flex-col items-center w-full max-w-xs mx-auto gap-8 md:gap-10">
+        <div className="flex flex-col items-center w-full max-w-xs mx-auto gap-4 md:gap-10 mb-2 md:mb-0">
           {/* Unified Vertical Stack - Space Reserved */}
           <div className={`flex flex-col items-center text-center gap-2 transition-all duration-500 min-h-[120px] md:min-h-[160px] justify-center ${isActive ? 'opacity-100' : 'opacity-0 invisible'}`}>
             {/* 1. Phase Text */}
