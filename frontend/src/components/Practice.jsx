@@ -231,10 +231,10 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const currentPhase = (methods[selectedMethod].phases && methods[selectedMethod].phases[phaseState.index]) || PHASES[phaseState.index];
 
   return (
-    <div ref={containerRef} className="w-full min-h-dvh flex flex-col py-8 px-6 md:py-12 relative bg-[var(--color-bg)]">
-      <header className="mb-2 md:mb-4 flex justify-between items-start">
+    <div ref={containerRef} className="w-full min-h-dvh flex flex-col pt-4 pb-8 px-6 md:pt-8 md:pb-12 relative bg-[var(--color-bg)]">
+      <header className="mb-8 md:mb-20 flex justify-between items-start">
         <div className="flex items-center gap-4">
-          <h2 className="text-[1.8rem] md:text-[3rem] font-thin tracking-tight text-text text-left">{methods[selectedMethod].name}</h2>
+          <h2 className="text-[1.5rem] md:text-[2.5rem] font-thin uppercase tracking-widest text-text text-left opacity-60">{methods[selectedMethod].name}</h2>
           <button 
             onClick={() => setShowInfo(true)}
             className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all"
@@ -258,7 +258,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
             className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-2xl border border-white/10 rounded-squircle-lg shadow-2xl transition-opacity duration-500"
             style={{ opacity: selectedMethod === 'box' ? 1 : 0 }}
           ></div>
-          <div className="absolute top-[-60px] md:top-[-100px] text-[1.2rem] md:text-[2.2rem] font-thin text-text uppercase tracking-[0.8rem] md:tracking-[1.5rem] whitespace-nowrap">
+          <div className="absolute top-[-50px] md:top-[-90px] text-[1.2rem] md:text-[2.2rem] font-thin text-text uppercase tracking-[0.8rem] md:tracking-[1.5rem] whitespace-nowrap">
             {isActive ? currentPhase : ''}
           </div>
           
