@@ -22,6 +22,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const [sessionTime, setSessionTime] = useState(0);
   const [headPosition, setHeadPosition] = useState({ x: 225, y: 2 });
   const [showSummary, setShowSummary] = useState(false);
+  const [showNotesInput, setShowNotesInput] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [lastSession, setLastSession] = useState(null);
   const [currentNote, setCurrentNote] = useState('');
@@ -79,6 +80,15 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       document.exitFullscreen();
     }
   };
+
+  const focusAreaRef = useRef(null);
+
+  // Auto-scroll to hide header on mobile when journey begins
+  useEffect(() => {
+    if (isActive && window.innerWidth < 768 && focusAreaRef.current) {
+      focusAreaRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [isActive]);
 
   useEffect(() => {
     if (!isActive || selectedMethod !== 'box' || !pathRef.current) return;
@@ -186,6 +196,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       setCompletedCycles(0);
       setIsActive(true);
       setCurrentNote('');
+      setShowNotesInput(false);
     }
   };
 
@@ -237,33 +248,35 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
 
   return (
     <div ref={containerRef} className="w-full min-h-dvh flex flex-col pt-4 pb-8 px-6 md:pt-8 md:pb-12 relative bg-[var(--color-bg)]">
-      <header className="mb-8 md:mb-20 flex justify-between items-start">
-        <div className="flex items-center gap-4">
-          <h2 className="text-[1.5rem] md:text-[2.5rem] font-thin uppercase tracking-widest text-text text-left opacity-60">{methods[selectedMethod].name}</h2>
+      <header className="mb-4 md:mb-20 flex justify-between items-start shrink-0">
+        <div className="flex items-center gap-3">
+          <h2 className="text-[1.1rem] md:text-[2.5rem] font-thin uppercase tracking-widest text-text text-left opacity-60">
+            {methods[selectedMethod].name}
+          </h2>
           <button 
             onClick={() => setShowInfo(true)}
-            className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all"
+            className="p-1.5 md:p-2 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all shrink-0"
             title="Technique Details"
           >
-            <Info size={24} />
+            <Info size={18} className="md:size-[24px]" />
           </button>
         </div>
         <button 
           onClick={toggleFullscreen}
-          className="hidden md:flex p-3 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all items-center justify-center"
+          className="hidden md:flex p-3 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all items-center justify-center shrink-0"
           title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
         >
           {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
         </button>
       </header>
 
-      <div className="flex-1 flex flex-col items-center justify-center gap-4 md:gap-6 w-full">
-        <div className="relative w-[300px] h-[300px] md:w-[450px] md:h-[450px] flex justify-center items-center">
+      <div ref={focusAreaRef} className="flex-1 flex flex-col items-center justify-center gap-6 md:gap-8 w-full min-h-0">
+        <div className="relative w-[250px] h-[250px] md:w-[450px] md:h-[450px] flex justify-center items-center shrink-0">
           <div 
             className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-2xl border border-white/10 rounded-squircle-lg shadow-2xl transition-opacity duration-500"
             style={{ opacity: selectedMethod === 'box' ? 1 : 0 }}
           ></div>
-          <div className="absolute top-[-50px] md:top-[-90px] text-[1.2rem] md:text-[2.2rem] font-thin text-text uppercase tracking-[0.8rem] md:tracking-[1.5rem] whitespace-nowrap">
+          <div className="absolute top-[-40px] md:top-[-90px] text-[1rem] md:text-[2.2rem] font-thin text-text uppercase tracking-[0.6rem] md:tracking-[1.5rem] whitespace-nowrap">
             {isActive ? currentPhase : ''}
           </div>
           
@@ -340,82 +353,89 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
           )}
 
           <div 
-            className="absolute w-24 h-24 md:w-40 md:h-40 breath-glow rounded-full z-[2] flex justify-center items-center text-[2.5rem] md:text-[3.5rem] font-light text-white"
+            className="absolute w-20 h-20 md:w-40 md:h-40 breath-glow rounded-full z-[2] flex justify-center items-center text-[2rem] md:text-[3.5rem] font-light text-white"
             style={getCircleStyle()}
           >
             {isActive ? <span ref={timeDisplayRef}>{timeLeft}</span> : ''}
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-4 min-h-[120px] md:min-h-[160px]">
-          <button onClick={handleStartStop} className="btn-primary text-xl font-light tracking-widest flex items-center gap-3">
-            {isActive ? <Square size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+        <div className="flex flex-col items-center gap-4 shrink-0">
+          <button onClick={handleStartStop} className="btn-primary text-lg md:text-xl font-light tracking-widest flex items-center gap-3">
+            {isActive ? <Square size={18} md:size={20} fill="currentColor" /> : <Play size={18} md:size={20} fill="currentColor" />}
             {isActive ? 'Stop Session' : 'Begin Journey'}
           </button>
-          <div className={`flex flex-col items-center gap-2 transition-all duration-500 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="text-dim font-light tracking-wide">
+          
+          {/* Counter - Subtle & Static */}
+          <div className={`transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="text-dim font-light tracking-wide text-sm md:text-base">
               {selectedMethod === 'aum' ? 'Chants' : 'Cycles'}: {completedCycles}
-            </div>
-            <div 
-              className={`text-accent font-light tracking-wider text-sm md:text-base text-center max-w-xs transition-all duration-500 filter drop-shadow-[0_0_8px_var(--color-accent)] ${
-                guidanceVisible ? 'opacity-80 translate-y-0' : 'opacity-0 translate-y-2'
-              }`}
-            >
-              {methods[selectedMethod].guidance ? methods[selectedMethod].guidance[phaseState.index] : (GUIDANCE[currentPhase] || ' ')}
             </div>
           </div>
         </div>
       </div>
 
+      {/* Pinned Guidance - Absolute bottom for stability */}
+      <div className="absolute bottom-8 left-0 right-0 px-6 flex justify-center pointer-events-none md:relative md:bottom-auto md:mt-8 shrink-0">
+        <div 
+          className={`text-accent font-light tracking-wider text-sm md:text-base text-center max-w-xs transition-opacity duration-500 filter drop-shadow-[0_0_8px_var(--color-accent)] ${
+            guidanceVisible ? 'opacity-80' : 'opacity-0'
+          }`}
+        >
+          {methods[selectedMethod].guidance ? methods[selectedMethod].guidance[phaseState.index] : (GUIDANCE[currentPhase] || ' ')}
+        </div>
+      </div>
+
       {showSummary && lastSession && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-6">
-          <div className="w-full max-w-lg bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-10 shadow-2xl animate-fadeIn overflow-y-auto max-h-[90vh]">
-            <div className="flex flex-col items-center mb-6 md:mb-8">
-              <CheckCircle2 size={40} className="text-accent mb-4" />
-              <h2 className="text-2xl md:text-4xl font-thin text-center tracking-tight">Breathing Complete</h2>
+          <div className="w-full max-w-sm bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-2xl animate-fadeIn overflow-y-auto max-h-[90vh]">
+            <div className="flex flex-col items-center mb-6 md:mb-8 text-center">
+              <CheckCircle2 size={32} className="text-accent mb-3" />
+              <h2 className="text-xl md:text-3xl font-thin tracking-tight">Session Complete</h2>
             </div>
             
-            <div className="flex justify-around mb-6 md:mb-8 p-4 md:p-6 bg-white/5 rounded-squircle-md border border-white/5">
-              <div className="text-center">
-                <p className="text-xs uppercase tracking-widest text-dim mb-1">Duration</p>
-                <p className="text-2xl font-light">{lastSession.duration}s</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs uppercase tracking-widest text-dim mb-1">Method</p>
-                <p className="text-2xl font-light">{lastSession.pattern}</p>
-              </div>
-              {selectedMethod === 'aum' && (
-                <div className="text-center">
-                  <p className="text-xs uppercase tracking-widest text-dim mb-1">Total AUMs</p>
-                  <p className="text-2xl font-light">{lastSession.cycles}</p>
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mb-8 text-sm md:text-base font-light text-text/80 tracking-wide text-center">
+              <span>{lastSession.duration}s</span>
+              <span className="opacity-20 text-[0.6rem]">•</span>
+              <span>{lastSession.pattern}</span>
+              <span className="opacity-20 text-[0.6rem]">•</span>
+              <span>{lastSession.cycles} {selectedMethod === 'aum' ? 'Chants' : 'Cycles'}</span>
+            </div>
+            
+            <div className="mb-8 flex flex-col items-center">
+              {!showNotesInput ? (
+                <button 
+                  onClick={() => setShowNotesInput(true)}
+                  className="text-[0.65rem] md:text-xs uppercase tracking-[0.2rem] text-accent/60 hover:text-accent hover:bg-white/5 border border-white/10 rounded-full px-6 py-2.5 transition-all"
+                >
+                  + Add a note
+                </button>
+              ) : (
+                <div className="w-full animate-fadeIn">
+                  <textarea 
+                    autoFocus
+                    value={currentNote}
+                    onChange={(e) => setCurrentNote(e.target.value)}
+                    placeholder="How do you feel?"
+                    className="w-full bg-white/5 border border-white/10 rounded-squircle-md p-4 text-text focus:outline-none focus:border-accent min-h-[80px] md:min-h-[100px] resize-none transition-all placeholder:text-dim/30 text-sm md:text-base"
+                  />
                 </div>
               )}
             </div>
-            
-            <div className="mb-6 md:mb-8">
-              <label className="block text-sm font-light text-dim mb-3 ml-1 uppercase tracking-wider">Add a note about your session:</label>
-              <textarea 
-                value={currentNote}
-                onChange={(e) => setCurrentNote(e.target.value)}
-                placeholder="How do you feel?"
-                className="w-full bg-white/5 border border-white/10 rounded-squircle-md p-5 text-text focus:outline-none focus:border-accent min-h-[100px] md:min-h-[120px] resize-none transition-all placeholder:text-dim/50"
-              />
-            </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button 
-                onClick={() => setShowSummary(false)} 
-                className="flex-1 border border-white/10 py-3 md:py-4 rounded-squircle-md font-light hover:bg-white/5 transition-all duration-300 flex items-center justify-center gap-2 order-2 sm:order-1"
-              >
-                <X size={18} />
-                Discard
-              </button>
+            <div className="flex flex-col gap-3">
               <button 
                 onClick={handleSaveSession}
-                className="flex-1 bg-accent text-bg py-3 md:py-4 rounded-squircle-md font-medium hover:bg-indicator transition-all duration-300 flex items-center justify-center gap-2 order-1 sm:order-2 shadow-lg"
+                className="w-full bg-accent text-bg py-4 rounded-squircle-md font-medium hover:bg-indicator transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
               >
                 <Save size={18} />
-                Save & Continue
+                Save Journey
+              </button>
+              <button 
+                onClick={() => setShowSummary(false)} 
+                className="w-full py-3 rounded-squircle-md text-xs uppercase tracking-widest text-dim hover:text-white transition-all duration-300"
+              >
+                Discard Session
               </button>
             </div>
           </div>
