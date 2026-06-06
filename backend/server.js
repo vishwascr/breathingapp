@@ -72,6 +72,60 @@ app.get('/api/history', async (req, res) => {
   }
 });
 
+app.get('/api/challenge/status', async (req, res) => {
+  try {
+    const activeSetting = await Settings.findOne({ key: 'challengeActive' });
+    const startSetting = await Settings.findOne({ key: 'challengeStartDate' });
+    res.json({
+      challengeActive: activeSetting ? activeSetting.value : false,
+      challengeStartDate: startSetting ? startSetting.value : null
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post('/api/challenge/start', async (req, res) => {
+  try {
+    // Hard delete history
+    await History.deleteMany({});
+    
+    // Set challenge settings
+    await Settings.findOneAndUpdate(
+      { key: 'challengeActive' },
+      { value: true },
+      { new: true, upsert: true }
+    );
+    await Settings.findOneAndUpdate(
+      { key: 'challengeStartDate' },
+      { value: new Date().toISOString() },
+      { new: true, upsert: true }
+    );
+    
+    res.json({ message: 'Challenge started' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post('/api/challenge/reset', async (req, res) => {
+  try {
+    await Settings.findOneAndUpdate(
+      { key: 'challengeActive' },
+      { value: false },
+      { new: true, upsert: true }
+    );
+    await Settings.findOneAndUpdate(
+      { key: 'challengeStartDate' },
+      { value: null },
+      { new: true, upsert: true }
+    );
+    res.json({ message: 'Challenge reset' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 app.post('/api/history', async (req, res) => {
   const historyItem = new History({
     duration: req.body.duration,

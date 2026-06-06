@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Palette, Timer, Info, Save, Github } from 'lucide-react';
+import { Palette, Timer, Info, Save, Github, Trophy, RefreshCcw } from 'lucide-react';
 
-function Settings({ methods, updateBoxDuration, updateAumDuration, currentTheme, setTheme, themes }) {
+function Settings({ methods, updateBoxDuration, updateAumDuration, currentTheme, setTheme, themes, challengeActive, resetChallenge }) {
   const [boxPattern, setBoxPattern] = useState(methods.box.pattern);
   const [aumBase, setAumBase] = useState(methods.aum.pattern[0]);
 
@@ -28,6 +28,12 @@ function Settings({ methods, updateBoxDuration, updateAumDuration, currentTheme,
     }
     updateAumDuration(val);
     alert('Aum chanting duration updated!');
+  };
+
+  const handleResetChallenge = () => {
+    if (window.confirm('Are you sure you want to reset your 30-day challenge? This will remove your challenge progress and return you to the standard dashboard.')) {
+      resetChallenge();
+    }
   };
 
   const labels = ['Inhale', 'Hold (Full)', 'Exhale', 'Hold (Empty)'];
@@ -58,6 +64,32 @@ function Settings({ methods, updateBoxDuration, updateAumDuration, currentTheme,
             ))}
           </div>
         </section>
+
+        {challengeActive && (
+          <section className="bg-accent/5 backdrop-blur-3xl border border-accent/20 rounded-squircle-lg p-6 md:p-8 shadow-xl animate-fadeIn">
+            <div className="flex items-center gap-3 mb-8">
+              <Trophy size={18} className="text-accent" />
+              <h3 className="text-xs uppercase tracking-[0.2rem] text-accent font-medium">Active Challenge</h3>
+            </div>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div>
+                <p className="text-lg font-light text-text/80 leading-relaxed">
+                  Your 30-Day / 30-Hour Meditation Challenge is currently in progress. 
+                </p>
+                <p className="text-sm font-light text-dim mt-2">
+                  Resetting will deactivate the challenge tracking on your dashboard.
+                </p>
+              </div>
+              <button 
+                onClick={handleResetChallenge}
+                className="flex items-center gap-2 px-8 py-4 bg-white/5 border border-white/10 rounded-squircle-md text-dim hover:text-white hover:bg-red-500/20 hover:border-red-500/30 transition-all duration-500 whitespace-nowrap"
+              >
+                <RefreshCcw size={18} />
+                Reset Challenge
+              </button>
+            </div>
+          </section>
+        )}
 
         <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-8 shadow-xl">
           <div className="flex items-center gap-3 mb-8">

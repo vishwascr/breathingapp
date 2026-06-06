@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { Trophy, Award, Clock, Calendar, Activity, Flame, CheckCircle2, Star, Target, Zap } from 'lucide-react'
 import './App.css'
 
 import Sidebar from './components/Sidebar'
@@ -57,6 +58,47 @@ function App() {
   const [methods, setMethods] = useState(INITIAL_METHODS);
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [history, setHistory] = useState([]);
+  const [challengeActive, setChallengeActive] = useState(false);
+  const [challengeStartDate, setChallengeStartDate] = useState(null);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [completionStats, setCompletionStats] = useState(null);
+
+  const calculateChallengeCompletion = (currentHistory) => {
+    if (!challengeActive || !challengeStartDate) return null;
+
+    const totalSeconds = currentHistory
+      .filter(session => session.pattern !== 'Aum Chanting')
+      .reduce((total, session) => total + session.duration, 0);
+    const totalHours = (totalSeconds / 3600).toFixed(2);
+
+    if (parseFloat(totalHours) >= 30) {
+      const start = new Date(challengeStartDate);
+      const now = new Date();
+      const diffTime = Math.abs(now - start);
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+      // Calculate Most Practiced Method
+      const methodCounts = currentHistory.reduce((acc, session) => {
+        acc[session.pattern] = (acc[session.pattern] || 0) + 1;
+        return acc;
+      }, {});
+      const favoriteMethod = Object.entries(methodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'None';
+
+      // Calculate Total AUMs
+      const totalAums = currentHistory
+        .filter(session => session.pattern === 'Aum Chanting')
+        .reduce((total, session) => total + (session.cycles || 0), 0);
+
+      return {
+        hours: totalHours,
+        days: Math.min(diffDays, 30),
+        sessions: currentHistory.length,
+        favoriteMethod,
+        totalAums
+      };
+    }
+    return null;
+  };
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('breath-theme') || null;
   });
@@ -94,6 +136,14 @@ function App() {
         if (isMounted) {
           setTheme(themeData.theme);
           localStorage.setItem('breath-theme', themeData.theme);
+        }
+
+        // Load Challenge Status
+        const challengeRes = await fetch('/api/challenge/status');
+        const challengeData = await challengeRes.json();
+        if (isMounted) {
+          setChallengeActive(challengeData.challengeActive);
+          setChallengeStartDate(challengeData.challengeStartDate);
         }
       } catch (err) {
         console.error('Failed to fetch initial data:', err);
@@ -145,11 +195,19 @@ function App() {
     }
   };
 
-  const fetchHistory = async () => {
+  const fetchHistory = async (checkCompletion = false) => {
     try {
       const response = await fetch('/api/history');
       const data = await response.json();
       setHistory(data);
+
+      if (checkCompletion) {
+        const stats = calculateChallengeCompletion(data);
+        if (stats) {
+          setCompletionStats(stats);
+          setShowCompletionModal(true);
+        }
+      }
     } catch (err) {
       console.error('Failed to fetch history:', err);
     }
@@ -162,9 +220,35 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ duration, pattern: patternName, notes, phaseDuration, cycles })
       });
-      fetchHistory();
+      fetchHistory(true);
     } catch (err) {
       console.error('Failed to save history:', err);
+    }
+  };
+
+  const startChallenge = async () => {
+    try {
+      const res = await fetch('/api/challenge/start', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        setHistory([]);
+        setChallengeActive(true);
+        setChallengeStartDate(new Date().toISOString());
+      }
+    } catch (err) {
+      console.error('Failed to start challenge:', err);
+    }
+  };
+
+  const resetChallenge = async () => {
+    try {
+      const res = await fetch('/api/challenge/reset', { method: 'POST' });
+      if (res.ok) {
+        setChallengeActive(false);
+        setChallengeStartDate(null);
+      }
+    } catch (err) {
+      console.error('Failed to reset challenge:', err);
     }
   };
 
@@ -228,6 +312,9 @@ function App() {
                   history={history} 
                   methods={methods}
                   openMethodModal={() => setIsMethodModalOpen(true)}
+                  challengeActive={challengeActive}
+                  challengeStartDate={challengeStartDate}
+                  startChallenge={startChallenge}
                 />
               } />
               <Route 
@@ -252,6 +339,8 @@ function App() {
                     currentTheme={theme}
                     setTheme={updateTheme}
                     themes={THEMES}
+                    challengeActive={challengeActive}
+                    resetChallenge={resetChallenge}
                   />
                 }
                 />
@@ -315,6 +404,74 @@ function App() {
                 className="mt-2 w-full bg-white/5 py-3 rounded-squircle-md font-light hover:bg-white/10 transition-all duration-300 text-dim"
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Challenge Completion Modal */}
+      {showCompletionModal && completionStats && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-xl p-6">
+          <div className="w-full max-w-xl bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-12 shadow-2xl animate-fadeIn text-center relative overflow-hidden">
+            {/* Background Decorative Icons */}
+            <div className="absolute -top-10 -left-10 opacity-10 rotate-12">
+              <Star size={120} className="text-accent" />
+            </div>
+            <div className="absolute -bottom-10 -right-10 opacity-10 -rotate-12">
+              <Trophy size={150} className="text-accent" />
+            </div>
+
+            <div className="relative z-10">
+              <div className="flex justify-center mb-6">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-accent/20 blur-2xl rounded-full"></div>
+                  <Trophy size={80} className="text-accent relative animate-trophy-glow" />
+                </div>
+              </div>
+
+              <h2 className="text-4xl md:text-5xl font-thin tracking-tighter mb-4">Challenge Accomplished!</h2>
+              <p className="text-lg text-dim font-light mb-10 max-w-md mx-auto leading-relaxed">
+                You've completed your 30-hour journey. Your dedication to mindfulness is truly inspiring.
+              </p>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
+                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-4 flex flex-col items-center">
+                  <Clock size={20} className="text-accent mb-2" />
+                  <span className="text-2xl font-light">{completionStats.hours}</span>
+                  <span className="text-[0.65rem] uppercase tracking-widest text-dim">Total Hours</span>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-4 flex flex-col items-center">
+                  <Calendar size={20} className="text-accent mb-2" />
+                  <span className="text-2xl font-light">{completionStats.days}</span>
+                  <span className="text-[0.65rem] uppercase tracking-widest text-dim">Days Taken</span>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-4 flex flex-col items-center">
+                  <Activity size={20} className="text-accent mb-2" />
+                  <span className="text-2xl font-light">{completionStats.sessions}</span>
+                  <span className="text-[0.65rem] uppercase tracking-widest text-dim">Sessions</span>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-4 flex flex-col items-center col-span-2 md:col-span-1">
+                  <Target size={20} className="text-accent mb-2" />
+                  <span className="text-lg font-light line-clamp-1">{completionStats.favoriteMethod}</span>
+                  <span className="text-[0.65rem] uppercase tracking-widest text-dim">Favorite</span>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-4 flex flex-col items-center col-span-2">
+                  <Zap size={20} className="text-accent mb-2" />
+                  <span className="text-2xl font-light">{completionStats.totalAums}</span>
+                  <span className="text-[0.65rem] uppercase tracking-widest text-dim">Total AUM Vibrations</span>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => {
+                  setShowCompletionModal(false);
+                  resetChallenge();
+                }}
+                className="btn-primary w-full py-5 text-lg flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(var(--color-accent-rgb),0.2)]"
+              >
+                <CheckCircle2 size={24} />
+                Finish Journey
               </button>
             </div>
           </div>

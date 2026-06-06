@@ -39,8 +39,13 @@
   animation: retract-stroke linear forwards;
 }
 
-.glowing-head {
-  /* Glow is now handled via SVG filter for better results */
+@keyframes trophy-glow {
+  0%, 100% { filter: drop-shadow(0 0 15px var(--color-accent)); opacity: 0.8; }
+  50% { filter: drop-shadow(0 0 45px var(--color-accent)); opacity: 1; }
+}
+
+.animate-trophy-glow {
+  animation: trophy-glow 3s ease-in-out infinite;
 }
 
 
