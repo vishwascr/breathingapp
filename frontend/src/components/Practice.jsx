@@ -34,6 +34,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const animationRef = useRef(null);
   const phaseStartTimeRef = useRef(null);
   const containerRef = useRef(null);
+  const timeDisplayRef = useRef(null);
 
   // Sync with global session state
   useEffect(() => {
@@ -115,12 +116,17 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
     const startTime = Date.now();
     phaseStartTimeRef.current = startTime;
     
-    // Use a more precise countdown based on elapsed time
-    const textInterval = setInterval(() => {
+    // Use requestAnimationFrame to update the countdown directly in the DOM, avoiding React state re-renders
+    let countdownAnimationFrameId;
+    const updateCountdown = () => {
       const elapsed = (Date.now() - startTime) / 1000;
       const remaining = Math.max(1, Math.ceil(currentDur - elapsed));
-      setTimeLeft(remaining);
-    }, 50);
+      if (timeDisplayRef.current && timeDisplayRef.current.innerText !== remaining.toString()) {
+        timeDisplayRef.current.innerText = remaining;
+      }
+      countdownAnimationFrameId = requestAnimationFrame(updateCountdown);
+    };
+    updateCountdown();
 
     const phaseTimeout = setTimeout(() => {
       let nextIndex = (phaseState.index + 1) % 4;
@@ -147,7 +153,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
     }, (currentDur * 1000) - 300);
 
     return () => {
-      clearInterval(textInterval);
+      cancelAnimationFrame(countdownAnimationFrameId);
       clearTimeout(phaseTimeout);
     };
   }, [isActive, phaseState.index, selectedMethod, methods]);
@@ -332,7 +338,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
             className="absolute w-24 h-24 md:w-40 md:h-40 breath-glow rounded-full z-[2] flex justify-center items-center text-[2.5rem] md:text-[3.5rem] font-light text-white"
             style={getCircleStyle()}
           >
-            {isActive ? timeLeft : ''}
+            {isActive ? <span ref={timeDisplayRef}>{timeLeft}</span> : ''}
           </div>
         </div>
 
