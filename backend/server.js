@@ -45,7 +45,8 @@ app.get('/api/settings/theme', async (req, res) => {
     }
     res.json({ theme: themeSetting.value });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error fetching theme:', err);
+    res.status(500).json({ message: 'Internal server error while fetching theme.' });
   }
 });
 
@@ -59,7 +60,8 @@ app.post('/api/settings/theme', async (req, res) => {
     );
     res.json({ theme: themeSetting.value });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Error updating theme:', err);
+    res.status(400).json({ message: 'Bad request while updating theme.' });
   }
 });
 
@@ -68,7 +70,8 @@ app.get('/api/history', async (req, res) => {
     const history = await History.find().sort({ timestamp: -1 });
     res.json(history);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error fetching history:', err);
+    res.status(500).json({ message: 'Internal server error while fetching history.' });
   }
 });
 
@@ -81,7 +84,8 @@ app.get('/api/challenge/status', async (req, res) => {
       challengeStartDate: startSetting ? startSetting.value : null
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error fetching challenge status:', err);
+    res.status(500).json({ message: 'Internal server error while fetching challenge status.' });
   }
 });
 
@@ -104,7 +108,8 @@ app.post('/api/challenge/start', async (req, res) => {
     
     res.json({ message: 'Challenge started' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error starting challenge:', err);
+    res.status(500).json({ message: 'Internal server error while starting challenge.' });
   }
 });
 
@@ -125,24 +130,36 @@ app.post('/api/challenge/reset', async (req, res) => {
     );
     res.json({ message: 'Challenge reset' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error resetting challenge:', err);
+    res.status(500).json({ message: 'Internal server error while resetting challenge.' });
   }
 });
 
 app.post('/api/history', async (req, res) => {
+  const { duration, pattern, phaseDuration, cycles, notes } = req.body;
+
+  // Input Validation
+  if (typeof duration !== 'number' || isNaN(duration) || duration < 0) {
+    return res.status(400).json({ message: 'Invalid duration: must be a positive number.' });
+  }
+  if (typeof pattern !== 'string' || !pattern.trim()) {
+    return res.status(400).json({ message: 'Invalid pattern: must be a non-empty string.' });
+  }
+
   const historyItem = new History({
-    duration: req.body.duration,
-    pattern: req.body.pattern,
-    phaseDuration: req.body.phaseDuration,
-    cycles: req.body.cycles,
-    notes: req.body.notes || ''
+    duration,
+    pattern,
+    phaseDuration,
+    cycles,
+    notes: notes || ''
   });
 
   try {
     const newHistory = await historyItem.save();
     res.status(201).json(newHistory);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Error saving history:', err);
+    res.status(500).json({ message: 'Internal server error while saving history.' });
   }
 });
 
