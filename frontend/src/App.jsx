@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import { Trophy, Award, Clock, Calendar, Activity, Flame, CheckCircle2, Star, Target, Zap } from 'lucide-react'
+import { Trophy, Award, Clock, Calendar, Activity, Flame, CheckCircle2, Star, Target, Zap, RefreshCcw } from 'lucide-react'
 import './App.css'
 
 import Sidebar from './components/Sidebar'
@@ -51,6 +51,18 @@ const THEMES = {
       secondary: '#101a15',
       dim: '#80A396'
     }
+  },
+  coder: {
+    name: 'Coder (Synth)',
+    colors: {
+      bg: '#212337',
+      accent: '#C099FF',
+      indicator: '#7AF8CA',
+      glass: '#1C1E30',
+      text: '#FFFFFF',
+      secondary: '#2D304A',
+      dim: '#65BCFF'
+    }
   }
 };
 
@@ -62,8 +74,10 @@ function App() {
   const [challengeStartDate, setChallengeStartDate] = useState(null);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completionStats, setCompletionStats] = useState(null);
+  const [showExpirationModal, setShowExpirationModal] = useState(false);
+  const [expirationStats, setExpirationStats] = useState(null);
 
-  const calculateChallengeCompletion = (currentHistory) => {
+  const getChallengeStats = (currentHistory) => {
     if (!challengeActive || !challengeStartDate) return null;
 
     const totalSeconds = currentHistory
@@ -71,31 +85,37 @@ function App() {
       .reduce((total, session) => total + session.duration, 0);
     const totalHours = (totalSeconds / 3600).toFixed(2);
 
-    if (parseFloat(totalHours) >= 30) {
-      const start = new Date(challengeStartDate);
-      const now = new Date();
-      const diffTime = Math.abs(now - start);
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    const start = new Date(challengeStartDate);
+    const now = new Date();
+    const diffTime = Math.abs(now - start);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
-      // Calculate Most Practiced Method
-      const methodCounts = currentHistory.reduce((acc, session) => {
-        acc[session.pattern] = (acc[session.pattern] || 0) + 1;
-        return acc;
-      }, {});
-      const favoriteMethod = Object.entries(methodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'None';
+    // Calculate Most Practiced Method
+    const methodCounts = currentHistory.reduce((acc, session) => {
+      acc[session.pattern] = (acc[session.pattern] || 0) + 1;
+      return acc;
+    }, {});
+    const favoriteMethod = Object.entries(methodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'None';
 
-      // Calculate Total AUMs
-      const totalAums = currentHistory
-        .filter(session => session.pattern === 'Aum Chanting')
-        .reduce((total, session) => total + (session.cycles || 0), 0);
+    // Calculate Total AUMs
+    const totalAums = currentHistory
+      .filter(session => session.pattern === 'Aum Chanting')
+      .reduce((total, session) => total + (session.cycles || 0), 0);
 
-      return {
-        hours: totalHours,
-        days: Math.min(diffDays, 30),
-        sessions: currentHistory.length,
-        favoriteMethod,
-        totalAums
-      };
+    return {
+      hours: totalHours,
+      days: Math.min(diffDays, 30),
+      rawDays: diffDays,
+      sessions: currentHistory.length,
+      favoriteMethod,
+      totalAums
+    };
+  };
+
+  const calculateChallengeCompletion = (currentHistory) => {
+    const stats = getChallengeStats(currentHistory);
+    if (stats && parseFloat(stats.hours) >= 30) {
+      return stats;
     }
     return null;
   };
@@ -120,6 +140,16 @@ function App() {
       navigate(target);
     }
   };
+
+  useEffect(() => {
+    if (challengeActive && challengeStartDate && !isSessionActive) {
+      const stats = getChallengeStats(history);
+      if (stats && stats.rawDays > 30 && parseFloat(stats.hours) < 30) {
+        setExpirationStats(stats);
+        setShowExpirationModal(true);
+      }
+    }
+  }, [challengeActive, challengeStartDate, isSessionActive, history]);
 
   useEffect(() => {
     let isMounted = true;
@@ -473,6 +503,73 @@ function App() {
               >
                 <CheckCircle2 size={24} />
                 Finish Journey
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Challenge Expiration Modal */}
+      {showExpirationModal && expirationStats && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-xl p-6">
+          <div className="w-full max-w-xl bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-12 shadow-2xl animate-fadeIn text-center relative overflow-hidden">
+            {/* Background Decorative Icons */}
+            <div className="absolute -top-10 -left-10 opacity-10 rotate-12">
+              <RefreshCcw size={120} className="text-accent" />
+            </div>
+            <div className="absolute -bottom-10 -right-10 opacity-10 -rotate-12">
+              <Clock size={150} className="text-accent" />
+            </div>
+
+            <div className="relative z-10">
+              <div className="flex justify-center mb-6">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-accent/20 blur-2xl rounded-full"></div>
+                  <RefreshCcw size={80} className="text-accent relative animate-pulse" />
+                </div>
+              </div>
+
+              <h2 className="text-4xl md:text-5xl font-thin tracking-tighter mb-4">Your 30 Days Have Ended</h2>
+              <p className="text-lg text-dim font-light mb-10 max-w-md mx-auto leading-relaxed">
+                The 30-day window for your challenge has closed. Every breath you took was progress—take what you've learned and start a fresh journey.
+              </p>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
+                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-4 flex flex-col items-center">
+                  <Clock size={20} className="text-accent mb-2" />
+                  <span className="text-2xl font-light">{expirationStats.hours}</span>
+                  <span className="text-[0.65rem] uppercase tracking-widest text-dim">Hours Practiced</span>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-4 flex flex-col items-center">
+                  <Calendar size={20} className="text-accent mb-2" />
+                  <span className="text-2xl font-light">{expirationStats.days}</span>
+                  <span className="text-[0.65rem] uppercase tracking-widest text-dim">Days Completed</span>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-4 flex flex-col items-center">
+                  <Activity size={20} className="text-accent mb-2" />
+                  <span className="text-2xl font-light">{expirationStats.sessions}</span>
+                  <span className="text-[0.65rem] uppercase tracking-widest text-dim">Sessions</span>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-4 flex flex-col items-center col-span-2 md:col-span-1">
+                  <Target size={20} className="text-accent mb-2" />
+                  <span className="text-lg font-light line-clamp-1">{expirationStats.favoriteMethod}</span>
+                  <span className="text-[0.65rem] uppercase tracking-widest text-dim">Favorite</span>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-4 flex flex-col items-center col-span-2">
+                  <Zap size={20} className="text-accent mb-2" />
+                  <span className="text-2xl font-light">{expirationStats.totalAums}</span>
+                  <span className="text-[0.65rem] uppercase tracking-widest text-dim">Total AUM Vibrations</span>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => {
+                  setShowExpirationModal(false);
+                  resetChallenge();
+                }}
+                className="btn-primary w-full py-5 text-lg flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(var(--color-accent-rgb),0.2)]"
+              >
+                <RefreshCcw size={24} />
+                Start Over
               </button>
             </div>
           </div>

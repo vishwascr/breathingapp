@@ -82,7 +82,7 @@ function Settings({ methods, updateBoxDuration, updateAumDuration, currentTheme,
               </div>
               <button 
                 onClick={handleResetChallenge}
-                className="flex items-center gap-2 px-8 py-4 bg-white/5 border border-white/10 rounded-squircle-md text-dim hover:text-white hover:bg-red-500/20 hover:border-red-500/30 transition-all duration-500 whitespace-nowrap"
+                className="flex items-center justify-center gap-2 px-8 py-4 bg-white/5 border border-white/10 rounded-squircle-md text-dim hover:text-white hover:bg-red-500/20 hover:border-red-500/30 transition-all duration-500 whitespace-nowrap"
               >
                 <RefreshCcw size={18} />
                 Reset Challenge
