@@ -37,6 +37,7 @@ function App() {
     totalSeconds: 0,
     totalAums: 0,
     overallDuration: 0,
+    totalSessions: 0,
     methodTotals: {},
     lastSession: null
   });
@@ -67,7 +68,7 @@ function App() {
       hours: totalHours,
       days: Math.min(diffDays, 30),
       rawDays: diffDays,
-      sessions: '—', // We don't have total sessions count easily without extra backend work, using placeholder
+      sessions: statsToUse.totalSessions,
       favoriteMethod,
       totalAums: statsToUse.totalAums
     };
@@ -276,6 +277,7 @@ function App() {
           totalSeconds: 0,
           totalAums: 0,
           overallDuration: 0,
+          totalSessions: 0,
           methodTotals: {},
           lastSession: null
         });
@@ -296,6 +298,7 @@ function App() {
           totalSeconds: 0,
           totalAums: 0,
           overallDuration: 0,
+          totalSessions: 0,
           methodTotals: {},
           lastSession: null
         });

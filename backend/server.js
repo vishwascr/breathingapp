@@ -103,17 +103,14 @@ app.get('/api/history/stats', async (req, res) => {
             {
               $group: {
                 _id: null,
-                totalSeconds: { 
-                  $sum: { 
-                    $cond: [{ $ne: ["$pattern", "Aum Chanting"] }, "$duration", 0] 
-                  } 
-                },
+                totalSeconds: { $sum: "$duration" },
                 totalAums: { 
                   $sum: { 
                     $cond: [{ $eq: ["$pattern", "Aum Chanting"] }, { $ifNull: ["$cycles", 0] }, 0] 
                   } 
                 },
-                overallDuration: { $sum: "$duration" }
+                overallDuration: { $sum: "$duration" },
+                totalSessions: { $sum: 1 }
               }
             }
           ],
@@ -134,7 +131,7 @@ app.get('/api/history/stats', async (req, res) => {
     ]);
 
     const stats = totalStats[0];
-    const overall = stats.overall[0] || { totalSeconds: 0, totalAums: 0, overallDuration: 0 };
+    const overall = stats.overall[0] || { totalSeconds: 0, totalAums: 0, overallDuration: 0, totalSessions: 0 };
     const methodTotals = stats.byMethod.reduce((acc, curr) => {
       acc[curr._id] = curr.totalDuration;
       return acc;
@@ -144,6 +141,7 @@ app.get('/api/history/stats', async (req, res) => {
       totalSeconds: overall.totalSeconds,
       totalAums: overall.totalAums,
       overallDuration: overall.overallDuration,
+      totalSessions: overall.totalSessions,
       methodTotals,
       lastSession: stats.lastSession[0] || null
     });

@@ -155,7 +155,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
         });
         setGuidanceVisible(true);
       }, 300); // Wait for fade out
-    }, (currentDur * 1000) - 300);
+    }, Math.max(0, (currentDur * 1000) - 300));
 
     return () => {
       cancelAnimationFrame(countdownAnimationFrameId);
