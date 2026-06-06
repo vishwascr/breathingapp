@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Square, Save, X, Info, CheckCircle2 } from 'lucide-react'
+import { Play, Square, Save, X, Info, CheckCircle2, Maximize, Minimize } from 'lucide-react'
 
 const PHASES = ['Inhale', 'Hold', 'Exhale', 'Hold'];
 
@@ -27,11 +27,13 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const [currentNote, setCurrentNote] = useState('');
   const [guidanceVisible, setGuidanceVisible] = useState(true);
   const [completedCycles, setCompletedCycles] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const sessionTimerRef = useRef(null);
   const pathRef = useRef(null);
   const animationRef = useRef(null);
   const phaseStartTimeRef = useRef(null);
+  const containerRef = useRef(null);
 
   // Sync with global session state
   useEffect(() => {
@@ -59,6 +61,24 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   }, [isActive]);
 
   // Animation for the head position
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
   useEffect(() => {
     if (!isActive || selectedMethod !== 'box' || !pathRef.current) return;
 
@@ -163,6 +183,10 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const handleSaveSession = () => {
     saveHistory(lastSession.duration, lastSession.pattern, currentNote, lastSession.phaseDuration, lastSession.cycles);
     setShowSummary(false);
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+    navigate('/history');
   };
 
   const getCircleStyle = () => {
@@ -203,9 +227,16 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const currentPhase = (methods[selectedMethod].phases && methods[selectedMethod].phases[phaseState.index]) || PHASES[phaseState.index];
 
   return (
-    <div className="w-full min-h-dvh flex flex-col py-8 px-6 md:py-12 relative">
-      <header className="mb-2 md:mb-4">
+    <div ref={containerRef} className="w-full min-h-dvh flex flex-col py-8 px-6 md:py-12 relative bg-[var(--color-bg)]">
+      <header className="mb-2 md:mb-4 flex justify-between items-start">
         <h2 className="text-[1.8rem] md:text-[3rem] font-thin tracking-tight text-text text-left">{methods[selectedMethod].name}</h2>
+        <button 
+          onClick={toggleFullscreen}
+          className="p-3 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all"
+          title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+        >
+          {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
+        </button>
       </header>
 
       <div className="flex-1 flex flex-col items-center justify-center gap-4 md:gap-6 w-full">

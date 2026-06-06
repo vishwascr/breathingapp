@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Wind, History as HistoryIcon, Settings } from 'lucide-react';
 
-function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethodModalOpen }) {
+function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethodModalOpen, challengeActive }) {
   const location = useLocation();
 
   const activeClass = 'bg-accent text-bg font-medium opacity-100 shadow-lg shadow-accent/20';
@@ -49,17 +49,19 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
                 </NavLink>
               </li>
               
-              <li className="relative">
-                <button 
-                  className={`w-full text-left border border-transparent p-4 rounded-squircle-md cursor-pointer transition-all duration-300 text-base flex items-center justify-between ${isBreatheActive ? activeClass : inactiveClass}`}
-                  onClick={handleBreatheClick}
-                >
-                  <div className="flex items-center gap-4">
-                    <Wind size={20} />
-                    <span>Breathing Techniques</span>
-                  </div>
-                </button>
-              </li>
+              {challengeActive && (
+                <li className="relative">
+                  <button 
+                    className={`w-full text-left border border-transparent p-4 rounded-squircle-md cursor-pointer transition-all duration-300 text-base flex items-center justify-between ${isBreatheActive ? activeClass : inactiveClass}`}
+                    onClick={handleBreatheClick}
+                  >
+                    <div className="flex items-center gap-4">
+                      <Wind size={20} />
+                      <span>Breathing Techniques</span>
+                    </div>
+                  </button>
+                </li>
+              )}
 
               <li>
                 <NavLink to="/history" className={linkClass} onClick={(e) => handleNavClick(e, '/history')}>
@@ -97,16 +99,18 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
               <LayoutDashboard size={24} strokeWidth={1.5} />
             </NavLink>
           </li>
-          <li className="flex-1 flex justify-center">
-            <button 
-              className={`p-3.5 rounded-[1.2rem] transition-all duration-300 flex items-center justify-center ${
-                isBreatheActive ? 'bg-white/10 text-white shadow-sm' : 'text-white/50 hover:text-white'
-              }`}
-              onClick={handleBreatheClick}
-            >
-              <Wind size={24} strokeWidth={1.5} />
-            </button>
-          </li>
+          {challengeActive && (
+            <li className="flex-1 flex justify-center">
+              <button 
+                className={`p-3.5 rounded-[1.2rem] transition-all duration-300 flex items-center justify-center ${
+                  isBreatheActive ? 'bg-white/10 text-white shadow-sm' : 'text-white/50 hover:text-white'
+                }`}
+                onClick={handleBreatheClick}
+              >
+                <Wind size={24} strokeWidth={1.5} />
+              </button>
+            </li>
+          )}
           <li className="flex-1 flex justify-center">
             <NavLink 
               to="/history" 

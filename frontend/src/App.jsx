@@ -287,6 +287,7 @@ function App() {
           onNavigateAttempt={(path) => setPendingNav(path)}
           openMethodModal={() => setIsMethodModalOpen(true)}
           isMethodModalOpen={isMethodModalOpen}
+          challengeActive={challengeActive}
         />
         
         <div className="flex-1 relative isolate min-h-dvh md:ml-72">
