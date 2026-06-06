@@ -359,7 +359,7 @@ function App() {
           
           <main className="w-full min-h-dvh p-6 md:p-12 flex justify-center items-start relative z-10 pb-32 md:pb-12">
             <Suspense fallback={
-              <div className="flex items-center justify-center p-20">
+              <div className="flex md:hidden items-center justify-center p-20">
                 <Wind size={40} className="text-accent animate-pulse" />
               </div>
             }>
@@ -441,31 +441,37 @@ function App() {
 
       {/* Global Method Selection Modal */}
       {isMethodModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-6">
-          <div className="w-full max-w-sm bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 shadow-2xl animate-fadeIn text-center">
-            <h3 className="text-2xl font-light mb-4">Select Technique</h3>
-            <p className="text-dim font-light mb-8 leading-relaxed">
-              Choose a breathing method to begin your session.
-            </p>
-            <div className="flex flex-col gap-3">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 md:p-6">
+          <div className="w-full max-w-sm bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-8 shadow-2xl animate-fadeIn text-center flex flex-col max-h-[90dvh]">
+            <div className="shrink-0">
+              <h3 className="text-xl md:text-2xl font-light mb-2">Select Technique</h3>
+              <p className="text-dim font-light mb-6 leading-relaxed text-sm md:text-base">
+                Choose a breathing method to begin your session.
+              </p>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-3 custom-scrollbar">
               {Object.entries(methods).map(([key, method]) => (
                 <button
                   key={key}
-                  className="w-full border border-white/10 py-4 rounded-squircle-md font-light hover:bg-white/5 transition-all duration-300 relative"
+                  className="w-full border border-white/10 py-3 md:py-4 px-4 rounded-squircle-md font-light hover:bg-white/5 transition-all duration-300 flex items-center justify-center gap-3"
                   onClick={() => {
                     handleMethodChange(key);
                     setIsMethodModalOpen(false);
                   }}
                 >
-                  {method.name}
+                  <span className="truncate">{method.name}</span>
                   {method.isNew && (
-                    <span className="absolute top-1/2 -translate-y-1/2 right-4 text-[0.6rem] bg-accent text-bg px-2 py-1 rounded-full font-medium tracking-widest">NEW</span>
+                    <span className="shrink-0 text-[0.6rem] bg-accent text-bg px-2 py-0.5 rounded-full font-bold tracking-widest">NEW</span>
                   )}
                 </button>
               ))}
+            </div>
+
+            <div className="shrink-0 mt-4">
               <button 
                 onClick={() => setIsMethodModalOpen(false)} 
-                className="mt-2 w-full bg-white/5 py-3 rounded-squircle-md font-light hover:bg-white/10 transition-all duration-300 text-dim"
+                className="w-full bg-white/5 py-3 rounded-squircle-md font-light hover:bg-white/10 transition-all duration-300 text-dim"
               >
                 Cancel
               </button>

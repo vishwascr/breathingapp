@@ -108,7 +108,11 @@ app.get('/api/history/stats', async (req, res) => {
                     $cond: [{ $ne: ["$pattern", "Aum Chanting"] }, "$duration", 0] 
                   } 
                 },
-                totalAums: { $sum: { $ifNull: ["$cycles", 0] } },
+                totalAums: { 
+                  $sum: { 
+                    $cond: [{ $eq: ["$pattern", "Aum Chanting"] }, { $ifNull: ["$cycles", 0] }, 0] 
+                  } 
+                },
                 overallDuration: { $sum: "$duration" }
               }
             }

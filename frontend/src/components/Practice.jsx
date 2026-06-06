@@ -128,6 +128,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
     };
     updateCountdown();
 
+    let transitionTimeoutId;
     const phaseTimeout = setTimeout(() => {
       let nextIndex = (phaseState.index + 1) % 4;
       while (currentPattern[nextIndex] === 0 && nextIndex !== phaseState.index) {
@@ -137,7 +138,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       // Start fade out slightly before transition
       setGuidanceVisible(false);
 
-      setTimeout(() => {
+      transitionTimeoutId = setTimeout(() => {
         setTimeLeft(currentPattern[nextIndex]);
         setPhaseState(prev => {
           if (nextIndex === 0) {
@@ -155,6 +156,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
     return () => {
       cancelAnimationFrame(countdownAnimationFrameId);
       clearTimeout(phaseTimeout);
+      clearTimeout(transitionTimeoutId);
     };
   }, [isActive, phaseState.index, selectedMethod, methods]);
 
