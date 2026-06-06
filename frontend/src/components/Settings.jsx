@@ -1,7 +1,57 @@
 import { useState, useEffect } from 'react';
-import { Palette, Timer, Info, Save, Github, Trophy, RefreshCcw } from 'lucide-react';
+import { Palette, Timer, Info, Save, Github, Trophy, RefreshCcw, Plus, Minus, ChevronDown } from 'lucide-react';
 
 const PHASE_LABELS = ['Inhale', 'Hold', 'Exhale', 'Hold'];
+
+function DurationPicker({ value, onChange, label }) {
+  const options = Array.from({ length: 10 }, (_, i) => i + 1);
+
+  const increment = () => onChange(Math.min(10, value + 1));
+  const decrement = () => onChange(Math.max(1, value - 1));
+
+  return (
+    <div className="flex flex-col gap-2 w-full">
+      {label && <label className="text-[0.65rem] font-light text-dim/80 ml-1 uppercase tracking-wider">{label}</label>}
+      
+      {/* Mobile: Native Select (Triggers iOS Wheel) */}
+      <div className="relative md:hidden">
+        <select 
+          value={value}
+          onChange={(e) => onChange(parseInt(e.target.value))}
+          className="w-full bg-white/5 border border-white/10 rounded-squircle-sm h-[60px] px-6 text-xl font-light text-text appearance-none focus:outline-none focus:border-accent transition-all"
+        >
+          {options.map(num => (
+            <option key={num} value={num}>{num} seconds</option>
+          ))}
+        </select>
+        <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-dim/50">
+          <ChevronDown size={20} />
+        </div>
+      </div>
+
+      {/* Desktop: Stepper UI */}
+      <div className="hidden md:flex items-center bg-white/5 border border-white/10 rounded-squircle-sm h-[60px] overflow-hidden focus-within:border-accent transition-all">
+        <button 
+          onClick={decrement}
+          disabled={value <= 1}
+          className="h-full px-5 hover:bg-white/5 text-dim disabled:opacity-20 transition-all"
+        >
+          <Minus size={20} />
+        </button>
+        <div className="flex-1 text-center text-xl font-light border-x border-white/5 h-full flex items-center justify-center">
+          {value}s
+        </div>
+        <button 
+          onClick={increment}
+          disabled={value >= 10}
+          className="h-full px-5 hover:bg-white/5 text-dim disabled:opacity-20 transition-all"
+        >
+          <Plus size={20} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function MethodSettings({ methodKey, method, onSave }) {
   const [localPattern, setLocalPattern] = useState(method.pattern);
@@ -19,16 +69,14 @@ function MethodSettings({ methodKey, method, onSave }) {
   }, [method]);
 
   const handleUniformChange = (val) => {
-    const num = parseInt(val) || 0;
-    setUniformValue(num);
-    const newPattern = method.pattern.map(v => v > 0 ? num : 0);
+    setUniformValue(val);
+    const newPattern = method.pattern.map(v => v > 0 ? val : 0);
     setLocalPattern(newPattern);
   };
 
   const handlePhaseChange = (idx, val) => {
-    const num = parseInt(val) || 0;
     const newPattern = [...localPattern];
-    newPattern[idx] = num;
+    newPattern[idx] = val;
     setLocalPattern(newPattern);
   };
 
@@ -52,40 +100,31 @@ function MethodSettings({ methodKey, method, onSave }) {
 
       <div className="flex flex-col gap-6">
         {isUniform ? (
-          <div className="flex flex-col gap-2">
-            <label className="text-[0.65rem] md:text-sm font-light text-dim/80 ml-1 uppercase tracking-wider">Duration per phase (seconds)</label>
-            <div className="flex gap-4">
-              <input 
-                type="number" 
-                value={uniformValue} 
-                onChange={(e) => handleUniformChange(e.target.value)}
-                className="flex-1 bg-white/5 border border-white/10 rounded-squircle-sm px-4 text-text text-center text-xl font-light focus:outline-none focus:border-accent transition-all h-[60px]"
-              />
-              <button 
-                onClick={handleSave} 
-                className="btn-primary tracking-wide h-[60px] flex items-center justify-center gap-2 px-6 md:px-10 whitespace-nowrap"
-              >
-                <Save size={18} />
-                <span>Save</span>
-              </button>
-            </div>
+          <div className="flex flex-col sm:flex-row items-end gap-4">
+            <DurationPicker 
+              value={uniformValue} 
+              onChange={handleUniformChange}
+              label="Duration per phase (seconds)"
+            />
+            <button 
+              onClick={handleSave} 
+              className="btn-primary tracking-wide h-[60px] flex items-center justify-center gap-2 px-10 whitespace-nowrap w-full sm:w-auto shrink-0"
+            >
+              <Save size={18} />
+              <span>Save</span>
+            </button>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {localPattern.map((val, idx) => (
                 val > 0 || method.pattern[idx] > 0 ? (
-                  <div key={idx} className="flex flex-col gap-2">
-                    <label className="text-[0.65rem] font-light text-dim/80 ml-1 uppercase tracking-wider">
-                      {(method.phases && method.phases[idx]) || PHASE_LABELS[idx]}
-                    </label>
-                    <input 
-                      type="number" 
-                      value={val} 
-                      onChange={(e) => handlePhaseChange(idx, e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-squircle-sm px-4 text-text text-center text-lg font-light focus:outline-none focus:border-accent transition-all h-[50px]"
-                    />
-                  </div>
+                  <DurationPicker 
+                    key={idx}
+                    value={val}
+                    onChange={(newVal) => handlePhaseChange(idx, newVal)}
+                    label={(method.phases && method.phases[idx]) || PHASE_LABELS[idx]}
+                  />
                 ) : null
               ))}
             </div>
@@ -120,18 +159,39 @@ function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes
             <Palette size={18} className="text-dim" />
             <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Theme</h3>
           </div>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-col gap-3">
             {Object.entries(themes).map(([key, themeInfo]) => (
               <button
                 key={key}
-                className={`flex-1 min-w-[140px] p-4 rounded-squircle-md border transition-all duration-300 ${
+                className={`w-full p-5 rounded-squircle-md border transition-all duration-500 flex items-center justify-between group ${
                   currentTheme === key 
-                  ? 'bg-accent border-white/20 text-bg shadow-lg opacity-100' 
-                  : 'bg-white/5 border-transparent text-dim opacity-60 hover:opacity-100 hover:bg-white/10'
+                  ? 'bg-accent border-white/20 text-bg shadow-xl' 
+                  : 'bg-white/5 border-transparent text-dim hover:bg-white/10'
                 }`}
                 onClick={() => setTheme(key)}
               >
-                {themeInfo.name}
+                <div className="flex flex-col items-start gap-1">
+                  <span className={`text-lg font-light tracking-wide ${currentTheme === key ? 'text-bg' : 'text-text'}`}>
+                    {themeInfo.name}
+                  </span>
+                  {currentTheme === key && (
+                    <span className="text-[0.6rem] uppercase tracking-widest font-bold opacity-60">Active Theme</span>
+                  )}
+                </div>
+                
+                {/* Color Swatches */}
+                <div className="flex gap-2 p-1.5 bg-black/10 rounded-full border border-white/5">
+                  <div 
+                    className="w-5 h-5 rounded-full border border-white/10 shadow-sm" 
+                    style={{ backgroundColor: themeInfo.colors.bg }}
+                    title="Background"
+                  />
+                  <div 
+                    className="w-5 h-5 rounded-full border border-white/10 shadow-sm" 
+                    style={{ backgroundColor: themeInfo.colors.accent }}
+                    title="Accent"
+                  />
+                </div>
               </button>
             ))}
           </div>
