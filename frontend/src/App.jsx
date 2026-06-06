@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { Trophy, Clock, Calendar, Activity, CheckCircle2, Star, Target, Zap, RefreshCcw } from 'lucide-react'
 import './App.css'
@@ -92,10 +92,9 @@ function App() {
   const [challengeStartDate, setChallengeStartDate] = useState(null);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completionStats, setCompletionStats] = useState(null);
-  const [showExpirationModal, setShowExpirationModal] = useState(false);
-  const [expirationStats, setExpirationStats] = useState(null);
+  const [hasDismissedExpiration, setHasDismissedExpiration] = useState(false);
 
-  const getChallengeStats = (currentHistory) => {
+  const getChallengeStats = useCallback((currentHistory) => {
     if (!challengeActive || !challengeStartDate) return null;
 
     const totalSeconds = currentHistory
@@ -128,23 +127,37 @@ function App() {
       favoriteMethod,
       totalAums
     };
-  };
+  }, [challengeActive, challengeStartDate]);
 
-  const calculateChallengeCompletion = (currentHistory) => {
+  const calculateChallengeCompletion = useCallback((currentHistory) => {
     const stats = getChallengeStats(currentHistory);
     if (stats && parseFloat(stats.hours) >= 30) {
       return stats;
     }
     return null;
-  };
+  }, [getChallengeStats]);
+
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('breath-theme') || null;
   });
+
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [pendingNav, setPendingNav] = useState(null);
   const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const expirationStats = useMemo(() => {
+    if (challengeActive && challengeStartDate && !isSessionActive && !hasDismissedExpiration) {
+      const stats = getChallengeStats(history);
+      if (stats && stats.rawDays > 30 && parseFloat(stats.hours) < 30) {
+        return stats;
+      }
+    }
+    return null;
+  }, [challengeActive, challengeStartDate, isSessionActive, history, getChallengeStats, hasDismissedExpiration]);
+
+  const showExpirationModal = !!expirationStats;
 
   const showStripes = ['/', '/history', '/settings'].includes(location.pathname);
 
@@ -160,16 +173,6 @@ function App() {
   };
 
   useEffect(() => {
-    if (challengeActive && challengeStartDate && !isSessionActive) {
-      const stats = getChallengeStats(history);
-      if (stats && stats.rawDays > 30 && parseFloat(stats.hours) < 30) {
-        setExpirationStats(stats);
-        setShowExpirationModal(true);
-      }
-    }
-  }, [challengeActive, challengeStartDate, isSessionActive, history]);
-
-  useEffect(() => {
     let isMounted = true;
     const loadInitialData = async () => {
       try {
@@ -179,11 +182,24 @@ function App() {
         if (isMounted) setHistory(historyData);
 
         // Load Theme
-        const themeRes = await fetch('/api/settings/theme');
-        const themeData = await themeRes.json();
+        let loadedTheme = null;
+        try {
+          const themeRes = await fetch('/api/settings/theme');
+          const themeData = await themeRes.json();
+          loadedTheme = themeData.theme;
+        } catch (e) {
+          console.error('Failed to load theme:', e);
+        }
+
         if (isMounted) {
-          setTheme(themeData.theme);
-          localStorage.setItem('breath-theme', themeData.theme);
+          if (loadedTheme) {
+            setTheme(loadedTheme);
+            localStorage.setItem('breath-theme', loadedTheme);
+          } else {
+            // Check localStorage before fallback
+            const cachedTheme = localStorage.getItem('breath-theme');
+            setTheme(cachedTheme || 'noir');
+          }
         }
 
         // Load Challenge Status
@@ -195,7 +211,6 @@ function App() {
         }
       } catch (err) {
         console.error('Failed to fetch initial data:', err);
-        if (isMounted && !theme) setTheme('noir'); // Only fallback if no cached theme
       }
     };
     loadInitialData();
@@ -364,8 +379,9 @@ function App() {
           <main className="w-full min-h-dvh p-6 md:p-12 flex justify-center items-start relative z-10 pb-32 md:pb-12">
             <Routes>
               <Route path="/" element={
-                <Dashboard 
-                  history={history} 
+                <Dashboard
+                  key={challengeActive}
+                  history={history}
                   methods={methods}
                   openMethodModal={() => setIsMethodModalOpen(true)}
                   challengeActive={challengeActive}
@@ -586,9 +602,9 @@ function App() {
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={() => {
-                  setShowExpirationModal(false);
+                  setHasDismissedExpiration(true);
                   resetChallenge();
                 }}
                 className="btn-primary w-full py-5 text-lg flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(var(--color-accent-rgb),0.2)]"

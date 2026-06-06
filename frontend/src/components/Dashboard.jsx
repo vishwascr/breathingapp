@@ -1,12 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Play, Clock, BookOpen, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 
 function Dashboard({ history, methods, openMethodModal, challengeActive, challengeStartDate, startChallenge }) {
   const [activeStatIndex, setActiveStatIndex] = useState(0);
-
-  useEffect(() => {
-    setActiveStatIndex(0);
-  }, [challengeActive]);
 
   const lastSession = history.length > 0 ? history[0] : null;
 
