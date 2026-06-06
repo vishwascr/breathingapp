@@ -156,7 +156,25 @@ const THEMES = {
 };
 
 function App() {
-  const [methods, setMethods] = useState(INITIAL_METHODS);
+  const [methods, setMethods] = useState(() => {
+    const saved = localStorage.getItem('breath-methods');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const merged = { ...INITIAL_METHODS };
+        for (const key in parsed) {
+          if (merged[key]) {
+            merged[key] = { ...merged[key], pattern: parsed[key].pattern };
+          }
+        }
+        return merged;
+      } catch (e) {
+        console.error('Failed to parse saved methods:', e);
+        return INITIAL_METHODS;
+      }
+    }
+    return INITIAL_METHODS;
+  });
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [history, setHistory] = useState([]);
   const [challengeActive, setChallengeActive] = useState(false);
@@ -395,10 +413,21 @@ function App() {
   };
 
   const updateMethodPattern = (methodKey, newPattern) => {
-    setMethods(prev => ({
-      ...prev,
-      [methodKey]: { ...prev[methodKey], pattern: newPattern }
-    }));
+    setMethods(prev => {
+      const updated = {
+        ...prev,
+        [methodKey]: { ...prev[methodKey], pattern: newPattern }
+      };
+      
+      // Save only patterns to localStorage
+      const toSave = {};
+      for (const key in updated) {
+        toSave[key] = { pattern: updated[key].pattern };
+      }
+      localStorage.setItem('breath-methods', JSON.stringify(toSave));
+      
+      return updated;
+    });
   };
 
   const handleMethodChange = (methodKey) => {
