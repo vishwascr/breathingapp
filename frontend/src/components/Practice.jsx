@@ -173,9 +173,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       transitionTimeoutId = setTimeout(() => {
         setTimeLeft(currentPattern[nextIndex]);
 
-        const isAumComplete = selectedMethod === 'aum' && nextIndex === 3;
-        const isStandardComplete = selectedMethod !== 'aum' && nextIndex === 0;
-        if (isAumComplete || isStandardComplete) {
+        if (nextIndex === 0) {
           setCompletedCycles(c => c + 1);
         }
 
@@ -244,7 +242,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       targetScale = 1;
       transitionDuration = 0.3;
     } else if (!isActive) {
-      targetScale = selectedMethod === 'aum' ? 2.5 : 1;
+      targetScale = 1;
     } else {
       // Active Session
       const currentPattern = methods[selectedMethod].pattern;
@@ -252,11 +250,12 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       timingFunction = 'linear';
 
       if (selectedMethod === 'aum') {
-        if (phaseState.index === 3) {
+        if (phaseState.index === 0) {
           targetScale = 2.5; 
         } else {
-          const totalExhale = currentPattern[0] + currentPattern[1] + currentPattern[2];
-          const elapsedExhale = currentPattern.slice(0, phaseState.index + 1).reduce((a, b) => a + b, 0);
+          // Phases 1, 2, 3 are exhalation (A, U, M)
+          const totalExhale = currentPattern[1] + currentPattern[2] + currentPattern[3];
+          const elapsedExhale = currentPattern.slice(1, phaseState.index + 1).reduce((a, b) => a + b, 0);
           targetScale = 2.5 - (1.5 * (elapsedExhale / totalExhale));
         }
       } else {

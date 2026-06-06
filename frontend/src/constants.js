@@ -66,10 +66,10 @@ export const INITIAL_METHODS = {
       'Allow your breath to be gentle and effortless.'
     ]
   },
-  aum: { 
-    name: 'Aum Chanting', 
-    pattern: [4, 4, 5, 4],
-    phases: ['Aaa', 'Uuu', 'Mmmm', 'Inhale'],
+  aum: {
+    name: 'Aum Chanting',
+    pattern: [4, 4, 4, 5],
+    phases: ['Inhale', 'Aaa', 'Uuu', 'Mmmm'],
     description: 'Combines controlled exhalation with sound vibrations to stimulate the vagus nerve and calm the mind.',
     steps: [
       'Inhale deeply through your nose.',
@@ -79,10 +79,10 @@ export const INITIAL_METHODS = {
       'Inhale and repeat.'
     ],
     guidance: [
+      'Breathe in deeply through your nose.',
       'Creates vibrations in your stomach and chest.',
       'Creates vibrations in your throat.',
-      'Creates vibrations in your brain and nasal cavity.',
-      'Breathe in deeply through your nose.'
+      'Creates vibrations in your brain and nasal cavity.'
     ]
   }
 };
