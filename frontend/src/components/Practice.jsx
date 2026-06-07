@@ -225,8 +225,9 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       const pattern = methods[selectedMethod].pattern;
       
       const inhale = pattern[0];
-      const hold = pattern[1];
+      const inhaleHold = selectedMethod === 'aum' ? 0 : pattern[1];
       const exhale = selectedMethod === 'aum' ? (pattern[1] + pattern[2] + pattern[3]) : pattern[2];
+      const exhaleHold = selectedMethod === 'aum' ? 0 : pattern[3];
 
       let finalCooldownSeconds = 0;
       if (isCooldown && cooldownStartTimeRef.current) {
@@ -242,8 +243,9 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
         cycles: Number(completedCycles),
         cooldownSeconds: finalCooldownSeconds,
         inhale,
-        hold,
-        exhale
+        inhaleHold,
+        exhale,
+        exhaleHold
       });
       setIsActive(false);
       setCountdown(null);
@@ -263,7 +265,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
 
   const handleSaveSession = () => {
     if (sessionRating === 0) return;
-    saveHistory(lastSession.duration, lastSession.pattern, currentNote, lastSession.cycles, lastSession.cooldownSeconds, sessionRating, lastSession.inhale, lastSession.hold, lastSession.exhale);
+    saveHistory(lastSession.duration, lastSession.pattern, currentNote, lastSession.cycles, lastSession.cooldownSeconds, sessionRating, lastSession.inhale, lastSession.inhaleHold, lastSession.exhale, lastSession.exhaleHold);
     setShowSummary(false);
     if (document.fullscreenElement) {
       document.exitFullscreen();
@@ -489,7 +491,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
               <span className="opacity-20 text-[0.6rem]">•</span>
               <span>{lastSession.pattern}</span>
               <span className="opacity-20 text-[0.6rem]">•</span>
-              <span>{lastSession.inhale}-{lastSession.hold}-{lastSession.exhale}s</span>
+              <span>{lastSession.inhale}-{lastSession.inhaleHold}-{lastSession.exhale}-{lastSession.exhaleHold}s</span>
               <span className="opacity-20 text-[0.6rem]">•</span>
               <span>{lastSession.cycles} {selectedMethod === 'aum' ? 'Chants' : 'Cycles'}</span>
             </div>

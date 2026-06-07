@@ -268,7 +268,7 @@ function App() {
     fetchHistory(historyPage + 1, true);
   };
 
-  const saveHistory = async (duration, patternName, notes, cycles, cooldownSeconds, rating, inhale, hold, exhale) => {
+  const saveHistory = async (duration, patternName, notes, cycles, cooldownSeconds, rating, inhale, inhaleHold, exhale, exhaleHold) => {
     try {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       await fetch('/api/history', {
@@ -277,7 +277,7 @@ function App() {
           'Content-Type': 'application/json',
           'x-timezone': timezone
         },
-        body: JSON.stringify({ duration, pattern: patternName, notes, cycles, cooldownSeconds, rating, inhale, hold, exhale })
+        body: JSON.stringify({ duration, pattern: patternName, notes, cycles, cooldownSeconds, rating, inhale, inhaleHold, exhale, exhaleHold })
       });
       
       // Refresh stats and first page of history

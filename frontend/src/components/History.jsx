@@ -75,7 +75,7 @@ function History({ history, hasMore, loadMore, onDelete }) {
                     </span>
                     {item.inhale !== undefined && (
                       <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-dim text-[0.7rem] uppercase tracking-widest font-medium">
-                        {item.inhale}-{item.hold}-{item.exhale}s
+                        {item.inhale}-{item.inhaleHold}-{item.exhale}-{item.exhaleHold}s
                       </span>
                     )}
                     {item.rating && (

@@ -207,7 +207,7 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
                         <span className="text-xl md:text-2xl font-light">{lastSession.pattern}</span>
                         {lastSession.inhale !== undefined && (
                           <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-dim/60 uppercase tracking-tighter">
-                            {lastSession.inhale}-{lastSession.hold}-{lastSession.exhale}s
+                            {lastSession.inhale}-{lastSession.inhaleHold}-{lastSession.exhale}-{lastSession.exhaleHold}s
                           </span>
                         )}
                       </div>
