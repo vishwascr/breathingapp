@@ -333,17 +333,27 @@ function App() {
     }
   };
 
-  const resetChallenge = async (closureNotes = '', downloadCsv = true) => {
+  const resetChallenge = async (closureNotes = '', downloadCsv = false) => {
     try {
       const res = await fetch('/api/challenge/reset', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ closureNotes })
+        body: JSON.stringify({ closureNotes, generateCsv: downloadCsv })
       });
       if (res.ok) {
-        // Trigger automatic CSV download conditionally
-        if (downloadCsv) {
-          window.location.assign('/api/history/export');
+        const data = await res.json();
+        
+        // Trigger automatic CSV download conditionally if returned from backend
+        if (data.csv) {
+          const blob = new Blob([data.csv], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.setAttribute('href', url);
+          link.setAttribute('download', 'breathing_history.csv');
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
         }
 
         setHistory([]);

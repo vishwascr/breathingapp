@@ -75,8 +75,8 @@ app.post('/api/settings/theme', async (req, res) => {
 
 app.get('/api/history/export', async (req, res) => {
   try {
-    // Export all history, including archived
-    const history = await History.find().sort({ timestamp: -1 });
+    // Export active history
+    const history = await History.find({ archived: { $ne: true } }).sort({ timestamp: -1 });
     
     // CSV Header
     const headers = ['Date', 'Time', 'Method', 'Duration (s)', 'Phase Duration (s)', 'Cycles', 'Cooldown (s)', 'Rating', 'Notes', 'Closure notes'];
@@ -233,8 +233,8 @@ app.get('/api/challenge/status', async (req, res) => {
 
 app.post('/api/challenge/start', async (req, res) => {
   try {
-    // Archive history instead of hard deleting
-    await History.updateMany({ archived: { $ne: true } }, { $set: { archived: true } });
+    // Hard delete history instead of archiving
+    await History.deleteMany({});
     
     // Set challenge settings
     await Settings.findOneAndUpdate(
@@ -257,9 +257,44 @@ app.post('/api/challenge/start', async (req, res) => {
 
 app.post('/api/challenge/reset', async (req, res) => {
   try {
-    const { closureNotes } = req.body;
-    // Archive history instead of hard deleting
-    await History.updateMany({ archived: { $ne: true } }, { $set: { archived: true, closureNotes: closureNotes || '' } });
+    const { closureNotes, generateCsv } = req.body;
+    let csvContent = null;
+
+    if (generateCsv) {
+      // Export all history before deletion
+      const history = await History.find().sort({ timestamp: -1 });
+      
+      // CSV Header
+      const headers = ['Date', 'Time', 'Method', 'Duration (s)', 'Phase Duration (s)', 'Cycles', 'Cooldown (s)', 'Rating', 'Notes', 'Closure notes'];
+      
+      // CSV Rows
+      const rows = history.map(item => {
+        const date = new Date(item.timestamp);
+        const formattedDate = date.toISOString().split('T')[0];
+        const formattedTime = date.toTimeString().split(' ')[0];
+        
+        // Escape notes: wrap in quotes and escape existing quotes
+        const escapedNotes = `"${(item.notes || '').replace(/"/g, '""')}"`;
+        const escapedClosureNotes = `"${(closureNotes || '').replace(/"/g, '""')}"`;
+        
+        return [
+          formattedDate,
+          formattedTime,
+          item.pattern,
+          item.duration,
+          item.phaseDuration || '',
+          item.cycles || '',
+          item.cooldownSeconds || 0,
+          item.rating || '',
+          escapedNotes,
+          escapedClosureNotes
+        ].join(',');
+      });
+      csvContent = [headers.join(','), ...rows].join('\n');
+    }
+
+    // Hard delete all history
+    await History.deleteMany({});
     
     await Settings.findOneAndUpdate(
       { key: 'challengeActive' },
@@ -271,7 +306,7 @@ app.post('/api/challenge/reset', async (req, res) => {
       { value: null },
       { returnDocument: 'after', upsert: true }
     );
-    res.json({ message: 'Challenge reset' });
+    res.json({ message: 'Challenge reset', csv: csvContent });
   } catch (err) {
     console.error('Error resetting challenge:', err);
     res.status(500).json({ message: 'Internal server error while resetting challenge.' });
