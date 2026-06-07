@@ -48,8 +48,12 @@ function App() {
   const [challengeActive, setChallengeActive] = useState(false);
   const [challengeStartDate, setChallengeStartDate] = useState(null);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [hasDismissedCompletion, setHasDismissedCompletion] = useState(false);
   const [completionStats, setCompletionStats] = useState(null);
   const [hasDismissedExpiration, setHasDismissedExpiration] = useState(false);
+  const [completionNotes, setCompletionNotes] = useState('');
+  const [expirationNotes, setExpirationNotes] = useState('');
+  const [generateCsv, setGenerateCsv] = useState(false);
 
   const getChallengeStats = useCallback((statsOverride = null) => {
     if (!challengeActive || !challengeStartDate) return null;
@@ -78,7 +82,7 @@ function App() {
 
   const calculateChallengeCompletion = useCallback((statsOverride = null) => {
     const stats = getChallengeStats(statsOverride);
-    if (stats && parseFloat(stats.hours) >= 30) {
+    if (stats && stats.rawDays > 30 && parseFloat(stats.hours) >= 30) {
       return stats;
     }
     return null;
@@ -106,6 +110,16 @@ function App() {
 
   const showExpirationModal = !!expirationStats;
 
+  useEffect(() => {
+    if (challengeActive && challengeStartDate && !isSessionActive && !showCompletionModal && !hasDismissedCompletion) {
+      const stats = calculateChallengeCompletion();
+      if (stats && parseFloat(stats.hours) >= 30) {
+        setCompletionStats(stats);
+        setShowCompletionModal(true);
+      }
+    }
+  }, [challengeActive, challengeStartDate, isSessionActive, calculateChallengeCompletion, showCompletionModal, historyStats.totalSeconds, hasDismissedCompletion]);
+
   const showStripes = ['/', '/history', '/settings'].includes(location.pathname);
 
   const confirmEndSession = () => {
@@ -123,8 +137,9 @@ function App() {
     let isMounted = true;
     const loadInitialData = async () => {
       try {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const [statsRes, historyRes, themeRes, challengeRes] = await Promise.all([
-          fetch('/api/history/stats'),
+          fetch('/api/history/stats', { headers: { 'x-timezone': timezone } }),
           fetch('/api/history?page=1&limit=10'),
           fetch('/api/settings/theme'),
           fetch('/api/challenge/status')
@@ -139,10 +154,11 @@ function App() {
 
         if (isMounted) {
           // Process Stats
-          fetchHistoryStats();
+          setHistoryStats(statsData);
 
           // Process History
-          fetchHistory(1, false);
+          setHistory(historyData.data);
+          setHasMoreHistory(historyData.hasMore);
 
           // Process Theme
           const loadedTheme = themeData.theme;
@@ -269,7 +285,7 @@ function App() {
       fetchHistory(1, false);
 
       const compStats = calculateChallengeCompletion(newStats);
-      if (compStats) {
+      if (compStats && !hasDismissedCompletion) {
         setCompletionStats(compStats);
         setShowCompletionModal(true);
       }
@@ -309,16 +325,27 @@ function App() {
         });
         setChallengeActive(true);
         setChallengeStartDate(new Date().toISOString());
+        setHasDismissedCompletion(false);
+        setHasDismissedExpiration(false);
       }
     } catch (err) {
       console.error('Failed to start challenge:', err);
     }
   };
 
-  const resetChallenge = async () => {
+  const resetChallenge = async (closureNotes = '', downloadCsv = true) => {
     try {
-      const res = await fetch('/api/challenge/reset', { method: 'POST' });
+      const res = await fetch('/api/challenge/reset', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ closureNotes })
+      });
       if (res.ok) {
+        // Trigger automatic CSV download conditionally
+        if (downloadCsv) {
+          window.location.assign('/api/history/export');
+        }
+
         setHistory([]);
         setHistoryStats({
           totalSeconds: 0,
@@ -520,7 +547,7 @@ function App() {
       {/* Challenge Completion Modal */}
       {showCompletionModal && completionStats && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4 md:p-6">
-          <div className="w-full max-w-xl bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-12 shadow-2xl animate-fadeIn text-center relative overflow-hidden max-h-[90dvh] overflow-y-auto custom-scrollbar">
+          <div className="w-full max-w-xl bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-12 shadow-2xl animate-fadeIn text-center relative max-h-[90dvh] md:max-h-none overflow-y-auto overflow-x-hidden md:overflow-hidden custom-scrollbar">
             {/* Background Decorative Icons */}
             <div className="absolute -top-10 -left-10 opacity-10 rotate-12">
               <Star className="w-20 h-20 md:w-[120px] md:h-[120px] text-accent" />
@@ -570,10 +597,31 @@ function App() {
                 </div>
               </div>
 
+              <div className="mb-8">
+                <textarea 
+                  value={completionNotes}
+                  onChange={(e) => setCompletionNotes(e.target.value)}
+                  placeholder="Reflect on your journey... (Closure notes for CSV)"
+                  className="w-full bg-white/5 border border-white/10 rounded-squircle-md p-4 text-text focus:outline-none focus:border-accent min-h-[60px] resize-none transition-all placeholder:text-dim/30 text-sm md:text-base mb-4"
+                />
+                <label className="flex items-center gap-2 text-dim text-sm cursor-pointer justify-center md:justify-start">
+                  <input 
+                    type="checkbox" 
+                    checked={generateCsv}
+                    onChange={(e) => setGenerateCsv(e.target.checked)}
+                    className="w-4 h-4 rounded bg-white/5 border-white/10 text-accent focus:ring-accent focus:ring-offset-0"
+                  />
+                  <span>Generate and download CSV report</span>
+                </label>
+              </div>
+
               <button 
                 onClick={() => {
+                  setHasDismissedCompletion(true);
                   setShowCompletionModal(false);
-                  resetChallenge();
+                  resetChallenge(completionNotes, generateCsv);
+                  setCompletionNotes('');
+                  navigate('/');
                 }}
                 className="btn-primary w-full py-4 md:py-5 text-base md:text-lg flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(var(--color-accent-rgb),0.2)]"
               >
@@ -587,7 +635,7 @@ function App() {
       {/* Challenge Expiration Modal */}
       {showExpirationModal && expirationStats && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4 md:p-6">
-          <div className="w-full max-w-xl bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-12 shadow-2xl animate-fadeIn text-center relative overflow-hidden max-h-[90dvh] overflow-y-auto custom-scrollbar">
+          <div className="w-full max-w-xl bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-12 shadow-2xl animate-fadeIn text-center relative max-h-[90dvh] md:max-h-none overflow-y-auto overflow-x-hidden md:overflow-hidden custom-scrollbar">
             {/* Background Decorative Icons */}
             <div className="absolute -top-10 -left-10 opacity-10 rotate-12">
               <RefreshCcw className="w-20 h-20 md:w-[120px] md:h-[120px] text-accent" />
@@ -637,10 +685,30 @@ function App() {
                 </div>
               </div>
 
+              <div className="mb-8">
+                <textarea 
+                  value={expirationNotes}
+                  onChange={(e) => setExpirationNotes(e.target.value)}
+                  placeholder="What happened? (Closure notes for CSV)"
+                  className="w-full bg-white/5 border border-white/10 rounded-squircle-md p-4 text-text focus:outline-none focus:border-accent min-h-[60px] resize-none transition-all placeholder:text-dim/30 text-sm md:text-base mb-4"
+                />
+                <label className="flex items-center gap-2 text-dim text-sm cursor-pointer justify-center md:justify-start">
+                  <input 
+                    type="checkbox" 
+                    checked={generateCsv}
+                    onChange={(e) => setGenerateCsv(e.target.checked)}
+                    className="w-4 h-4 rounded bg-white/5 border-white/10 text-accent focus:ring-accent focus:ring-offset-0"
+                  />
+                  <span>Generate and download CSV report</span>
+                </label>
+              </div>
+
               <button
                 onClick={() => {
                   setHasDismissedExpiration(true);
-                  resetChallenge();
+                  resetChallenge(expirationNotes, generateCsv);
+                  setExpirationNotes('');
+                  navigate('/');
                 }}
                 className="btn-primary w-full py-4 md:py-5 text-base md:text-lg flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(var(--color-accent-rgb),0.2)]"
               >

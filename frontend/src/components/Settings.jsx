@@ -170,9 +170,33 @@ function MethodSettings({ methodKey, method, onSave }) {
 }
 
 function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes, challengeActive, resetChallenge }) {
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetNotes, setResetNotes] = useState('');
+  const [generateCsv, setGenerateCsv] = useState(false);
+
   const handleResetChallenge = () => {
-    if (window.confirm('Are you sure you want to reset your 30-day challenge? This will remove your challenge progress and return you to the standard dashboard.')) {
-      resetChallenge();
+    resetChallenge(resetNotes, generateCsv);
+    setShowResetConfirm(false);
+    setResetNotes('');
+  };
+
+  const simulateExpiration = async () => {
+    try {
+      const res = await fetch('/api/debug/expire-challenge', { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to simulate expiration');
+      window.location.reload();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const simulateCompletion = async () => {
+    try {
+      const res = await fetch('/api/debug/complete-challenge', { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to simulate completion');
+      window.location.reload();
+    } catch (err) {
+      alert(err.message);
     }
   };
 
@@ -230,23 +254,68 @@ function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes
               <Trophy size={18} className="text-accent" />
               <h3 className="text-xs uppercase tracking-[0.2rem] text-accent font-medium">Active Challenge</h3>
             </div>
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div>
-                <p className="text-lg font-light text-text/80 leading-relaxed">
-                  Your 30-Day / 30-Hour Meditation Challenge is currently in progress. 
-                </p>
-                <p className="text-sm font-light text-dim mt-2">
-                  Resetting will deactivate the challenge tracking on your dashboard.
-                </p>
+            
+            {!showResetConfirm ? (
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div>
+                  <p className="text-lg font-light text-text/80 leading-relaxed">
+                    Your 30-Day / 30-Hour Meditation Challenge is currently in progress. 
+                  </p>
+                  <p className="text-sm font-light text-dim mt-2">
+                    Resetting will deactivate the challenge tracking on your dashboard.
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setShowResetConfirm(true)}
+                  className="flex items-center justify-center gap-2 px-8 py-4 bg-white/5 border border-white/10 rounded-squircle-md text-dim hover:text-white hover:bg-red-500/20 hover:border-red-500/30 transition-all duration-500 whitespace-nowrap"
+                >
+                  <RefreshCcw size={18} />
+                  Reset Challenge
+                </button>
               </div>
-              <button 
-                onClick={handleResetChallenge}
-                className="flex items-center justify-center gap-2 px-8 py-4 bg-white/5 border border-white/10 rounded-squircle-md text-dim hover:text-white hover:bg-red-500/20 hover:border-red-500/30 transition-all duration-500 whitespace-nowrap"
-              >
-                <RefreshCcw size={18} />
-                Reset Challenge
-              </button>
-            </div>
+            ) : (
+              <div className="flex flex-col gap-6 animate-fadeIn">
+                <div>
+                  <h4 className="text-xl font-light mb-2">Are you sure you want to reset?</h4>
+                  <p className="text-sm font-light text-dim leading-relaxed mb-4">
+                    This will archive your current progress. Please share your final thoughts below (Closure notes for CSV).
+                  </p>
+                  <textarea 
+                    autoFocus
+                    value={resetNotes}
+                    onChange={(e) => setResetNotes(e.target.value)}
+                    placeholder="Why are you resetting? What did you learn?"
+                    className="w-full bg-white/5 border border-white/10 rounded-squircle-md p-4 text-text focus:outline-none focus:border-accent min-h-[60px] resize-none transition-all placeholder:text-dim/30 text-sm md:text-base mb-4"
+                  />
+                  <label className="flex items-center gap-2 text-dim text-sm cursor-pointer mb-2">
+                    <input 
+                      type="checkbox" 
+                      checked={generateCsv}
+                      onChange={(e) => setGenerateCsv(e.target.checked)}
+                      className="w-4 h-4 rounded bg-white/5 border-white/10 text-accent focus:ring-accent focus:ring-offset-0"
+                    />
+                    <span>Generate and download CSV report</span>
+                  </label>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button 
+                    onClick={handleResetChallenge}
+                    className="flex-1 bg-red-500/20 border border-red-500/30 py-4 rounded-squircle-md text-red-400 hover:bg-red-500/30 transition-all duration-300 font-medium"
+                  >
+                    Confirm Reset
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setShowResetConfirm(false);
+                      setResetNotes('');
+                    }}
+                    className="flex-1 bg-white/5 border border-white/10 py-4 rounded-squircle-md text-dim hover:text-white transition-all duration-300 font-light"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </section>
         )}
 
@@ -286,6 +355,25 @@ function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes
               <Github size={18} />
               <span className="text-sm font-light tracking-wide">View on GitHub</span>
             </a>
+          </div>
+        </section>
+
+        {/* Debug / Simulation Section */}
+        <section className="mt-8 p-6 border border-dashed border-white/10 rounded-squircle-lg opacity-40 hover:opacity-100 transition-opacity">
+          <h3 className="text-[0.65rem] uppercase tracking-widest text-dim mb-4">Simulation (Debug Only)</h3>
+          <div className="flex flex-wrap gap-4">
+            <button 
+              onClick={simulateExpiration}
+              className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[0.65rem] uppercase tracking-widest text-dim hover:bg-white/10 transition-all"
+            >
+              Simulate 30 Days Passed
+            </button>
+            <button 
+              onClick={simulateCompletion}
+              className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[0.65rem] uppercase tracking-widest text-dim hover:bg-white/10 transition-all"
+            >
+              Simulate 30 Hours Reached
+            </button>
           </div>
         </section>
       </div>

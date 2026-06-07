@@ -28,6 +28,8 @@ const historySchema = new mongoose.Schema({
   cooldownSeconds: { type: Number, default: 0 },
   notes: { type: String, default: '' },
   rating: { type: Number, required: true },
+  closureNotes: { type: String, default: '' },
+  archived: { type: Boolean, default: false },
   timestamp: { type: Date, default: Date.now }
 });
 
@@ -73,10 +75,11 @@ app.post('/api/settings/theme', async (req, res) => {
 
 app.get('/api/history/export', async (req, res) => {
   try {
+    // Export all history, including archived
     const history = await History.find().sort({ timestamp: -1 });
     
     // CSV Header
-    const headers = ['Date', 'Time', 'Method', 'Duration (s)', 'Phase Duration (s)', 'Cycles', 'Cooldown (s)', 'Rating', 'Notes'];
+    const headers = ['Date', 'Time', 'Method', 'Duration (s)', 'Phase Duration (s)', 'Cycles', 'Cooldown (s)', 'Rating', 'Notes', 'Closure notes'];
     
     // CSV Rows
     const rows = history.map(item => {
@@ -86,6 +89,7 @@ app.get('/api/history/export', async (req, res) => {
       
       // Escape notes: wrap in quotes and escape existing quotes
       const escapedNotes = `"${(item.notes || '').replace(/"/g, '""')}"`;
+      const escapedClosureNotes = `"${(item.closureNotes || '').replace(/"/g, '""')}"`;
       
       return [
         formattedDate,
@@ -96,7 +100,8 @@ app.get('/api/history/export', async (req, res) => {
         item.cycles || '',
         item.cooldownSeconds || 0,
         item.rating || '',
-        escapedNotes
+        escapedNotes,
+        escapedClosureNotes
       ].join(',');
     });
     
@@ -117,12 +122,12 @@ app.get('/api/history', async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const history = await History.find()
+    const history = await History.find({ archived: { $ne: true } })
       .sort({ timestamp: -1 })
       .skip(skip)
       .limit(limit);
 
-    const totalCount = await History.countDocuments();
+    const totalCount = await History.countDocuments({ archived: { $ne: true } });
     const hasMore = skip + history.length < totalCount;
 
     res.json({
@@ -140,6 +145,7 @@ app.get('/api/history/stats', async (req, res) => {
   try {
     const timezone = req.headers['x-timezone'] || 'UTC';
     const totalStats = await History.aggregate([
+      { $match: { archived: { $ne: true } } },
       {
         $facet: {
           overall: [
@@ -227,8 +233,8 @@ app.get('/api/challenge/status', async (req, res) => {
 
 app.post('/api/challenge/start', async (req, res) => {
   try {
-    // Hard delete history
-    await History.deleteMany({});
+    // Archive history instead of hard deleting
+    await History.updateMany({ archived: { $ne: true } }, { $set: { archived: true } });
     
     // Set challenge settings
     await Settings.findOneAndUpdate(
@@ -251,8 +257,9 @@ app.post('/api/challenge/start', async (req, res) => {
 
 app.post('/api/challenge/reset', async (req, res) => {
   try {
-    // Hard delete history
-    await History.deleteMany({});
+    const { closureNotes } = req.body;
+    // Archive history instead of hard deleting
+    await History.updateMany({ archived: { $ne: true } }, { $set: { archived: true, closureNotes: closureNotes || '' } });
     
     await Settings.findOneAndUpdate(
       { key: 'challengeActive' },
@@ -268,6 +275,61 @@ app.post('/api/challenge/reset', async (req, res) => {
   } catch (err) {
     console.error('Error resetting challenge:', err);
     res.status(500).json({ message: 'Internal server error while resetting challenge.' });
+  }
+});
+
+// Debug Simulation Routes
+app.post('/api/debug/expire-challenge', async (req, res) => {
+  try {
+    const thirtyOneDaysAgo = new Date();
+    thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 31);
+    
+    await Settings.findOneAndUpdate(
+      { key: 'challengeStartDate' },
+      { $set: { value: thirtyOneDaysAgo.toISOString() } },
+      { upsert: true }
+    );
+    await Settings.findOneAndUpdate(
+      { key: 'challengeActive' },
+      { $set: { value: true } },
+      { upsert: true }
+    );
+    res.json({ message: 'Challenge expired (Start date set to 31 days ago)' });
+  } catch (err) {
+    console.error('Debug Expire Error:', err);
+    res.status(500).json({ message: 'Debug error' });
+  }
+});
+
+app.post('/api/debug/complete-challenge', async (req, res) => {
+  try {
+    const thirtyOneDaysAgo = new Date();
+    thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 31);
+
+    await Settings.findOneAndUpdate(
+      { key: 'challengeActive' },
+      { $set: { value: true } },
+      { upsert: true }
+    );
+    await Settings.findOneAndUpdate(
+      { key: 'challengeStartDate' },
+      { $set: { value: thirtyOneDaysAgo.toISOString() } },
+      { upsert: true }
+    );
+
+    const completionSession = new History({
+      duration: 144001, // 40 hours + 1 second
+      pattern: 'Debug Completion',
+      rating: 5,
+      notes: 'Automatically generated for testing completion modal.',
+      archived: false,
+      timestamp: new Date()
+    });
+    await completionSession.save();
+    res.json({ message: 'Challenge completed (31 days passed + 40hr session added)' });
+  } catch (err) {
+    console.error('Debug Complete Error:', err);
+    res.status(500).json({ message: 'Debug error' });
   }
 });
 
