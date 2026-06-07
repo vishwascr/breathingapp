@@ -27,6 +27,7 @@ const historySchema = new mongoose.Schema({
   cycles: { type: Number },
   cooldownSeconds: { type: Number, default: 0 },
   notes: { type: String, default: '' },
+  rating: { type: Number, required: true },
   timestamp: { type: Date, default: Date.now }
 });
 
@@ -67,6 +68,46 @@ app.post('/api/settings/theme', async (req, res) => {
   } catch (err) {
     console.error('Error updating theme:', err);
     res.status(400).json({ message: 'Bad request while updating theme.' });
+  }
+});
+
+app.get('/api/history/export', async (req, res) => {
+  try {
+    const history = await History.find().sort({ timestamp: -1 });
+    
+    // CSV Header
+    const headers = ['Date', 'Time', 'Method', 'Duration (s)', 'Phase Duration (s)', 'Cycles', 'Cooldown (s)', 'Rating', 'Notes'];
+    
+    // CSV Rows
+    const rows = history.map(item => {
+      const date = new Date(item.timestamp);
+      const formattedDate = date.toISOString().split('T')[0];
+      const formattedTime = date.toTimeString().split(' ')[0];
+      
+      // Escape notes: wrap in quotes and escape existing quotes
+      const escapedNotes = `"${(item.notes || '').replace(/"/g, '""')}"`;
+      
+      return [
+        formattedDate,
+        formattedTime,
+        item.pattern,
+        item.duration,
+        item.phaseDuration || '',
+        item.cycles || '',
+        item.cooldownSeconds || 0,
+        item.rating || '',
+        escapedNotes
+      ].join(',');
+    });
+    
+    const csvContent = [headers.join(','), ...rows].join('\n');
+    
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="breathing_history.csv"');
+    res.status(200).send(csvContent);
+  } catch (err) {
+    console.error('Error exporting history:', err);
+    res.status(500).json({ message: 'Internal server error while exporting history.' });
   }
 });
 
@@ -231,7 +272,7 @@ app.post('/api/challenge/reset', async (req, res) => {
 });
 
 app.post('/api/history', async (req, res) => {
-  const { duration, pattern, phaseDuration, cycles, notes, cooldownSeconds } = req.body;
+  const { duration, pattern, phaseDuration, cycles, notes, cooldownSeconds, rating } = req.body;
 
   // Input Validation
   if (typeof duration !== 'number' || isNaN(duration) || duration < 0) {
@@ -240,6 +281,9 @@ app.post('/api/history', async (req, res) => {
   if (typeof pattern !== 'string' || !pattern.trim()) {
     return res.status(400).json({ message: 'Invalid pattern: must be a non-empty string.' });
   }
+  if (typeof rating !== 'number' || rating < 1 || rating > 5) {
+    return res.status(400).json({ message: 'Invalid rating: must be a number between 1 and 5.' });
+  }
 
   const historyItem = new History({
     duration,
@@ -247,7 +291,8 @@ app.post('/api/history', async (req, res) => {
     phaseDuration,
     cycles,
     cooldownSeconds: cooldownSeconds || 0,
-    notes: notes || ''
+    notes: notes || '',
+    rating
   });
 
   try {

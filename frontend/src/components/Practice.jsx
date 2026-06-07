@@ -26,6 +26,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const [showInfo, setShowInfo] = useState(false);
   const [lastSession, setLastSession] = useState(null);
   const [currentNote, setCurrentNote] = useState('');
+  const [sessionRating, setSessionRating] = useState(0);
   const [guidanceVisible, setGuidanceVisible] = useState(true);
   const [completedCycles, setCompletedCycles] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -239,17 +240,21 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       setCountdown(null);
       setIsCooldown(false);
       cooldownStartTimeRef.current = null;
-      if (isActive) setShowSummary(true);
+      if (isActive) {
+        setShowSummary(true);
+      }
     } else {
       setCountdown(3);
       setCurrentNote('');
       setShowNotesInput(false);
       setIsCooldown(false);
+      setSessionRating(0);
     }
   };
 
   const handleSaveSession = () => {
-    saveHistory(lastSession.duration, lastSession.pattern, currentNote, lastSession.phaseDuration, lastSession.cycles, lastSession.cooldownSeconds);
+    if (sessionRating === 0) return;
+    saveHistory(lastSession.duration, lastSession.pattern, currentNote, lastSession.phaseDuration, lastSession.cycles, lastSession.cooldownSeconds, sessionRating);
     setShowSummary(false);
     if (document.fullscreenElement) {
       document.exitFullscreen();
@@ -478,6 +483,23 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
               <span>{lastSession.cycles} {selectedMethod === 'aum' ? 'Chants' : 'Cycles'}</span>
             </div>
             
+            <div className="mb-6 flex flex-col items-center gap-3">
+              <span className="text-[0.65rem] md:text-xs uppercase tracking-[0.2rem] text-dim font-medium">How was your session?</span>
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <button 
+                    key={num}
+                    onClick={() => setSessionRating(num)}
+                    className={`transition-all duration-300 ${sessionRating >= num ? 'text-accent scale-110' : 'text-dim/40 hover:text-dim hover:scale-105'}`}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill={sessionRating >= num ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                    </svg>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="mb-8 flex flex-col items-center">
               {!showNotesInput ? (
                 <button 
@@ -502,7 +524,8 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
             <div className="flex flex-col gap-3">
               <button 
                 onClick={handleSaveSession}
-                className="w-full bg-accent text-bg py-4 rounded-squircle-md font-medium hover:bg-indicator transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
+                disabled={sessionRating === 0}
+                className="w-full bg-accent text-bg py-4 rounded-squircle-md font-medium hover:bg-indicator transition-all duration-300 flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save size={18} />
                 Save Journey

@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react';
+import { Trash2, Download } from 'lucide-react';
 
 function History({ history, hasMore, loadMore, onDelete }) {
   const formatDuration = (seconds) => {
@@ -31,7 +31,17 @@ function History({ history, hasMore, loadMore, onDelete }) {
 
   return (
     <div className="w-full max-w-4xl mx-auto py-8">
-      <h1 className="text-4xl font-extralight mb-12 tracking-tight">Past Journeys</h1>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-12">
+        <h1 className="text-4xl font-extralight tracking-tight">Past Journeys</h1>
+        <a 
+          href="/api/history/export" 
+          download 
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-squircle-md text-dim hover:text-white hover:bg-white/10 transition-all duration-300 font-light uppercase tracking-widest text-xs"
+        >
+          <Download size={16} />
+          <span>Export CSV</span>
+        </a>
+      </div>
       
       <div className="flex flex-col gap-6">
         {history.length === 0 && (
@@ -58,8 +68,8 @@ function History({ history, hasMore, loadMore, onDelete }) {
             </button>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex-1">
-                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 mb-4 md:mb-2">
-                  <div className="flex gap-2">
+                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 mb-4 md:mb-2 pr-12 md:pr-0">
+                  <div className="flex flex-wrap gap-2 items-center">
                     <span className="px-3 py-1 rounded-full bg-accent/20 text-accent text-[0.7rem] uppercase tracking-widest font-medium">
                       {item.pattern}
                     </span>
@@ -67,6 +77,15 @@ function History({ history, hasMore, loadMore, onDelete }) {
                       <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-dim text-[0.7rem] uppercase tracking-widest font-medium">
                         {item.phaseDuration}s Phase
                       </span>
+                    )}
+                    {item.rating && (
+                      <div className="flex gap-1 ml-2">
+                        {[1, 2, 3, 4, 5].map((num) => (
+                          <svg key={num} width="12" height="12" viewBox="0 0 24 24" fill={item.rating >= num ? "var(--color-accent)" : "none"} stroke="var(--color-accent)" strokeWidth="1.5">
+                            <circle cx="12" cy="12" r="10"></circle>
+                          </svg>
+                        ))}
+                      </div>
                     )}
                   </div>
                   <span className="text-dim text-sm font-light">
