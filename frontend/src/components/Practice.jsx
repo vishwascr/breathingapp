@@ -227,6 +227,9 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       let finalCooldownSeconds = 0;
       if (isCooldown && cooldownStartTimeRef.current) {
         finalCooldownSeconds = Number(Math.floor((Date.now() - cooldownStartTimeRef.current) / 1000));
+      } else if (!isCooldown && cooldownStartTimeRef.current) {
+        // This case handles if cooldown was active but toggled off before stopping
+        finalCooldownSeconds = Number(Math.floor((Date.now() - cooldownStartTimeRef.current) / 1000));
       }
 
       setLastSession({ 
@@ -421,7 +424,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
 
           <div 
             onClick={() => {
-              if (selectedMethod === 'resonance' && isActive && !isCooldown) {
+              if (isActive && !isCooldown) {
                 setIsCooldown(true);
                 cooldownStartTimeRef.current = Date.now();
               } else if (isCooldown) {
