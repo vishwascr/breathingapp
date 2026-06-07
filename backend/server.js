@@ -23,7 +23,9 @@ mongoose.connect(process.env.MONGODB_URI)
 const historySchema = new mongoose.Schema({
   duration: { type: Number, required: true },
   pattern: { type: String, required: true },
-  phaseDuration: { type: Number },
+  inhale: { type: Number },
+  hold: { type: Number },
+  exhale: { type: Number },
   cycles: { type: Number },
   cooldownSeconds: { type: Number, default: 0 },
   notes: { type: String, default: '' },
@@ -79,7 +81,7 @@ app.get('/api/history/export', async (req, res) => {
     const history = await History.find({ archived: { $ne: true } }).sort({ timestamp: -1 });
     
     // CSV Header
-    const headers = ['Date', 'Time', 'Method', 'Duration (s)', 'Phase Duration (s)', 'Cycles', 'Cooldown (s)', 'Rating', 'Notes', 'Closure notes'];
+    const headers = ['Date', 'Time', 'Method', 'Duration (s)', 'Inhale (s)', 'Hold (s)', 'Exhale (s)', 'Cycles', 'Cooldown (s)', 'Rating', 'Notes', 'Closure notes'];
     
     // CSV Rows
     const rows = history.map(item => {
@@ -96,7 +98,9 @@ app.get('/api/history/export', async (req, res) => {
         formattedTime,
         item.pattern,
         item.duration,
-        item.phaseDuration || '',
+        item.inhale || '',
+        item.hold || '',
+        item.exhale || '',
         item.cycles || '',
         item.cooldownSeconds || 0,
         item.rating || '',
@@ -265,7 +269,7 @@ app.post('/api/challenge/reset', async (req, res) => {
       const history = await History.find().sort({ timestamp: -1 });
       
       // CSV Header
-      const headers = ['Date', 'Time', 'Method', 'Duration (s)', 'Phase Duration (s)', 'Cycles', 'Cooldown (s)', 'Rating', 'Notes', 'Closure notes'];
+      const headers = ['Date', 'Time', 'Method', 'Duration (s)', 'Inhale (s)', 'Hold (s)', 'Exhale (s)', 'Cycles', 'Cooldown (s)', 'Rating', 'Notes', 'Closure notes'];
       
       // CSV Rows
       const rows = history.map(item => {
@@ -282,7 +286,9 @@ app.post('/api/challenge/reset', async (req, res) => {
           formattedTime,
           item.pattern,
           item.duration,
-          item.phaseDuration || '',
+          item.inhale || '',
+          item.hold || '',
+          item.exhale || '',
           item.cycles || '',
           item.cooldownSeconds || 0,
           item.rating || '',
@@ -369,7 +375,7 @@ app.post('/api/debug/complete-challenge', async (req, res) => {
 });
 
 app.post('/api/history', async (req, res) => {
-  const { duration, pattern, phaseDuration, cycles, notes, cooldownSeconds, rating } = req.body;
+  const { duration, pattern, inhale, hold, exhale, cycles, notes, cooldownSeconds, rating } = req.body;
 
   // Input Validation
   if (typeof duration !== 'number' || isNaN(duration) || duration < 0) {
@@ -385,7 +391,9 @@ app.post('/api/history', async (req, res) => {
   const historyItem = new History({
     duration,
     pattern,
-    phaseDuration,
+    inhale,
+    hold,
+    exhale,
     cycles,
     cooldownSeconds: cooldownSeconds || 0,
     notes: notes || '',

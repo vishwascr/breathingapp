@@ -205,9 +205,9 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
                       <span className="block text-[0.65rem] uppercase tracking-widest text-dim mb-1">Method</span>
                       <div className="flex items-center gap-2">
                         <span className="text-xl md:text-2xl font-light">{lastSession.pattern}</span>
-                        {lastSession.phaseDuration && (
+                        {lastSession.inhale !== undefined && (
                           <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-dim/60 uppercase tracking-tighter">
-                            {lastSession.phaseDuration}s
+                            {lastSession.inhale}-{lastSession.hold}-{lastSession.exhale}s
                           </span>
                         )}
                       </div>

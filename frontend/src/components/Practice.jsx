@@ -222,8 +222,12 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const handleStartStop = () => {
     if (isActive || countdown !== null) {
       const methodName = methods[selectedMethod].name;
-      const phaseDuration = (selectedMethod === 'box' || selectedMethod === 'aum') ? methods[selectedMethod].pattern[0] : null;
+      const pattern = methods[selectedMethod].pattern;
       
+      const inhale = pattern[0];
+      const hold = pattern[1];
+      const exhale = selectedMethod === 'aum' ? (pattern[1] + pattern[2] + pattern[3]) : pattern[2];
+
       let finalCooldownSeconds = 0;
       if (isCooldown && cooldownStartTimeRef.current) {
         finalCooldownSeconds = Number(Math.floor((Date.now() - cooldownStartTimeRef.current) / 1000));
@@ -235,9 +239,11 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       setLastSession({ 
         duration: Number(sessionTime), 
         pattern: methodName, 
-        phaseDuration, 
         cycles: Number(completedCycles),
-        cooldownSeconds: finalCooldownSeconds 
+        cooldownSeconds: finalCooldownSeconds,
+        inhale,
+        hold,
+        exhale
       });
       setIsActive(false);
       setCountdown(null);
@@ -257,7 +263,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
 
   const handleSaveSession = () => {
     if (sessionRating === 0) return;
-    saveHistory(lastSession.duration, lastSession.pattern, currentNote, lastSession.phaseDuration, lastSession.cycles, lastSession.cooldownSeconds, sessionRating);
+    saveHistory(lastSession.duration, lastSession.pattern, currentNote, lastSession.cycles, lastSession.cooldownSeconds, sessionRating, lastSession.inhale, lastSession.hold, lastSession.exhale);
     setShowSummary(false);
     if (document.fullscreenElement) {
       document.exitFullscreen();
@@ -482,6 +488,8 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
               <span>{lastSession.duration}s</span>
               <span className="opacity-20 text-[0.6rem]">•</span>
               <span>{lastSession.pattern}</span>
+              <span className="opacity-20 text-[0.6rem]">•</span>
+              <span>{lastSession.inhale}-{lastSession.hold}-{lastSession.exhale}s</span>
               <span className="opacity-20 text-[0.6rem]">•</span>
               <span>{lastSession.cycles} {selectedMethod === 'aum' ? 'Chants' : 'Cycles'}</span>
             </div>

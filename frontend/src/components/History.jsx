@@ -73,9 +73,9 @@ function History({ history, hasMore, loadMore, onDelete }) {
                     <span className="px-3 py-1 rounded-full bg-accent/20 text-accent text-[0.7rem] uppercase tracking-widest font-medium">
                       {item.pattern}
                     </span>
-                    {item.phaseDuration && (
+                    {item.inhale !== undefined && (
                       <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-dim text-[0.7rem] uppercase tracking-widest font-medium">
-                        {item.phaseDuration}s Phase
+                        {item.inhale}-{item.hold}-{item.exhale}s
                       </span>
                     )}
                     {item.rating && (
