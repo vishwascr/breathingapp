@@ -345,11 +345,17 @@ function App() {
         
         // Trigger automatic CSV download conditionally if returned from backend
         if (data.csv) {
+          const now = new Date();
+          const year = now.getFullYear().toString().slice(-2);
+          const month = (now.getMonth() + 1).toString().padStart(2, '0');
+          const day = now.getDate().toString().padStart(2, '0');
+          const filename = `breathing_history_${year}${month}${day}.csv`;
+
           const blob = new Blob([data.csv], { type: 'text/csv;charset=utf-8;' });
           const url = URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.setAttribute('href', url);
-          link.setAttribute('download', 'breathing_history.csv');
+          link.setAttribute('download', filename);
           link.style.visibility = 'hidden';
           document.body.appendChild(link);
           link.click();

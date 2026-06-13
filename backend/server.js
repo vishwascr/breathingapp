@@ -113,8 +113,14 @@ app.get('/api/history/export', async (req, res) => {
     
     const csvContent = [headers.join(','), ...rows].join('\n');
     
+    const now = new Date();
+    const year = now.getFullYear().toString().slice(-2);
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const filename = `breathing_history_${year}${month}${day}.csv`;
+    
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename="breathing_history.csv"');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.status(200).send(csvContent);
   } catch (err) {
     console.error('Error exporting history:', err);

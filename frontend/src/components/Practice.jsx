@@ -7,7 +7,7 @@ const PHASES = ['Inhale', 'Hold', 'Exhale', 'Hold'];
 const GUIDANCE = {
   'Inhale': 'Breathe in through your nose deeply.',
   'Hold': 'Maintain the breath gently.',
-  'Exhale': 'Exhale slowly through your mouth.'
+  'Exhale': 'Exhale slowly through your nose.'
 };
 
 function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) {

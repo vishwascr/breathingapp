@@ -4,10 +4,10 @@ export const INITIAL_METHODS = {
     pattern: [4, 4, 4, 4],
     description: 'A powerful stress-reliever used by Navy SEALs. It involves four equal steps of breathing, holding, and exhaling.',
     steps: [
-      'Exhale all air from your lungs through your mouth.',
+      'Exhale all air from your lungs through your nose.',
       'Inhale slowly through your nose for 4 seconds.',
       'Hold your breath for 4 seconds.',
-      'Exhale slowly through your mouth for 4 seconds.',
+      'Exhale slowly through your nose for 4 seconds.',
       'Hold your breath again for 4 seconds.'
     ]
   },
@@ -19,7 +19,7 @@ export const INITIAL_METHODS = {
       'Sit or lie down in a comfortable position.',
       'Place one hand on your chest and the other on your abdomen.',
       'Inhale through your nose, feeling your abdomen rise while your chest remains still.',
-      'Exhale through pursed lips, feeling your abdomen fall.'
+      'Exhale through your nose, feeling your abdomen fall.'
     ]
   },
   '478': { 
@@ -27,10 +27,10 @@ export const INITIAL_METHODS = {
     pattern: [4, 7, 8, 0],
     description: 'A natural tranquilizer for the nervous system. Developed by Dr. Andrew Weil, it is excellent for falling asleep.',
     steps: [
-      'Exhale completely through your mouth, making a whoosh sound.',
+      'Exhale completely through your nose.',
       'Close your mouth and inhale quietly through your nose for 4 seconds.',
       'Hold your breath for 7 seconds.',
-      'Exhale completely through your mouth for 8 seconds.'
+      'Exhale completely through your nose for 8 seconds.'
     ]
   },
   completeBreath: {
