@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Play, Clock, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 import DailyProgress from './DailyProgress';
+import ConsciousEating from './ConsciousEating';
 
-function Dashboard({ historyStats, methods, openMethodModal, challengeActive, challengeStartDate, startChallenge }) {
+function Dashboard({ historyStats, methods, openMethodModal, challengeActive, challengeStartDate, startChallenge, refreshStats }) {
   const [activeStatIndex, setActiveStatIndex] = useState(0);
 
   const lastSession = historyStats.lastSession;
@@ -27,7 +28,7 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
   // Calculate Stats using historyStats from backend
   const stats = challengeActive ? [
     {
-      label: 'Challenge Progress',
+      label: 'Total Conscious Time',
       ...formatTime(historyStats.totalSeconds),
       color: 'text-accent'
     },
@@ -50,7 +51,7 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
     }
   ] : [
     {
-      label: 'Overall Focus Time',
+      label: 'Total Conscious Time',
       ...formatTime(historyStats.overallDuration),
       color: 'text-text'
     },
@@ -70,7 +71,7 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
       ...formatTime(historyStats.methodTotals[method.name] || 0),
       color: 'text-text'
     }))
-  ].filter(stat => stat.total > 0 || stat.label === 'Overall Focus Time');
+  ].filter(stat => stat.total > 0 || stat.label === 'Total Conscious Time');
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -125,16 +126,16 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
 
         {challengeActive && (
           <>
-            <section className="relative bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-2xl transition-all duration-500 z-10">
-              <div className="relative z-10 flex flex-col h-full justify-between">
-                <div>
+            <section className="relative bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-2xl transition-all duration-500 z-10 lg:col-span-2">
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 h-full">
+                <div className="text-center md:text-left">
                   <h2 className="text-3xl md:text-4xl font-light mb-4 tracking-tight">Ready to Begin?</h2>
                   <p className="text-base md:text-lg font-light text-text/80 max-w-sm leading-relaxed">
                     Start your breathing journey with your selected method and find instant clarity.
                   </p>
                 </div>
                 
-                <div className="mt-8 flex relative">
+                <div className="flex relative">
                   <button 
                     className="btn-primary min-w-[200px] md:min-w-[240px] flex items-center justify-center gap-2"
                     onClick={handleBeginClick}
@@ -192,6 +193,8 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
                 </div>
               </div>
             </section>
+
+            <ConsciousEating refreshStats={refreshStats} />
 
             {lastSession ? (
               <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-xl flex flex-col justify-between hover:bg-white/10 transition-all duration-300">

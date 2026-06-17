@@ -452,6 +452,7 @@ function App() {
                     challengeActive={challengeActive}
                     challengeStartDate={challengeStartDate}
                     startChallenge={startChallenge}
+                    refreshStats={fetchHistoryStats}
                   />
                 } />
                 <Route 

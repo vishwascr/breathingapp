@@ -328,6 +328,56 @@ app.post('/api/challenge/reset', async (req, res) => {
   }
 });
 
+// Conscious Eating Integrated Routes
+app.get('/api/eating', async (req, res) => {
+  try {
+    const { date } = req.query; // Expecting YYYY-MM-DD
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const records = await History.find({
+      pattern: { $regex: /^Conscious Eating -/ },
+      timestamp: { $gte: startOfDay, $lte: endOfDay }
+    });
+    res.json(records);
+  } catch (err) {
+    console.error('Error fetching eating records:', err);
+    res.status(500).json({ message: 'Internal server error while fetching eating records.' });
+  }
+});
+
+app.post('/api/eating', async (req, res) => {
+  try {
+    const { meal, value, notes, timestamp } = req.body;
+    const pattern = `Conscious Eating - ${meal}`;
+    const targetDate = new Date(timestamp);
+
+    if (value) {
+      const record = await History.findOneAndUpdate(
+        { pattern, timestamp: targetDate },
+        { 
+          $set: { 
+            duration: 300, 
+            rating: 5, 
+            notes: notes || '',
+            archived: false
+          } 
+        },
+        { upsert: true, new: true }
+      );
+      res.json(record);
+    } else {
+      await History.findOneAndDelete({ pattern, timestamp: targetDate });
+      res.json({ message: 'Entry removed' });
+    }
+  } catch (err) {
+    console.error('Error updating eating record:', err);
+    res.status(500).json({ message: 'Internal server error while updating eating record.' });
+  }
+});
+
 // Debug Simulation Routes
 app.post('/api/debug/expire-challenge', async (req, res) => {
   try {
