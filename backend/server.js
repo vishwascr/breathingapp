@@ -184,9 +184,9 @@ app.get('/api/history/stats', async (req, res) => {
               }
             }
           ],
-          lastSession: [
+          lastSessions: [
             { $sort: { timestamp: -1 } },
-            { $limit: 1 }
+            { $limit: 3 }
           ],
           practicedDates: [
             {
@@ -220,7 +220,7 @@ app.get('/api/history/stats', async (req, res) => {
       overallDuration: overall.overallDuration,
       totalSessions: overall.totalSessions,
       methodTotals,
-      lastSession: stats.lastSession[0] || null,
+      lastSessions: stats.lastSessions || [],
       practicedDates
     });
   } catch (err) {
@@ -403,6 +403,7 @@ app.post('/api/debug/expire-challenge', async (req, res) => {
 
 app.post('/api/debug/complete-challenge', async (req, res) => {
   try {
+    const now = new Date();
     const thirtyOneDaysAgo = new Date();
     thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 31);
 
@@ -417,16 +418,24 @@ app.post('/api/debug/complete-challenge', async (req, res) => {
       { upsert: true }
     );
 
-    const completionSession = new History({
-      duration: 144001, // 40 hours + 1 second
-      pattern: 'Debug Completion',
-      rating: 5,
-      notes: 'Automatically generated for testing completion modal.',
-      archived: false,
-      timestamp: new Date()
-    });
-    await completionSession.save();
-    res.json({ message: 'Challenge completed (31 days passed + 40hr session added)' });
+    // Generate 31 sessions, one for each day
+    const historyEntries = [];
+    for (let i = 0; i <= 31; i++) {
+      const sessionDate = new Date(thirtyOneDaysAgo);
+      sessionDate.setDate(sessionDate.getDate() + i);
+      
+      historyEntries.push({
+        duration: 1860, // 31 minutes
+        pattern: 'Isha Meditation (Debug)',
+        rating: 5,
+        notes: `Day ${i} of Isha Challenge`,
+        archived: false,
+        timestamp: sessionDate
+      });
+    }
+    
+    await History.insertMany(historyEntries);
+    res.json({ message: 'Challenge completed (31 sessions of 31 mins added across 31 days)' });
   } catch (err) {
     console.error('Debug Complete Error:', err);
     res.status(500).json({ message: 'Debug error' });

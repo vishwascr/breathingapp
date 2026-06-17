@@ -372,7 +372,7 @@ function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes
               onClick={simulateCompletion}
               className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[0.65rem] uppercase tracking-widest text-dim hover:bg-white/10 transition-all"
             >
-              Simulate 30 Hours Reached
+              Simulate 30 minute per day goal reached
             </button>
           </div>
         </section>

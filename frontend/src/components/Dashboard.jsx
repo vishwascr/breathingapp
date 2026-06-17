@@ -6,7 +6,7 @@ import ConsciousEating from './ConsciousEating';
 function Dashboard({ historyStats, methods, openMethodModal, challengeActive, challengeStartDate, startChallenge, refreshStats }) {
   const [activeStatIndex, setActiveStatIndex] = useState(0);
 
-  const lastSession = historyStats.lastSession;
+  const lastSessions = historyStats.lastSessions || [];
 
   const formatTime = (seconds) => {
     if (seconds < 60) return { total: Math.round(seconds), unit: 'seconds' };
@@ -26,6 +26,9 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
   const challengeDays = calculateDays();
   
   // Calculate Stats using historyStats from backend
+  const challengeStats = challengeActive ? (Object.values(historyStats.practicedDates || {})
+    .filter(duration => duration >= 1800).length) : 0;
+
   const stats = challengeActive ? [
     {
       label: 'Total Conscious Time',
@@ -33,8 +36,8 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
       color: 'text-accent'
     },
     {
-      label: 'Challenge Days',
-      total: Math.min(challengeDays, 30),
+      label: 'Isha Streak',
+      total: Math.min(challengeStats, 30),
       color: 'text-text',
       unit: '/ 30 days'
     },
@@ -105,10 +108,10 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
               <div className="text-center md:text-left">
                 <div className="flex items-center gap-3 mb-4 justify-center md:justify-start">
                   <Trophy className="text-accent" size={24} />
-                  <h2 className="text-3xl md:text-4xl font-light tracking-tight">30 Day / 30 Hour Challenge</h2>
+                  <h2 className="text-3xl md:text-4xl font-light tracking-tight">The Isha Challenge</h2>
                 </div>
                 <p className="text-base md:text-lg font-light text-text/80 max-w-xl leading-relaxed">
-                  Embark on a transformative journey. 30 days of consistency, 30 hours of deep presence. 
+                  30 days of consistency, 30 minutes of deep presence. 
                   <span className="block mt-2 italic text-accent/80">"Your future self is waiting for you to click this button."</span>
                 </p>
               </div>
@@ -196,46 +199,48 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
 
             <ConsciousEating refreshStats={refreshStats} />
 
-            {lastSession ? (
-              <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-xl flex flex-col justify-between hover:bg-white/10 transition-all duration-300">
-                <div>
-                  <div className="flex items-center gap-2 mb-6">
-                    <Clock size={16} className="text-dim" />
-                    <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Last Session</h3>
-                  </div>
-                  <div className="flex flex-wrap gap-8 md:gap-12 mb-8">
-                    <div>
-                      <span className="block text-[0.65rem] uppercase tracking-widest text-dim mb-1">Method</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl md:text-2xl font-light">{lastSession.pattern}</span>
-                        {lastSession.inhale !== undefined && (
-                          <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-dim/60 uppercase tracking-tighter">
-                            {lastSession.inhale}-{lastSession.inhaleHold}-{lastSession.exhale}-{lastSession.exhaleHold}s
-                          </span>
+            {lastSessions.length > 0 ? (
+              <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-xl flex flex-col gap-8 hover:bg-white/10 transition-all duration-300">
+                <div className="flex items-center gap-2">
+                  <Clock size={16} className="text-dim" />
+                  <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Recent Sessions</h3>
+                </div>
+                
+                <div className="space-y-8">
+                  {lastSessions.map((session, idx) => (
+                    <div key={session._id} className={idx !== 0 ? "pt-8 border-t border-white/5" : ""}>
+                      <div className="flex flex-wrap gap-8 md:gap-12 mb-4">
+                        <div>
+                          <span className="block text-[0.65rem] uppercase tracking-widest text-dim mb-1">Method</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl md:text-2xl font-light">{session.pattern}</span>
+                            {session.inhale !== undefined && (
+                              <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-dim/60 uppercase tracking-tighter">
+                                {session.inhale}-{session.inhaleHold}-{session.exhale}-{session.exhaleHold}s
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="block text-[0.65rem] uppercase tracking-widest text-dim mb-1">Duration</span>
+                          <span className="text-xl md:text-2xl font-light">{session.duration}s</span>
+                        </div>
+                        {session.cooldownSeconds > 0 && (
+                          <div>
+                            <span className="block text-[0.65rem] uppercase tracking-widest text-dim mb-1">Breath-Hold</span>
+                            <span className="text-xl md:text-2xl font-light text-accent">{session.cooldownSeconds}s</span>
+                          </div>
                         )}
                       </div>
+                      {session.notes && (
+                        <div>
+                          <span className="block text-[0.65rem] uppercase tracking-widest text-dim mb-2">Note</span>
+                          <p className="text-text/80 font-light italic leading-relaxed line-clamp-3">"{session.notes}"</p>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <span className="block text-[0.65rem] uppercase tracking-widest text-dim mb-1">Duration</span>
-                      <span className="text-xl md:text-2xl font-light">{lastSession.duration}s</span>
-                    </div>
-                    {lastSession.cooldownSeconds > 0 && (
-                      <div>
-                        <span className="block text-[0.65rem] uppercase tracking-widest text-dim mb-1">Breath-Hold</span>
-                        <span className="text-xl md:text-2xl font-light text-accent">{lastSession.cooldownSeconds}s</span>
-                      </div>
-                    )}
-                  </div>
-                  {lastSession.notes && (
-                    <div className="pt-6 border-t border-white/5">
-                      <span className="block text-[0.65rem] uppercase tracking-widest text-dim mb-2">Note</span>
-                      <p className="text-text/80 font-light italic leading-relaxed line-clamp-3">"{lastSession.notes}"</p>
-                    </div>
-                  )}
+                  ))}
                 </div>
-                {!lastSession.notes && (
-                  <div className="text-dim/30 font-light italic text-sm">No notes from your last session.</div>
-                )}
               </section>
             ) : (
               <section className="bg-white/5 backdrop-blur-3xl border border-white/10 border-dashed rounded-squircle-lg p-8 md:p-10 flex flex-col items-center justify-center text-center opacity-60">

@@ -40,7 +40,7 @@ function App() {
     overallDuration: 0,
     totalSessions: 0,
     methodTotals: {},
-    lastSession: null,
+    lastSessions: [],
     practicedDates: {}
   });
   const [hasMoreHistory, setHasMoreHistory] = useState(false);
@@ -59,21 +59,26 @@ function App() {
     if (!challengeActive || !challengeStartDate) return null;
 
     const statsToUse = statsOverride || historyStats;
-    const totalHours = (statsToUse.totalSeconds / 3600).toFixed(2);
+    const totalMinutes = (statsToUse.totalSeconds / 60).toFixed(1);
 
     const start = new Date(challengeStartDate);
     const now = new Date();
     const diffTime = Math.abs(now - start);
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
+    // Calculate Qualified Days (at least 30 minutes)
+    const qualifiedDays = Object.values(statsToUse.practicedDates || {})
+      .filter(duration => duration >= 1800).length;
+
     // Calculate Most Practiced Method from stats
     const favoriteMethod = Object.entries(statsToUse.methodTotals)
       .sort((a, b) => b[1] - a[1])[0]?.[0] || 'None';
 
     return {
-      hours: totalHours,
+      minutes: totalMinutes,
       days: Math.min(diffDays, 30),
       rawDays: diffDays,
+      qualifiedDays,
       sessions: statsToUse.totalSessions,
       favoriteMethod,
       totalAums: statsToUse.totalAums
@@ -82,7 +87,8 @@ function App() {
 
   const calculateChallengeCompletion = useCallback((statsOverride = null) => {
     const stats = getChallengeStats(statsOverride);
-    if (stats && stats.rawDays > 30 && parseFloat(stats.hours) >= 30) {
+    // Complete if they have reached 30 qualified days and are past the 30-day window
+    if (stats && stats.rawDays > 30 && stats.qualifiedDays >= 30) {
       return stats;
     }
     return null;
@@ -101,7 +107,7 @@ function App() {
   const expirationStats = useMemo(() => {
     if (challengeActive && challengeStartDate && !isSessionActive && !hasDismissedExpiration) {
       const stats = getChallengeStats();
-      if (stats && stats.rawDays > 30 && parseFloat(stats.hours) < 30) {
+      if (stats && stats.rawDays > 30 && stats.qualifiedDays < 30) {
         return stats;
       }
     }
@@ -113,7 +119,7 @@ function App() {
   useEffect(() => {
     if (challengeActive && challengeStartDate && !isSessionActive && !showCompletionModal && !hasDismissedCompletion) {
       const stats = calculateChallengeCompletion();
-      if (stats && parseFloat(stats.hours) >= 30) {
+      if (stats && parseFloat(stats.minutes) >= 30) {
         setCompletionStats(stats);
         setShowCompletionModal(true);
       }
@@ -320,7 +326,7 @@ function App() {
           overallDuration: 0,
           totalSessions: 0,
           methodTotals: {},
-          lastSession: null,
+          lastSessions: [],
           practicedDates: {}
         });
         setChallengeActive(true);
@@ -370,7 +376,7 @@ function App() {
           overallDuration: 0,
           totalSessions: 0,
           methodTotals: {},
-          lastSession: null,
+          lastSessions: [],
           practicedDates: {}
         });
         setChallengeActive(false);
@@ -583,14 +589,14 @@ function App() {
 
               <h2 className="text-3xl md:text-5xl font-thin tracking-tighter mb-3 md:mb-4">Challenge Accomplished!</h2>
               <p className="text-base md:text-lg text-dim font-light mb-6 md:mb-10 max-w-md mx-auto leading-relaxed">
-                You've completed your 30-hour journey. Your dedication to mindfulness is truly inspiring.
+                You've completed your 30-minute journey. Your dedication to mindfulness is truly inspiring.
               </p>
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-8 md:mb-10">
                 <div className="bg-white/5 border border-white/10 rounded-squircle-md p-3 md:p-4 flex flex-col items-center">
                   <Clock size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
-                  <span className="text-xl md:text-2xl font-light">{completionStats.hours}</span>
-                  <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Total Hours</span>
+                  <span className="text-xl md:text-2xl font-light">{completionStats.minutes}</span>
+                  <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Total Minutes</span>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-squircle-md p-3 md:p-4 flex flex-col items-center">
                   <Calendar size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
@@ -677,8 +683,8 @@ function App() {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-8 md:mb-10">
                 <div className="bg-white/5 border border-white/10 rounded-squircle-md p-3 md:p-4 flex flex-col items-center">
                   <Clock size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
-                  <span className="text-xl md:text-2xl font-light">{expirationStats.hours}</span>
-                  <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Hours Practiced</span>
+                  <span className="text-xl md:text-2xl font-light">{expirationStats.minutes}</span>
+                  <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Minutes Practiced</span>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-squircle-md p-3 md:p-4 flex flex-col items-center">
                   <Calendar size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
