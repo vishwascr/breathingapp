@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Play, Clock, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 import DailyProgress from './DailyProgress';
 import ConsciousEating from './ConsciousEating';
+import WeeklyGraph from './WeeklyGraph';
 
 function Dashboard({ historyStats, methods, openMethodModal, challengeActive, challengeStartDate, startChallenge, refreshStats }) {
   const [activeStatIndex, setActiveStatIndex] = useState(0);
@@ -14,17 +15,6 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
     return { total: (seconds / 3600).toFixed(2), unit: 'hours' };
   };
 
-  const calculateDays = () => {
-    if (!challengeActive || !challengeStartDate) return 0;
-    
-    const start = new Date(challengeStartDate);
-    const now = new Date();
-    const diffTime = Math.abs(now - start);
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-  };
-
-  const challengeDays = calculateDays();
-  
   // Calculate Stats using historyStats from backend
   const challengeStats = challengeActive ? (Object.values(historyStats.practicedDates || {})
     .filter(duration => duration >= 1800).length) : 0;
@@ -69,7 +59,7 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
       ...formatTime(historyStats.totalCooldownSeconds || 0),
       color: 'text-accent'
     },
-    ...Object.entries(methods).map(([key, method]) => ({
+    ...Object.entries(methods).map(([, method]) => ({
       label: `${method.name} Total`,
       ...formatTime(historyStats.methodTotals[method.name] || 0),
       color: 'text-text'
@@ -102,6 +92,12 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
+        {(lastSessions.length > 0 || Object.keys(historyStats.practicedDates || {}).length > 0) && (
+          <div className="lg:col-span-2">
+            <WeeklyGraph practicedDates={historyStats.practicedDates || {}} />
+          </div>
+        )}
+
         {!challengeActive && (
           <section className="relative bg-accent/5 backdrop-blur-3xl border border-accent/20 rounded-squircle-lg p-8 md:p-10 shadow-2xl transition-all duration-500 z-10 lg:col-span-2 overflow-hidden group">
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
