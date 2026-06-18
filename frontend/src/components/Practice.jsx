@@ -209,7 +209,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       clearTimeout(phaseTimeout);
       clearTimeout(transitionTimeoutId);
     };
-  }, [isActive, phaseState.index, selectedMethod, methods]);
+  }, [isActive, isCooldown, phaseState.index, selectedMethod, methods]);
 
   if (!selectedMethod || !methods[selectedMethod]) {
     return (

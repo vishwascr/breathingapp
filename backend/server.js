@@ -353,23 +353,36 @@ app.post('/api/eating', async (req, res) => {
     const { meal, value, notes, timestamp } = req.body;
     const pattern = `Conscious Eating - ${meal}`;
     const targetDate = new Date(timestamp);
+    
+    // Day bounds for the target date
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
 
     if (value) {
       const record = await History.findOneAndUpdate(
-        { pattern, timestamp: targetDate },
+        { 
+          pattern, 
+          timestamp: { $gte: startOfDay, $lte: endOfDay } 
+        },
         { 
           $set: { 
             duration: 300, 
             rating: 5, 
             notes: notes || '',
-            archived: false
+            archived: false,
+            timestamp: targetDate // Maintain the latest sent timestamp
           } 
         },
         { upsert: true, new: true }
       );
       res.json(record);
     } else {
-      await History.findOneAndDelete({ pattern, timestamp: targetDate });
+      await History.findOneAndDelete({ 
+        pattern, 
+        timestamp: { $gte: startOfDay, $lte: endOfDay } 
+      });
       res.json({ message: 'Entry removed' });
     }
   } catch (err) {
