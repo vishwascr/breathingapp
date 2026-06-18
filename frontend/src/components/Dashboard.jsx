@@ -26,7 +26,7 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
       color: 'text-accent'
     },
     {
-      label: 'Isha Streak',
+      label: 'Unlearning Streak',
       total: Math.min(challengeStats, 30),
       color: 'text-text',
       unit: '/ 30 days'
@@ -104,7 +104,7 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
               <div className="text-center md:text-left">
                 <div className="flex items-center gap-3 mb-4 justify-center md:justify-start">
                   <Trophy className="text-accent" size={24} />
-                  <h2 className="text-3xl md:text-4xl font-light tracking-tight">The Isha Challenge</h2>
+                  <h2 className="text-3xl md:text-4xl font-light tracking-tight">The Unlearn Yourself Challenge</h2>
                 </div>
                 <p className="text-base md:text-lg font-light text-text/80 max-w-xl leading-relaxed">
                   30 days of consistency, 30 minutes of deep presence. 

@@ -439,9 +439,9 @@ app.post('/api/debug/complete-challenge', async (req, res) => {
       
       historyEntries.push({
         duration: 1860, // 31 minutes
-        pattern: 'Isha Meditation (Debug)',
+        pattern: 'Unlearn Meditation (Debug)',
         rating: 5,
-        notes: `Day ${i} of Isha Challenge`,
+        notes: `Day ${i} of Unlearn Challenge`,
         archived: false,
         timestamp: sessionDate
       });
