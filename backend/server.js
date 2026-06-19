@@ -36,6 +36,9 @@ const historySchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now }
 });
 
+historySchema.index({ archived: 1, timestamp: -1 });
+historySchema.index({ timestamp: -1 });
+
 const History = mongoose.model('History', historySchema);
 
 // Settings Schema

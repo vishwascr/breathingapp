@@ -20,7 +20,6 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const [phaseState, setPhaseState] = useState({ index: 0, cumulativeIndex: 0 });
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [sessionTime, setSessionTime] = useState(0);
-  const [headPosition, setHeadPosition] = useState({ x: 225, y: 2 });
   const [showSummary, setShowSummary] = useState(false);
   const [showNotesInput, setShowNotesInput] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
@@ -40,6 +39,7 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   const cooldownStartTimeRef = useRef(null);
   const containerRef = useRef(null);
   const timeDisplayRef = useRef(null);
+  const headRef = useRef(null);
 
   // Countdown timer logic
   useEffect(() => {
@@ -145,7 +145,10 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
       const totalPixelLength = pathRef.current.getTotalLength();
       const pixelPoint = pathRef.current.getPointAtLength((currentLen / 100) * totalPixelLength);
       
-      setHeadPosition({ x: pixelPoint.x, y: pixelPoint.y });
+      if (headRef.current) {
+        headRef.current.setAttribute('cx', pixelPoint.x);
+        headRef.current.setAttribute('cy', pixelPoint.y);
+      }
 
       if (progress < 1) {
         animationRef.current = requestAnimationFrame(step);
@@ -418,8 +421,9 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
                   })}
 
                   <circle 
-                    cx={headPosition.x} 
-                    cy={headPosition.y} 
+                    ref={headRef}
+                    cx="225" 
+                    cy="2" 
                     r="4" 
                     className="fill-accent"
                     filter="url(#head-glow-filter)"
