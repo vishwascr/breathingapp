@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from './common';
 
 function DailyProgress({ practicedDates, challengeStartDate }) {
   const [viewDate, setViewDate] = useState(new Date());
@@ -69,15 +70,16 @@ function DailyProgress({ practicedDates, challengeStartDate }) {
       </div>
 
       <div className="flex-1 flex items-center justify-between gap-4">
-        <button 
+        <Button 
           onClick={handlePrev}
           disabled={!canGoPrev}
-          className={`p-3 rounded-full transition-all ${
-            canGoPrev ? 'bg-white/5 hover:bg-white/10 text-text' : 'opacity-10 text-dim cursor-not-allowed'
-          }`}
+          variant="ghost"
+          size="none"
+          rounded="full"
+          className="p-3 text-text disabled:text-dim"
         >
           <ChevronLeft size={24} />
-        </button>
+        </Button>
 
         <div className="flex flex-col items-center text-center animate-fadeIn">
           <span className="text-xs uppercase tracking-[0.3rem] text-dim mb-2">
@@ -104,15 +106,16 @@ function DailyProgress({ practicedDates, challengeStartDate }) {
           </div>
         </div>
 
-        <button 
+        <Button 
           onClick={handleNext}
           disabled={!canGoNext}
-          className={`p-3 rounded-full transition-all ${
-            canGoNext ? 'bg-white/5 hover:bg-white/10 text-text' : 'opacity-10 text-dim cursor-not-allowed'
-          }`}
+          variant="ghost"
+          size="none"
+          rounded="full"
+          className="p-3 text-text disabled:text-dim"
         >
           <ChevronRight size={24} />
-        </button>
+        </Button>
       </div>
 
       <div className="mt-8 pt-4 border-t border-white/5 flex justify-center gap-1.5 shrink-0">

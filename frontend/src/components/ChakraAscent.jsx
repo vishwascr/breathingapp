@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Play, ArrowRight, CheckCircle2, RotateCcw, 
   Volume2, VolumeX, Sparkles, AlertCircle, 
-  HelpCircle, Compass, ChevronRight, PenTool, 
+  HelpCircle, ChevronRight, PenTool, 
   BookOpen, Droplet, Music, Footprints, Clock
 } from 'lucide-react';
+import { Card, Button, Textarea } from './common';
 
 const CHAKRAS = [
   {
@@ -444,13 +445,15 @@ function ChakraAscent() {
               />
             </div>
 
-            <button 
+            <Button 
               onClick={handleStartAscent}
-              className="btn-primary w-full py-5 text-base uppercase tracking-widest flex items-center justify-center gap-3"
+              variant="primary"
+              size="none"
+              className="w-full py-5 text-base tracking-widest"
             >
               <span>Begin the Ascent</span>
               <ArrowRight size={18} />
-            </button>
+            </Button>
           </div>
         )}
 
@@ -460,32 +463,16 @@ function ChakraAscent() {
             
             {/* Pulsing Breathing Ring matching size/layout in Practice.jsx */}
             <div className="relative w-[250px] h-[250px] md:w-[450px] md:h-[450px] flex justify-center items-center shrink-0">
-              {/* Outer pulsing energy field */}
+              {/* Core scale circle mirroring Practice.jsx exactly */}
               <div 
-                className={`absolute inset-0 rounded-full transition-transform ease-linear border border-white/5 backdrop-blur-[2px] ${
-                  isInhaling ? 'scale-[1.8] duration-[5000ms]' : 'scale-100 duration-[5000ms]'
-                }`}
+                className="absolute w-20 h-20 md:w-40 md:h-40 rounded-full flex flex-col justify-center items-center text-center font-extralight border border-white/10 z-10 transition-transform duration-[5000ms] ease-linear bg-black/50 text-white"
                 style={{
-                  boxShadow: `0 0 50px 10px ${activeChakra.colorClasses.glowColor}`,
-                  backgroundColor: `${activeChakra.colorClasses.glowColor.replace('0.2', '0.05')}`
-                }}
-              ></div>
-              
-              {/* Center solid core ring */}
-              <div 
-                className={`absolute w-28 h-28 md:w-44 md:h-44 rounded-full flex flex-col justify-center items-center text-center font-extralight border border-white/10 z-10 transition-all duration-[5000ms] ease-linear bg-black/50 ${
-                  isInhaling ? 'scale-110' : 'scale-90'
-                }`}
-                style={{
-                  boxShadow: `inset 0 0 30px ${activeChakra.colorClasses.glowColor}`
+                  transform: `scale(${isInhaling ? 2.5 : 1})`,
+                  boxShadow: `0 0 15px 2px ${activeChakra.colorClasses.glowColor}, 0 0 50px 8px ${activeChakra.colorClasses.glowColor}, inset 0 0 10px rgba(255, 255, 255, 0.1)`
                 }}
               >
-                <span className={`text-[0.65rem] uppercase tracking-widest font-bold opacity-65 ${activeChakra.colorClasses.accent}`}>
-                  {activeChakra.mantra}
-                </span>
-                <span className="text-3xl md:text-5xl font-light mt-1">{secondsLeft}</span>
-                <span className="text-[0.55rem] uppercase tracking-widest opacity-40 mt-1">
-                  {isInhaling ? 'Inhale' : 'Exhale'}
+                <span className="text-[2rem] md:text-[3.5rem] font-light leading-none">
+                  {secondsLeft}
                 </span>
               </div>
             </div>
@@ -495,6 +482,11 @@ function ChakraAscent() {
               
               {/* Unified Vertical Stack - Space Reserved */}
               <div className="flex flex-col items-center text-center gap-2 min-h-[140px] md:min-h-[180px] justify-center">
+                {/* Dynamic Breath Phase & Mantra */}
+                <div className="text-[1.2rem] md:text-[1.8rem] font-thin text-text uppercase tracking-[0.6rem] md:tracking-[1rem] whitespace-nowrap mb-1">
+                  {isInhaling ? 'Inhale' : 'Exhale'} — {activeChakra.mantra}
+                </div>
+
                 {/* Chakra info */}
                 <div className="text-[0.65rem] md:text-[0.75rem] font-medium tracking-[0.2rem] text-dim uppercase">
                   {activeChakra.location} • {activeChakra.meaning}
@@ -513,23 +505,25 @@ function ChakraAscent() {
 
               {/* Text reflection input */}
               <div className="w-full max-w-md px-4">
-                <textarea
+                <Textarea
                   value={responseText}
                   onChange={(e) => setResponseText(e.target.value)}
                   placeholder="Type your reflection... (or leave blank to reflect in silence)"
-                  className="w-full bg-white/5 backdrop-blur-sm border border-white/10 focus:border-accent text-text p-4 rounded-squircle-md text-center text-sm md:text-base focus:outline-none resize-none transition-all placeholder:text-dim/20"
+                  className="text-center placeholder:text-dim/20"
                   rows={2}
                 />
               </div>
 
               {/* Action Button */}
-              <button 
+              <Button 
                 onClick={handleNextStep} 
-                className="btn-primary text-base md:text-lg font-light tracking-widest flex items-center gap-3 shrink-0"
+                variant="primary"
+                size="none"
+                className="text-base md:text-lg tracking-widest shrink-0"
               >
                 <span>{responseText.trim() === '' ? 'Reflect in Silence' : 'Save & Continue'}</span>
                 <ChevronRight size={18} />
-              </button>
+              </Button>
               
             </div>
           </div>
@@ -538,12 +532,25 @@ function ChakraAscent() {
         {/* STAGE 3: TRANSITION */}
         {stage === 'transition' && (
           <div className="flex flex-col items-center justify-center text-center animate-fadeIn py-16 gap-6">
-            <div className="relative">
-              <div className="w-24 h-24 rounded-full border border-white/15 animate-ping opacity-25"></div>
-              <Compass className="w-16 h-16 text-accent/60 absolute inset-0 m-auto animate-spin-slow" />
+            <div className="relative w-24 h-24 flex items-center justify-center">
+              {/* Outer pulsing color ring */}
+              <div 
+                className="absolute inset-0 rounded-full animate-pulse border border-white/10"
+                style={{
+                  boxShadow: `0 0 40px 10px ${CHAKRAS[chakraIndex + 1]?.colorClasses.glowColor || 'var(--color-accent)'}`,
+                  backgroundColor: `${(CHAKRAS[chakraIndex + 1]?.colorClasses.glowColor || 'var(--color-accent)').replace('0.2', '0.05')}`
+                }}
+              ></div>
+              {/* Core tiny center color light */}
+              <div 
+                className="w-4 h-4 rounded-full"
+                style={{
+                  backgroundColor: CHAKRAS[chakraIndex + 1]?.colorClasses.glowColor.replace('0.2', '1') || 'var(--color-accent)'
+                }}
+              ></div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 mt-4">
               <span className="text-[0.65rem] uppercase tracking-widest text-dim/40 font-medium">Ascending to next energy center</span>
               <h2 className="text-2xl md:text-4xl font-extralight tracking-widest text-text">
                 {CHAKRAS[chakraIndex + 1]?.name}
@@ -569,7 +576,7 @@ function ChakraAscent() {
             </div>
 
             {/* Current Self vs Superior Self Card */}
-            <div className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-8 shadow-xl flex flex-col gap-6">
+            <Card variant="default" padding="md" className="flex flex-col gap-6">
               <div className="border-b border-white/5 pb-3 flex justify-between items-center">
                 <h3 className="text-lg font-light tracking-tight text-text">Current Self vs Superior Self</h3>
                 <span className="text-[0.6rem] uppercase tracking-widest bg-accent/15 text-accent border border-accent/20 px-2 py-0.5 rounded-full font-bold">Dual Aspect reflection</span>
@@ -619,10 +626,10 @@ function ChakraAscent() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Card>
 
             {/* ACTION CENTER */}
-            <div className="bg-white/5 border border-white/10 rounded-squircle-lg p-6 md:p-8 shadow-xl flex flex-col gap-4">
+            <Card variant="flat" padding="md" className="flex flex-col gap-4">
               <div className="flex flex-col gap-0.5">
                 <span className="text-[0.65rem] uppercase tracking-widest text-accent font-bold">Action Center</span>
                 <h3 className="text-lg font-light tracking-tight text-text">Choose your next conscious action</h3>
@@ -763,16 +770,19 @@ function ChakraAscent() {
                   
                 </div>
               )}
-            </div>
+            </Card>
 
             {/* Return to Dashboard */}
             <div className="flex justify-center mt-2">
-              <button
+              <Button
                 onClick={() => navigate('/')}
-                className="px-8 py-3 bg-white/5 border border-white/10 text-dim uppercase tracking-widest text-[0.65rem] hover:text-white hover:bg-white/10 rounded-full transition-all cursor-pointer"
+                variant="secondary"
+                size="none"
+                rounded="full"
+                className="px-8 py-3 text-[0.65rem] tracking-widest font-light"
               >
                 Return to Dashboard
-              </button>
+              </Button>
             </div>
             
           </div>

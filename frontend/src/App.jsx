@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { Trophy, Clock, Calendar, Activity, CheckCircle2, Star, Target, Zap, RefreshCcw, Wind } from 'lucide-react'
 import './App.css'
+import { Modal, Card, Button, Textarea, Checkbox } from './components/common'
 
 import Sidebar from './components/Sidebar'
 const Dashboard = lazy(() => import('./components/Dashboard'));
@@ -506,247 +507,271 @@ function App() {
       </div>
 
       {/* Global Confirmation Modal */}
-      {pendingNav && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-6">
-          <div className="w-full max-w-sm bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 shadow-2xl animate-fadeIn text-center">
-            <h3 className="text-2xl font-light mb-4">End Session?</h3>
-            <p className="text-dim font-light mb-8 leading-relaxed">
-              You have a session in progress. Navigating away will end your current journey.
-            </p>
-            <div className="flex gap-4">
-              <button 
-                onClick={() => setPendingNav(null)} 
-                className="flex-1 border border-white/10 py-3 rounded-squircle-md font-light hover:bg-white/5 transition-all duration-300"
-              >
-                Stay
-              </button>
-              <button 
-                onClick={confirmEndSession}
-                className="flex-1 bg-accent text-bg py-3 rounded-squircle-md font-medium hover:bg-indicator transition-all duration-300"
-              >
-                End Session
-              </button>
-            </div>
-          </div>
+      <Modal
+        isOpen={!!pendingNav}
+        onClose={() => setPendingNav(null)}
+        maxWidth="sm"
+        zIndex="z-[100]"
+        className="text-center"
+      >
+        <h3 className="text-2xl font-light mb-4">End Session?</h3>
+        <p className="text-dim font-light mb-8 leading-relaxed">
+          You have a session in progress. Navigating away will end your current journey.
+        </p>
+        <div className="flex gap-4">
+          <Button 
+            onClick={() => setPendingNav(null)} 
+            variant="secondary"
+            size="none"
+            className="flex-1 py-3 font-light"
+          >
+            Stay
+          </Button>
+          <Button 
+            onClick={confirmEndSession}
+            variant="primary"
+            size="none"
+            className="flex-1 py-3 font-medium"
+          >
+            End Session
+          </Button>
         </div>
-      )}
+      </Modal>
 
       {/* Global Method Selection Modal */}
-      {isMethodModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 md:p-6">
-          <div className="w-full max-w-sm bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-8 shadow-2xl animate-fadeIn text-center flex flex-col max-h-[90dvh] min-w-0">
-            <div className="shrink-0 min-w-0">
-              <h3 className="text-xl md:text-2xl font-light mb-2 truncate">Select Technique</h3>
-              <p className="text-dim font-light mb-6 leading-relaxed text-sm md:text-base">
-                Choose a breathing method to begin your session.
-              </p>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-3 custom-scrollbar min-w-0">
-              {Object.entries(methods).map(([key, method]) => (
-                <button
-                  key={key}
-                  className="w-full border border-white/10 py-3 md:py-4 px-4 rounded-squircle-md font-light hover:bg-white/5 transition-all duration-300 flex items-center justify-between gap-3 min-w-0"
-                  onClick={() => {
-                    handleMethodChange(key);
-                    setIsMethodModalOpen(false);
-                  }}
-                >
-                  <span className="truncate text-left flex-1 min-w-0 pr-2">{method.name}</span>
-                  {method.isNew && (
-                    <span className="shrink-0 text-[0.6rem] bg-accent text-bg px-2 py-0.5 rounded-full font-bold tracking-widest leading-none">NEW</span>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            <div className="shrink-0 mt-4">
-              <button 
-                onClick={() => setIsMethodModalOpen(false)} 
-                className="w-full bg-white/5 py-3 rounded-squircle-md font-light hover:bg-white/10 transition-all duration-300 text-dim"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
+      <Modal
+        isOpen={isMethodModalOpen}
+        onClose={() => setIsMethodModalOpen(false)}
+        maxWidth="sm"
+        zIndex="z-[100]"
+        className="text-center flex flex-col max-h-[90dvh] min-w-0"
+      >
+        <div className="shrink-0 min-w-0">
+          <h3 className="text-xl md:text-2xl font-light mb-2 truncate">Select Technique</h3>
+          <p className="text-dim font-light mb-6 leading-relaxed text-sm md:text-base">
+            Choose a breathing method to begin your session.
+          </p>
         </div>
-      )}
+        
+        <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-3 custom-scrollbar min-w-0">
+          {Object.entries(methods).map(([key, method]) => (
+            <Button
+              key={key}
+              variant="secondary"
+              size="none"
+              className="w-full py-3 md:py-4 px-4 flex items-center justify-between gap-3 min-w-0"
+              onClick={() => {
+                handleMethodChange(key);
+                setIsMethodModalOpen(false);
+              }}
+            >
+              <span className="truncate text-left flex-1 min-w-0 pr-2">{method.name}</span>
+              {method.isNew && (
+                <span className="shrink-0 text-[0.6rem] bg-accent text-bg px-2 py-0.5 rounded-full font-bold tracking-widest leading-none">NEW</span>
+              )}
+            </Button>
+          ))}
+        </div>
+
+        <div className="shrink-0 mt-4">
+          <Button 
+            onClick={() => setIsMethodModalOpen(false)} 
+            variant="secondary"
+            size="none"
+            className="w-full py-3 text-dim"
+          >
+            Cancel
+          </Button>
+        </div>
+      </Modal>
 
       {/* Challenge Completion Modal */}
-      {showCompletionModal && completionStats && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4 md:p-6">
-          <div className="w-full max-w-xl bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-12 shadow-2xl animate-fadeIn text-center relative max-h-[90dvh] md:max-h-none overflow-y-auto overflow-x-hidden md:overflow-hidden custom-scrollbar">
-            {/* Background Decorative Icons */}
-            <div className="absolute -top-10 -left-10 opacity-10 rotate-12">
-              <Star className="w-20 h-20 md:w-[120px] md:h-[120px] text-accent" />
-            </div>
-            <div className="absolute -bottom-10 -right-10 opacity-10 -rotate-12">
-              <Trophy className="w-24 h-24 md:w-[150px] md:h-[150px] text-accent" />
-            </div>
+      <Modal
+        isOpen={showCompletionModal && !!completionStats}
+        onClose={() => {
+          setHasDismissedCompletion(true);
+          setShowCompletionModal(false);
+        }}
+        maxWidth="xl"
+        zIndex="z-[110]"
+        backdropBlur="xl"
+        backdropOpacity="bg-black/80"
+        className="text-center relative md:max-h-none overflow-x-hidden md:overflow-hidden"
+      >
+        {/* Background Decorative Icons */}
+        <div className="absolute -top-10 -left-10 opacity-10 rotate-12 pointer-events-none">
+          <Star className="w-20 h-20 md:w-[120px] md:h-[120px] text-accent" />
+        </div>
+        <div className="absolute -bottom-10 -right-10 opacity-10 -rotate-12 pointer-events-none">
+          <Trophy className="w-24 h-24 md:w-[150px] md:h-[150px] text-accent" />
+        </div>
 
-            <div className="relative z-10">
-              <div className="flex justify-center mb-4 md:mb-6">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-accent/20 blur-2xl rounded-full"></div>
-                  <Trophy size={64} className="md:size-[80px] text-accent relative animate-trophy-glow" />
-                </div>
-              </div>
-
-              <h2 className="text-3xl md:text-5xl font-thin tracking-tighter mb-3 md:mb-4">Challenge Accomplished!</h2>
-              <p className="text-base md:text-lg text-dim font-light mb-6 md:mb-10 max-w-md mx-auto leading-relaxed">
-                You've completed your 30-minute journey. Your dedication to mindfulness is truly inspiring.
-              </p>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-8 md:mb-10">
-                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-3 md:p-4 flex flex-col items-center">
-                  <Clock size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
-                  <span className="text-xl md:text-2xl font-light">{completionStats.minutes}</span>
-                  <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Total Minutes</span>
-                </div>
-                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-3 md:p-4 flex flex-col items-center">
-                  <Calendar size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
-                  <span className="text-xl md:text-2xl font-light">{completionStats.days}</span>
-                  <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Days Taken</span>
-                </div>
-                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-3 md:p-4 flex flex-col items-center">
-                  <Activity size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
-                  <span className="text-xl md:text-2xl font-light">{completionStats.sessions}</span>
-                  <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Sessions</span>
-                </div>
-                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-3 md:p-4 flex flex-col items-center">
-                  <Target size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
-                  <span className="text-base md:text-lg font-light line-clamp-1">{completionStats.favoriteMethod}</span>
-                  <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Favorite</span>
-                </div>
-                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-3 md:p-4 flex flex-col items-center col-span-2 md:col-span-2">
-                  <Zap size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
-                  <span className="text-xl md:text-2xl font-light">{completionStats.totalAums}</span>
-                  <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim text-center">Total AUM Vibrations</span>
-                </div>
-              </div>
-
-              <div className="mb-8">
-                <textarea 
-                  value={completionNotes}
-                  onChange={(e) => setCompletionNotes(e.target.value)}
-                  placeholder="Reflect on your journey... (Closure notes for CSV)"
-                  className="w-full bg-white/5 border border-white/10 rounded-squircle-md p-4 text-text focus:outline-none focus:border-accent min-h-[60px] resize-none transition-all placeholder:text-dim/30 text-sm md:text-base mb-4"
-                />
-                <label className="flex items-center gap-2 text-dim text-sm cursor-pointer justify-center md:justify-start">
-                  <input 
-                    type="checkbox" 
-                    checked={generateCsv}
-                    onChange={(e) => setGenerateCsv(e.target.checked)}
-                    className="w-4 h-4 rounded bg-white/5 border-white/10 text-accent focus:ring-accent focus:ring-offset-0"
-                  />
-                  <span>Generate and download CSV report</span>
-                </label>
-              </div>
-
-              <button 
-                onClick={() => {
-                  setHasDismissedCompletion(true);
-                  setShowCompletionModal(false);
-                  resetChallenge(completionNotes, generateCsv);
-                  setCompletionNotes('');
-                  navigate('/');
-                }}
-                className="btn-primary w-full py-4 md:py-5 text-base md:text-lg flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(var(--color-accent-rgb),0.2)]"
-              >
-                <CheckCircle2 size={24} />
-                Finish Journey
-              </button>
+        <div className="relative z-10">
+          <div className="flex justify-center mb-4 md:mb-6">
+            <div className="relative">
+              <div className="absolute inset-0 bg-accent/20 blur-2xl rounded-full"></div>
+              <Trophy size={64} className="md:size-[80px] text-accent relative animate-trophy-glow" />
             </div>
           </div>
+
+          <h2 className="text-3xl md:text-5xl font-thin tracking-tighter mb-3 md:mb-4">Challenge Accomplished!</h2>
+          <p className="text-base md:text-lg text-dim font-light mb-6 md:mb-10 max-w-md mx-auto leading-relaxed">
+            You've completed your 30-minute journey. Your dedication to mindfulness is truly inspiring.
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-8 md:mb-10">
+            <Card variant="flat" padding="sm" className="flex flex-col items-center">
+              <Clock size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
+              <span className="text-xl md:text-2xl font-light">{completionStats?.minutes}</span>
+              <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Total Minutes</span>
+            </Card>
+            <Card variant="flat" padding="sm" className="flex flex-col items-center">
+              <Calendar size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
+              <span className="text-xl md:text-2xl font-light">{completionStats?.days}</span>
+              <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Days Taken</span>
+            </Card>
+            <Card variant="flat" padding="sm" className="flex flex-col items-center">
+              <Activity size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
+              <span className="text-xl md:text-2xl font-light">{completionStats?.sessions}</span>
+              <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Sessions</span>
+            </Card>
+            <Card variant="flat" padding="sm" className="flex flex-col items-center">
+              <Target size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
+              <span className="text-base md:text-lg font-light line-clamp-1">{completionStats?.favoriteMethod}</span>
+              <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Favorite</span>
+            </Card>
+            <Card variant="flat" padding="sm" className="flex flex-col items-center col-span-2 md:col-span-2">
+              <Zap size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
+              <span className="text-xl md:text-2xl font-light">{completionStats?.totalAums}</span>
+              <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim text-center">Total AUM Vibrations</span>
+            </Card>
+          </div>
+
+          <div className="mb-8">
+            <Textarea 
+              value={completionNotes}
+              onChange={(e) => setCompletionNotes(e.target.value)}
+              placeholder="Reflect on your journey... (Closure notes for CSV)"
+              className="min-h-[60px] mb-4 text-center"
+            />
+            <Checkbox 
+              checked={generateCsv}
+              onChange={(e) => setGenerateCsv(e.target.checked)}
+              label="Generate and download CSV report"
+              className="justify-center"
+            />
+          </div>
+
+          <Button 
+            onClick={() => {
+              setHasDismissedCompletion(true);
+              setShowCompletionModal(false);
+              resetChallenge(completionNotes, generateCsv);
+              setCompletionNotes('');
+              navigate('/');
+            }}
+            variant="primary"
+            size="none"
+            className="w-full py-4 md:py-5 text-base md:text-lg shadow-[0_0_40px_rgba(var(--color-accent-rgb),0.2)]"
+          >
+            <CheckCircle2 size={24} />
+            Finish Journey
+          </Button>
         </div>
-      )}
+      </Modal>
+
       {/* Challenge Expiration Modal */}
-      {showExpirationModal && expirationStats && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4 md:p-6">
-          <div className="w-full max-w-xl bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-12 shadow-2xl animate-fadeIn text-center relative max-h-[90dvh] md:max-h-none overflow-y-auto overflow-x-hidden md:overflow-hidden custom-scrollbar">
-            {/* Background Decorative Icons */}
-            <div className="absolute -top-10 -left-10 opacity-10 rotate-12">
-              <RefreshCcw className="w-20 h-20 md:w-[120px] md:h-[120px] text-accent" />
-            </div>
-            <div className="absolute -bottom-10 -right-10 opacity-10 -rotate-12">
-              <Clock className="w-24 h-24 md:w-[150px] md:h-[150px] text-accent" />
-            </div>
+      <Modal
+        isOpen={showExpirationModal && !!expirationStats}
+        onClose={() => {
+          setHasDismissedExpiration(true);
+        }}
+        maxWidth="xl"
+        zIndex="z-[110]"
+        backdropBlur="xl"
+        backdropOpacity="bg-black/80"
+        className="text-center relative md:max-h-none overflow-x-hidden md:overflow-hidden"
+      >
+        {/* Background Decorative Icons */}
+        <div className="absolute -top-10 -left-10 opacity-10 rotate-12 pointer-events-none">
+          <RefreshCcw className="w-20 h-20 md:w-[120px] md:h-[120px] text-accent" />
+        </div>
+        <div className="absolute -bottom-10 -right-10 opacity-10 -rotate-12 pointer-events-none">
+          <Clock className="w-24 h-24 md:w-[150px] md:h-[150px] text-accent" />
+        </div>
 
-            <div className="relative z-10">
-              <div className="flex justify-center mb-4 md:mb-6">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-accent/20 blur-2xl rounded-full"></div>
-                  <RefreshCcw size={64} className="md:size-[80px] text-accent relative animate-pulse" />
-                </div>
-              </div>
-
-              <h2 className="text-3xl md:text-5xl font-thin tracking-tighter mb-3 md:mb-4">Your 30 Days Have Ended</h2>
-              <p className="text-base md:text-lg text-dim font-light mb-6 md:mb-10 max-w-md mx-auto leading-relaxed">
-                The 30-day window for your challenge has closed. Every breath you took was progress—take what you've learned and start a fresh journey.
-              </p>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-8 md:mb-10">
-                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-3 md:p-4 flex flex-col items-center">
-                  <Clock size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
-                  <span className="text-xl md:text-2xl font-light">{expirationStats.minutes}</span>
-                  <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Minutes Practiced</span>
-                </div>
-                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-3 md:p-4 flex flex-col items-center">
-                  <Calendar size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
-                  <span className="text-xl md:text-2xl font-light">{expirationStats.days}</span>
-                  <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Days Completed</span>
-                </div>
-                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-3 md:p-4 flex flex-col items-center">
-                  <Activity size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
-                  <span className="text-xl md:text-2xl font-light">{expirationStats.sessions}</span>
-                  <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Sessions</span>
-                </div>
-                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-3 md:p-4 flex flex-col items-center">
-                  <Target size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
-                  <span className="text-base md:text-lg font-light line-clamp-1">{expirationStats.favoriteMethod}</span>
-                  <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Favorite</span>
-                </div>
-                <div className="bg-white/5 border border-white/10 rounded-squircle-md p-3 md:p-4 flex flex-col items-center col-span-2 md:col-span-2">
-                  <Zap size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
-                  <span className="text-xl md:text-2xl font-light">{expirationStats.totalAums}</span>
-                  <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim text-center">Total AUM Vibrations</span>
-                </div>
-              </div>
-
-              <div className="mb-8">
-                <textarea 
-                  value={expirationNotes}
-                  onChange={(e) => setExpirationNotes(e.target.value)}
-                  placeholder="What happened? (Closure notes for CSV)"
-                  className="w-full bg-white/5 border border-white/10 rounded-squircle-md p-4 text-text focus:outline-none focus:border-accent min-h-[60px] resize-none transition-all placeholder:text-dim/30 text-sm md:text-base mb-4"
-                />
-                <label className="flex items-center gap-2 text-dim text-sm cursor-pointer justify-center md:justify-start">
-                  <input 
-                    type="checkbox" 
-                    checked={generateCsv}
-                    onChange={(e) => setGenerateCsv(e.target.checked)}
-                    className="w-4 h-4 rounded bg-white/5 border-white/10 text-accent focus:ring-accent focus:ring-offset-0"
-                  />
-                  <span>Generate and download CSV report</span>
-                </label>
-              </div>
-
-              <button
-                onClick={() => {
-                  setHasDismissedExpiration(true);
-                  resetChallenge(expirationNotes, generateCsv);
-                  setExpirationNotes('');
-                  navigate('/');
-                }}
-                className="btn-primary w-full py-4 md:py-5 text-base md:text-lg flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(var(--color-accent-rgb),0.2)]"
-              >
-                <RefreshCcw size={24} />
-                Start Over
-              </button>
+        <div className="relative z-10">
+          <div className="flex justify-center mb-4 md:mb-6">
+            <div className="relative">
+              <div className="absolute inset-0 bg-accent/20 blur-2xl rounded-full"></div>
+              <RefreshCcw size={64} className="md:size-[80px] text-accent relative animate-pulse" />
             </div>
           </div>
+
+          <h2 className="text-3xl md:text-5xl font-thin tracking-tighter mb-3 md:mb-4">Your 30 Days Have Ended</h2>
+          <p className="text-base md:text-lg text-dim font-light mb-6 md:mb-10 max-w-md mx-auto leading-relaxed">
+            The 30-day window for your challenge has closed. Every breath you took was progress—take what you've learned and start a fresh journey.
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-8 md:mb-10">
+            <Card variant="flat" padding="sm" className="flex flex-col items-center">
+              <Clock size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
+              <span className="text-xl md:text-2xl font-light">{expirationStats?.minutes}</span>
+              <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Minutes Practiced</span>
+            </Card>
+            <Card variant="flat" padding="sm" className="flex flex-col items-center">
+              <Calendar size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
+              <span className="text-xl md:text-2xl font-light">{expirationStats?.days}</span>
+              <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Days Completed</span>
+            </Card>
+            <Card variant="flat" padding="sm" className="flex flex-col items-center">
+              <Activity size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
+              <span className="text-xl md:text-2xl font-light">{expirationStats?.sessions}</span>
+              <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Sessions</span>
+            </Card>
+            <Card variant="flat" padding="sm" className="flex flex-col items-center">
+              <Target size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
+              <span className="text-base md:text-lg font-light line-clamp-1">{expirationStats?.favoriteMethod}</span>
+              <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim">Favorite</span>
+            </Card>
+            <Card variant="flat" padding="sm" className="flex flex-col items-center col-span-2 md:col-span-2">
+              <Zap size={18} className="md:size-[20px] text-accent mb-1 md:mb-2" />
+              <span className="text-xl md:text-2xl font-light">{expirationStats?.totalAums}</span>
+              <span className="text-[0.6rem] md:text-[0.65rem] uppercase tracking-widest text-dim text-center">Total AUM Vibrations</span>
+            </Card>
+          </div>
+
+          <div className="mb-8">
+            <Textarea 
+              value={expirationNotes}
+              onChange={(e) => setExpirationNotes(e.target.value)}
+              placeholder="What happened? (Closure notes for CSV)"
+              className="min-h-[60px] mb-4 text-center"
+            />
+            <Checkbox 
+              checked={generateCsv}
+              onChange={(e) => setGenerateCsv(e.target.checked)}
+              label="Generate and download CSV report"
+              className="justify-center"
+            />
+          </div>
+
+          <Button
+            onClick={() => {
+              setHasDismissedExpiration(true);
+              resetChallenge(expirationNotes, generateCsv);
+              setExpirationNotes('');
+              navigate('/');
+            }}
+            variant="primary"
+            size="none"
+            className="w-full py-4 md:py-5 text-base md:text-lg shadow-[0_0_40px_rgba(var(--color-accent-rgb),0.2)]"
+          >
+            <RefreshCcw size={24} />
+            Start Over
+          </Button>
         </div>
-      )}
+      </Modal>
     </div>
   )
 }

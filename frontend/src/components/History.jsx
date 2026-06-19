@@ -1,4 +1,5 @@
 import { Trash2, Download } from 'lucide-react';
+import { Card, Button } from './common';
 
 function History({ history, hasMore, loadMore, onDelete }) {
   const formatDuration = (seconds) => {
@@ -33,27 +34,32 @@ function History({ history, hasMore, loadMore, onDelete }) {
     <div className="w-full max-w-4xl mx-auto py-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-12">
         <h1 className="text-4xl font-extralight tracking-tight">Past Journeys</h1>
-        <a 
+        <Button 
+          as="a"
           href="/api/history/export" 
           download 
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-squircle-md text-dim hover:text-white hover:bg-white/10 transition-all duration-300 font-light uppercase tracking-widest text-xs"
+          variant="secondary"
+          size="none"
+          className="px-6 py-3 text-xs font-light tracking-widest"
         >
           <Download size={16} />
           <span>Export CSV</span>
-        </a>
+        </Button>
       </div>
       
       <div className="flex flex-col gap-6">
         {history.length === 0 && (
-          <div className="p-12 text-center bg-white/5 border border-white/10 rounded-squircle-lg opacity-50">
+          <Card variant="flat" padding="none" className="p-12 text-center opacity-50">
             <p className="text-lg font-light">Your history will appear here after your first session.</p>
-          </div>
+          </Card>
         )}
         
         {history.map((item) => (
-          <div 
+          <Card 
             key={item._id} 
-            className="group relative bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-8 transition-all duration-300 hover:bg-white/10 hover:border-white/20 shadow-xl"
+            variant="hoverable"
+            padding="md"
+            className="group relative"
           >
             <button 
               onClick={() => {
@@ -108,16 +114,19 @@ function History({ history, hasMore, loadMore, onDelete }) {
                 )}
               </div>
             </div>
-          </div>
+          </Card>
         ))}
 
         {hasMore && (
-          <button 
+          <Button 
             onClick={loadMore}
-            className="mt-4 w-full py-6 bg-white/5 border border-white/10 rounded-squircle-lg text-dim hover:text-white hover:bg-white/10 transition-all duration-300 font-light uppercase tracking-widest text-sm"
+            variant="secondary"
+            size="none"
+            rounded="lg"
+            className="mt-4 w-full py-6 font-light text-sm tracking-widest"
           >
             Load More Sessions
-          </button>
+          </Button>
         )}
       </div>
     </div>

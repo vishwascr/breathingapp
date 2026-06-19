@@ -9,6 +9,7 @@ import {
   CartesianGrid 
 } from 'recharts';
 import { Activity } from 'lucide-react';
+import { Card } from './common';
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -53,7 +54,12 @@ const WeeklyGraph = ({ practicedDates }) => {
   }, [practicedDates]);
 
   return (
-    <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-8 shadow-xl hover:bg-white/10 transition-all duration-300 mb-8 overflow-hidden group">
+    <Card 
+      as="section" 
+      variant="hoverable" 
+      padding="md" 
+      className="mb-8 overflow-hidden group"
+    >
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-2">
           <Activity size={16} className="text-accent" />
@@ -102,7 +108,7 @@ const WeeklyGraph = ({ practicedDates }) => {
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </section>
+    </Card>
   );
 };
 

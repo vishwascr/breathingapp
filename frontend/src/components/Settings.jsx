@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Palette, Timer, Info, Save, Github, Trophy, RefreshCcw, Plus, Minus, ChevronDown } from 'lucide-react';
+import { Card, Button, Textarea, Checkbox } from './common';
 
 const PHASE_LABELS = ['Inhale', 'Hold', 'Exhale', 'Hold'];
 
@@ -93,7 +94,7 @@ function MethodSettings({ methodKey, method, onSave }) {
   const isAum = methodKey === 'aum';
 
   return (
-    <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-8 shadow-xl">
+    <Card as="section" variant="default" padding="md">
       <div className="flex items-center gap-3 mb-4">
         <Timer size={18} className="text-dim" />
         <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">{method.name}</h3>
@@ -113,13 +114,15 @@ function MethodSettings({ methodKey, method, onSave }) {
               onChange={handleAumChange}
               label="Inhale Duration (seconds)"
             />
-            <button 
+            <Button 
               onClick={handleSave} 
-              className="btn-primary tracking-wide h-[60px] flex items-center justify-center gap-2 px-10 whitespace-nowrap w-full sm:w-auto shrink-0"
+              variant="primary"
+              size="none"
+              className="tracking-wide h-[60px] px-10 whitespace-nowrap w-full sm:w-auto shrink-0"
             >
               <Save size={18} />
               <span>Save</span>
-            </button>
+            </Button>
           </div>
         ) : isUniform ? (
           <div className="flex flex-col sm:flex-row items-end gap-4">
@@ -128,13 +131,15 @@ function MethodSettings({ methodKey, method, onSave }) {
               onChange={handleUniformChange}
               label="Duration per phase (seconds)"
             />
-            <button 
+            <Button 
               onClick={handleSave} 
-              className="btn-primary tracking-wide h-[60px] flex items-center justify-center gap-2 px-10 whitespace-nowrap w-full sm:w-auto shrink-0"
+              variant="primary"
+              size="none"
+              className="tracking-wide h-[60px] px-10 whitespace-nowrap w-full sm:w-auto shrink-0"
             >
               <Save size={18} />
               <span>Save</span>
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="flex flex-col gap-6">
@@ -150,13 +155,15 @@ function MethodSettings({ methodKey, method, onSave }) {
                 ) : null
               ))}
             </div>
-            <button 
+            <Button 
               onClick={handleSave} 
-              className="btn-primary tracking-wide h-[60px] flex items-center justify-center gap-2 w-full shadow-lg"
+              variant="primary"
+              size="none"
+              className="tracking-wide h-[60px] w-full shadow-lg"
             >
               <Save size={18} />
               <span>Save Pattern</span>
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -165,7 +172,7 @@ function MethodSettings({ methodKey, method, onSave }) {
           Chanting phases (Aaa, Uuu, Mmmm) are autocalculated.
         </p>
       )}
-    </section>
+    </Card>
   );
 }
 
@@ -205,7 +212,7 @@ function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes
       <h1 className="text-4xl font-extralight mb-12 tracking-tight">Settings</h1>
       
       <div className="flex flex-col gap-10">
-        <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-8 shadow-xl">
+        <Card as="section" variant="default" padding="md">
           <div className="flex items-center gap-3 mb-8">
             <Palette size={18} className="text-dim" />
             <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Theme</h3>
@@ -246,10 +253,10 @@ function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes
               </button>
             ))}
           </div>
-        </section>
+        </Card>
 
         {challengeActive && (
-          <section className="bg-accent/5 backdrop-blur-3xl border border-accent/20 rounded-squircle-lg p-6 md:p-8 shadow-xl animate-fadeIn">
+          <Card as="section" variant="accent" padding="md" className="animate-fadeIn">
             <div className="flex items-center gap-3 mb-8">
               <Trophy size={18} className="text-accent" />
               <h3 className="text-xs uppercase tracking-[0.2rem] text-accent font-medium">Active Challenge</h3>
@@ -265,13 +272,15 @@ function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes
                     Resetting will deactivate the challenge tracking on your dashboard.
                   </p>
                 </div>
-                <button 
+                <Button 
                   onClick={() => setShowResetConfirm(true)}
-                  className="flex items-center justify-center gap-2 px-8 py-4 bg-white/5 border border-white/10 rounded-squircle-md text-dim hover:text-white hover:bg-red-500/20 hover:border-red-500/30 transition-all duration-500 whitespace-nowrap"
+                  variant="secondary"
+                  size="none"
+                  className="px-8 py-4 hover:bg-red-500/20 hover:border-red-500/30 whitespace-nowrap"
                 >
                   <RefreshCcw size={18} />
                   Reset Challenge
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="flex flex-col gap-6 animate-fadeIn">
@@ -280,43 +289,44 @@ function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes
                   <p className="text-sm font-light text-dim leading-relaxed mb-4">
                     This will archive your current progress. Please share your final thoughts below (Closure notes for CSV).
                   </p>
-                  <textarea 
+                  <Textarea 
                     autoFocus
                     value={resetNotes}
                     onChange={(e) => setResetNotes(e.target.value)}
                     placeholder="Why are you resetting? What did you learn?"
-                    className="w-full bg-white/5 border border-white/10 rounded-squircle-md p-4 text-text focus:outline-none focus:border-accent min-h-[60px] resize-none transition-all placeholder:text-dim/30 text-sm md:text-base mb-4"
+                    className="min-h-[60px] mb-4"
                   />
-                  <label className="flex items-center gap-2 text-dim text-sm cursor-pointer mb-2">
-                    <input 
-                      type="checkbox" 
-                      checked={generateCsv}
-                      onChange={(e) => setGenerateCsv(e.target.checked)}
-                      className="w-4 h-4 rounded bg-white/5 border-white/10 text-accent focus:ring-accent focus:ring-offset-0"
-                    />
-                    <span>Generate and download CSV report</span>
-                  </label>
+                  <Checkbox 
+                    checked={generateCsv}
+                    onChange={(e) => setGenerateCsv(e.target.checked)}
+                    label="Generate and download CSV report"
+                    className="mb-2"
+                  />
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <button 
+                  <Button 
                     onClick={handleResetChallenge}
-                    className="flex-1 bg-red-500/20 border border-red-500/30 py-4 rounded-squircle-md text-red-400 hover:bg-red-500/30 transition-all duration-300 font-medium"
+                    variant="danger"
+                    size="none"
+                    className="flex-1 py-4 font-medium"
                   >
                     Confirm Reset
-                  </button>
-                  <button 
+                  </Button>
+                  <Button 
                     onClick={() => {
                       setShowResetConfirm(false);
                       setResetNotes('');
                     }}
-                    className="flex-1 bg-white/5 border border-white/10 py-4 rounded-squircle-md text-dim hover:text-white transition-all duration-300 font-light"
+                    variant="secondary"
+                    size="none"
+                    className="flex-1 py-4 font-light"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
-          </section>
+          </Card>
         )}
 
         <div className="flex flex-col gap-8">
@@ -336,7 +346,7 @@ function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes
           ))}
         </div>
 
-        <section className="bg-white/5 border border-white/5 rounded-squircle-lg p-6 md:p-8">
+        <Card as="section" variant="flat" padding="md">
           <div className="flex items-center gap-3 mb-4">
             <Info size={18} className="text-dim" />
             <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">About</h3>
@@ -356,26 +366,32 @@ function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes
               <span className="text-sm font-light tracking-wide">View on GitHub</span>
             </a>
           </div>
-        </section>
+        </Card>
 
         {/* Debug / Simulation Section */}
-        <section className="mt-8 p-6 border border-dashed border-white/10 rounded-squircle-lg opacity-40 hover:opacity-100 transition-opacity">
+        <Card as="section" variant="dashed" padding="none" className="mt-8 p-6 opacity-40 hover:opacity-100 transition-opacity">
           <h3 className="text-[0.65rem] uppercase tracking-widest text-dim mb-4">Simulation (Debug Only)</h3>
           <div className="flex flex-wrap gap-4">
-            <button 
+            <Button 
               onClick={simulateExpiration}
-              className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[0.65rem] uppercase tracking-widest text-dim hover:bg-white/10 transition-all"
+              variant="secondary"
+              size="none"
+              rounded="full"
+              className="px-4 py-2 text-[0.65rem] tracking-widest"
             >
               Simulate 30 Days Passed
-            </button>
-            <button 
+            </Button>
+            <Button 
               onClick={simulateCompletion}
-              className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[0.65rem] uppercase tracking-widest text-dim hover:bg-white/10 transition-all"
+              variant="secondary"
+              size="none"
+              rounded="full"
+              className="px-4 py-2 text-[0.65rem] tracking-widest"
             >
               Simulate 30 minute per day goal reached
-            </button>
+            </Button>
           </div>
-        </section>
+        </Card>
       </div>
     </div>
   );

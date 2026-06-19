@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Play, Square, Save, X, CheckCircle2, Maximize, Minimize, Info } from 'lucide-react'
+import { Modal, Button, Textarea } from './common'
 
 const PHASES = ['Inhale', 'Hold', 'Exhale', 'Hold'];
 
@@ -474,135 +475,161 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
           </div>
 
           {/* 4. Action Button */}
-          <button onClick={handleStartStop} className="btn-primary text-lg md:text-xl font-light tracking-widest flex items-center gap-3 shrink-0">
+          <Button 
+            onClick={handleStartStop} 
+            variant="primary"
+            size="none"
+            className="text-lg md:text-xl tracking-widest flex items-center gap-3 shrink-0"
+          >
             {isActive || countdown !== null ? <Square size={18} md:size={20} fill="currentColor" /> : <Play size={18} md:size={20} fill="currentColor" />}
             {isActive || countdown !== null ? 'Stop Session' : 'Begin Journey'}
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Summary Modal */}
-      {showSummary && lastSession && (
-        <div className="absolute inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-6">
-          <div className="w-full max-w-sm bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-2xl animate-fadeIn overflow-y-auto max-h-[90vh]">
-            <div className="flex flex-col items-center mb-6 md:mb-8 text-center">
-              <CheckCircle2 size={32} className="text-accent mb-3" />
-              <h2 className="text-xl md:text-3xl font-thin tracking-tight">Session Complete</h2>
+      <Modal
+        isOpen={showSummary && !!lastSession}
+        onClose={() => setShowSummary(false)}
+        maxWidth="sm"
+        zIndex="z-[110]"
+        backdropBlur="md"
+        backdropOpacity="bg-black/80"
+      >
+        <div className="flex flex-col items-center mb-6 md:mb-8 text-center">
+          <CheckCircle2 size={32} className="text-accent mb-3" />
+          <h2 className="text-xl md:text-3xl font-thin tracking-tight">Session Complete</h2>
+        </div>
+        
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mb-8 text-sm md:text-base font-light text-text/80 tracking-wide text-center">
+          <span>{lastSession?.duration}s</span>
+          <span className="opacity-20 text-[0.6rem]">•</span>
+          <span>{lastSession?.pattern}</span>
+          <span className="opacity-20 text-[0.6rem]">•</span>
+          <span>{lastSession?.inhale}-{lastSession?.inhaleHold}-{lastSession?.exhale}-{lastSession?.exhaleHold}s</span>
+          <span className="opacity-20 text-[0.6rem]">•</span>
+          <span>{lastSession?.cycles} {selectedMethod === 'aum' ? 'Chants' : 'Cycles'}</span>
+        </div>
+        
+        <div className="mb-6 flex flex-col items-center gap-3">
+          <span className="text-[0.65rem] md:text-xs uppercase tracking-[0.2rem] text-dim font-medium">How was your session?</span>
+          <div className="flex items-center gap-2">
+            {[1, 2, 3, 4, 5].map((num) => (
+              <button 
+                key={num}
+                onClick={() => setSessionRating(num)}
+                className={`transition-all duration-300 ${sessionRating >= num ? 'text-accent scale-110' : 'text-dim/40 hover:text-dim hover:scale-105'}`}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill={sessionRating >= num ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                </svg>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-8 flex flex-col items-center">
+          {!showNotesInput ? (
+            <Button 
+              onClick={() => setShowNotesInput(true)}
+              variant="secondary"
+              size="none"
+              rounded="full"
+              className="text-[0.65rem] md:text-xs tracking-[0.2rem] text-accent/60 hover:text-accent px-6 py-2.5"
+            >
+              + Add a note
+            </Button>
+          ) : (
+            <div className="w-full animate-fadeIn">
+              <Textarea 
+                autoFocus
+                value={currentNote}
+                onChange={(e) => setCurrentNote(e.target.value)}
+                placeholder="How do you feel?"
+                className="min-h-[80px] md:min-h-[100px]"
+              />
             </div>
-            
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mb-8 text-sm md:text-base font-light text-text/80 tracking-wide text-center">
-              <span>{lastSession.duration}s</span>
-              <span className="opacity-20 text-[0.6rem]">•</span>
-              <span>{lastSession.pattern}</span>
-              <span className="opacity-20 text-[0.6rem]">•</span>
-              <span>{lastSession.inhale}-{lastSession.inhaleHold}-{lastSession.exhale}-{lastSession.exhaleHold}s</span>
-              <span className="opacity-20 text-[0.6rem]">•</span>
-              <span>{lastSession.cycles} {selectedMethod === 'aum' ? 'Chants' : 'Cycles'}</span>
-            </div>
-            
-            <div className="mb-6 flex flex-col items-center gap-3">
-              <span className="text-[0.65rem] md:text-xs uppercase tracking-[0.2rem] text-dim font-medium">How was your session?</span>
-              <div className="flex items-center gap-2">
-                {[1, 2, 3, 4, 5].map((num) => (
-                  <button 
-                    key={num}
-                    onClick={() => setSessionRating(num)}
-                    className={`transition-all duration-300 ${sessionRating >= num ? 'text-accent scale-110' : 'text-dim/40 hover:text-dim hover:scale-105'}`}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill={sessionRating >= num ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                    </svg>
-                  </button>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <Button 
+            onClick={handleSaveSession}
+            disabled={sessionRating === 0}
+            variant="primary"
+            size="none"
+            className="w-full py-4 font-medium"
+          >
+            <Save size={18} />
+            <span>Save Journey</span>
+          </Button>
+          <Button 
+            onClick={() => setShowSummary(false)} 
+            variant="secondary"
+            size="none"
+            className="w-full py-3 text-xs tracking-widest font-light"
+          >
+            Discard Session
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Technique Info Modal */}
+      <Modal
+        isOpen={showInfo}
+        onClose={() => setShowInfo(false)}
+        maxWidth="2xl"
+        zIndex="z-[110]"
+        backdropBlur="md"
+        backdropOpacity="bg-black/80"
+      >
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-thin tracking-tight">{methods[selectedMethod]?.name}</h2>
+          <Button 
+            onClick={() => setShowInfo(false)}
+            variant="ghost"
+            size="none"
+            rounded="full"
+            className="p-2 text-dim hover:text-white"
+          >
+            <X size={24} />
+          </Button>
+        </div>
+
+        <div className="space-y-8">
+          <div>
+            <h3 className="text-xs uppercase tracking-[0.2rem] text-accent font-medium mb-3">About</h3>
+            <p className="text-lg font-light text-text/80 leading-relaxed">
+              {methods[selectedMethod]?.description}
+            </p>
+          </div>
+
+          {methods[selectedMethod]?.steps && (
+            <div>
+              <h3 className="text-xs uppercase tracking-[0.2rem] text-accent font-medium mb-4">Steps</h3>
+              <div className="space-y-4">
+                {methods[selectedMethod].steps.map((step, idx) => (
+                  <div key={idx} className="flex gap-4 items-start">
+                    <span className="w-6 h-6 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs flex-shrink-0 mt-1">
+                      {idx + 1}
+                    </span>
+                    <p className="text-text/70 font-light leading-relaxed">{step}</p>
+                  </div>
                 ))}
               </div>
             </div>
-
-            <div className="mb-8 flex flex-col items-center">
-              {!showNotesInput ? (
-                <button 
-                  onClick={() => setShowNotesInput(true)}
-                  className="text-[0.65rem] md:text-xs uppercase tracking-[0.2rem] text-accent/60 hover:text-accent hover:bg-white/5 border border-white/10 rounded-full px-6 py-2.5 transition-all"
-                >
-                  + Add a note
-                </button>
-              ) : (
-                <div className="w-full animate-fadeIn">
-                  <textarea 
-                    autoFocus
-                    value={currentNote}
-                    onChange={(e) => setCurrentNote(e.target.value)}
-                    placeholder="How do you feel?"
-                    className="w-full bg-white/5 border border-white/10 rounded-squircle-md p-4 text-text focus:outline-none focus:border-accent min-h-[80px] md:min-h-[100px] resize-none transition-all placeholder:text-dim/30 text-sm md:text-base"
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <button 
-                onClick={handleSaveSession}
-                disabled={sessionRating === 0}
-                className="w-full bg-accent text-bg py-4 rounded-squircle-md font-medium hover:bg-indicator transition-all duration-300 flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Save size={18} />
-                Save Journey
-              </button>
-              <button 
-                onClick={() => setShowSummary(false)} 
-                className="w-full py-3 rounded-squircle-md text-xs uppercase tracking-widest text-dim hover:text-white transition-all duration-300"
-              >
-                Discard Session
-              </button>
-            </div>
-          </div>
+          )}
         </div>
-      )}
 
-      {/* Technique Info Modal */}
-      {showInfo && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-6">
-          <div className="w-full max-w-2xl bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-6 md:p-10 shadow-2xl animate-fadeIn overflow-y-auto max-h-[90vh]">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-thin tracking-tight">{methods[selectedMethod].name}</h2>
-              <button onClick={() => setShowInfo(false)} className="p-2 hover:bg-white/10 rounded-full transition-all">
-                <X size={24} className="text-dim" />
-              </button>
-            </div>
-
-            <div className="space-y-8">
-              <div>
-                <h3 className="text-xs uppercase tracking-[0.2rem] text-accent font-medium mb-3">About</h3>
-                <p className="text-lg font-light text-text/80 leading-relaxed">
-                  {methods[selectedMethod].description}
-                </p>
-              </div>
-
-              {methods[selectedMethod].steps && (
-                <div>
-                  <h3 className="text-xs uppercase tracking-[0.2rem] text-accent font-medium mb-4">Steps</h3>
-                  <div className="space-y-4">
-                    {methods[selectedMethod].steps.map((step, idx) => (
-                      <div key={idx} className="flex gap-4 items-start">
-                        <span className="w-6 h-6 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs flex-shrink-0 mt-1">
-                          {idx + 1}
-                        </span>
-                        <p className="text-text/70 font-light leading-relaxed">{step}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <button 
-              onClick={() => setShowInfo(false)}
-              className="mt-10 w-full py-4 bg-white/5 border border-white/10 rounded-squircle-md font-light hover:bg-white/10 transition-all text-dim uppercase tracking-widest text-xs"
-            >
-              Close Details
-            </button>
-          </div>
-        </div>
-      )}
+        <Button 
+          onClick={() => setShowInfo(false)}
+          variant="secondary"
+          size="none"
+          className="mt-10 w-full py-4 text-xs tracking-widest font-light"
+        >
+          Close Details
+        </Button>
+      </Modal>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Utensils, CheckCircle2, Circle, MessageSquare, ChevronLeft, ChevronRight, Save, Loader2 } from 'lucide-react';
+import { Card, Button } from './common';
 
 const ConsciousEating = ({ refreshStats }) => {
   const [currentDate, setCurrentDate] = useState(() => {
@@ -122,7 +123,7 @@ const ConsciousEating = ({ refreshStats }) => {
   ];
 
   return (
-    <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-xl hover:bg-white/10 transition-all duration-300">
+    <Card as="section" variant="hoverable" padding="lg">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-2">
           <Utensils size={16} className="text-dim" />
@@ -199,10 +200,13 @@ const ConsciousEating = ({ refreshStats }) => {
                         />
                       </div>
                       
-                      <button
+                      <Button
                         onClick={() => handleSave(id)}
                         disabled={meal.isSaving}
-                        className="w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-all bg-accent text-bg hover:bg-indicator shadow-[0_0_20px_rgba(var(--color-accent-rgb),0.2)]"
+                        variant="primary"
+                        size="none"
+                        rounded="none"
+                        className="w-full py-3 rounded-xl shadow-[0_0_20px_rgba(var(--color-accent-rgb),0.2)]"
                       >
                         {meal.isSaving ? (
                           <Loader2 size={16} className="animate-spin" />
@@ -210,7 +214,7 @@ const ConsciousEating = ({ refreshStats }) => {
                           <Save size={16} />
                         )}
                         Save Conscious Meal
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -223,7 +227,7 @@ const ConsciousEating = ({ refreshStats }) => {
       <p className="mt-8 text-xs text-dim italic font-light text-center">
         "Mindful eating is a way to rediscover one of life's most pleasurable activities."
       </p>
-    </section>
+    </Card>
   );
 };
 

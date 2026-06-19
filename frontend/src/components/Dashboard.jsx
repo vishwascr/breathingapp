@@ -3,6 +3,7 @@ import { Play, Clock, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 import DailyProgress from './DailyProgress';
 import ConsciousEating from './ConsciousEating';
 import WeeklyGraph from './WeeklyGraph';
+import { Card, Button } from './common';
 
 function Dashboard({ historyStats, methods, openMethodModal, challengeActive, challengeStartDate, startChallenge, refreshStats }) {
   const [activeStatIndex, setActiveStatIndex] = useState(0);
@@ -99,7 +100,12 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
         )}
 
         {!challengeActive && (
-          <section className="relative bg-accent/5 backdrop-blur-3xl border border-accent/20 rounded-squircle-lg p-8 md:p-10 shadow-2xl transition-all duration-500 z-10 lg:col-span-2 overflow-hidden group">
+          <Card 
+            as="section" 
+            variant="accent" 
+            padding="lg" 
+            className="z-10 lg:col-span-2 overflow-hidden group"
+          >
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="text-center md:text-left">
                 <div className="flex items-center gap-3 mb-4 justify-center md:justify-start">
@@ -112,20 +118,27 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
                 </p>
               </div>
               
-              <button 
-                className="btn-primary min-w-[240px] flex items-center justify-center gap-3 py-6 text-lg shadow-[0_0_30px_rgba(var(--color-accent-rgb),0.3)] hover:scale-105 transition-all duration-500"
+              <Button 
+                variant="primary"
+                size="none"
+                className="min-w-[240px] py-6 text-lg shadow-[0_0_30px_rgba(var(--color-accent-rgb),0.3)] hover:scale-105 transition-all duration-500"
                 onClick={startChallenge}
               >
                 <Play size={20} fill="currentColor" />
                 Start Challenge
-              </button>
+              </Button>
             </div>
-          </section>
+          </Card>
         )}
 
         {challengeActive && (
           <>
-            <section className="relative bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-2xl transition-all duration-500 z-10 lg:col-span-2">
+            <Card 
+              as="section" 
+              variant="default" 
+              padding="lg" 
+              className="z-10 lg:col-span-2"
+            >
               <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 h-full">
                 <div className="text-center md:text-left">
                   <h2 className="text-3xl md:text-4xl font-light mb-4 tracking-tight">Ready to Begin?</h2>
@@ -135,37 +148,54 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
                 </div>
                 
                 <div className="flex relative">
-                  <button 
-                    className="btn-primary min-w-[200px] md:min-w-[240px] flex items-center justify-center gap-2"
+                  <Button 
+                    variant="primary"
+                    className="min-w-[200px] md:min-w-[240px]"
                     onClick={handleBeginClick}
                   >
                     <Play size={18} fill="currentColor" />
                     Begin Breathing
-                  </button>
+                  </Button>
                 </div>
               </div>
-            </section>
+            </Card>
 
-            <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-xl hover:bg-white/10 transition-all duration-300 min-h-[300px]">
+            <Card 
+              as="section" 
+              variant="hoverable" 
+              padding="lg" 
+              className="min-h-[300px]"
+            >
               <DailyProgress 
                 practicedDates={historyStats.practicedDates || {}} 
                 challengeStartDate={challengeStartDate}
               />
-            </section>
+            </Card>
 
-            <section className="relative bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-xl flex flex-col justify-between hover:bg-white/10 transition-all duration-300 min-h-[220px]">
-              <button 
+            <Card 
+              as="section" 
+              variant="hoverable" 
+              padding="lg" 
+              className="flex flex-col justify-between min-h-[220px]"
+            >
+              <Button 
                 onClick={prevStat}
-                className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all z-20"
+                variant="ghost"
+                size="none"
+                rounded="full"
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-2 text-dim z-20"
               >
                 <ChevronLeft size={24} />
-              </button>
-              <button 
+              </Button>
+              <Button 
                 onClick={nextStat}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all z-20"
+                variant="ghost"
+                size="none"
+                rounded="full"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-dim z-20"
               >
                 <ChevronRight size={24} />
-              </button>
+              </Button>
 
               <div className="px-8 flex flex-col items-center text-center h-full justify-center">
                 <div className="flex items-center gap-2 mb-4">
@@ -191,12 +221,17 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
                   ))}
                 </div>
               </div>
-            </section>
+            </Card>
 
             <ConsciousEating refreshStats={refreshStats} />
 
             {lastSessions.length > 0 ? (
-              <section className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-squircle-lg p-8 md:p-10 shadow-xl flex flex-col gap-8 hover:bg-white/10 transition-all duration-300">
+              <Card 
+                as="section" 
+                variant="hoverable" 
+                padding="lg" 
+                className="flex flex-col gap-8"
+              >
                 <div className="flex items-center gap-2">
                   <Clock size={16} className="text-dim" />
                   <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Recent Sessions</h3>
@@ -237,15 +272,20 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
                     </div>
                   ))}
                 </div>
-              </section>
+              </Card>
             ) : (
-              <section className="bg-white/5 backdrop-blur-3xl border border-white/10 border-dashed rounded-squircle-lg p-8 md:p-10 flex flex-col items-center justify-center text-center opacity-60">
+              <Card 
+                as="section" 
+                variant="dashed" 
+                padding="lg" 
+                className="flex flex-col items-center justify-center text-center"
+              >
                 <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4">
                   <Clock size={20} className="text-dim" />
                 </div>
                 <h3 className="text-sm uppercase tracking-widest text-dim font-medium mb-2">No History</h3>
                 <p className="text-sm font-light text-text/60 max-w-[200px]">Complete your first session to see your stats here.</p>
-              </section>
+              </Card>
             )}
           </>
         )}
