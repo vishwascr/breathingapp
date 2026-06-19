@@ -8,6 +8,7 @@ const Dashboard = lazy(() => import('./components/Dashboard'));
 const Practice = lazy(() => import('./components/Practice'));
 const History = lazy(() => import('./components/History'));
 const Settings = lazy(() => import('./components/Settings'));
+const ChakraAscent = lazy(() => import('./components/ChakraAscent'));
 
 import { INITIAL_METHODS, THEMES } from './constants'
 
@@ -126,7 +127,7 @@ function App() {
     }
   }, [challengeActive, challengeStartDate, isSessionActive, calculateChallengeCompletion, showCompletionModal, historyStats.totalSeconds, hasDismissedCompletion]);
 
-  const showStripes = ['/', '/history', '/settings'].includes(location.pathname);
+  const showStripes = ['/', '/history', '/settings', '/chakra-ascent'].includes(location.pathname);
 
   const confirmEndSession = () => {
     const target = pendingNav;
@@ -494,6 +495,10 @@ function App() {
                     />
                   }
                   />
+                <Route 
+                  path="/chakra-ascent" 
+                  element={<ChakraAscent />} 
+                />
               </Routes>
             </Suspense>
           </main>

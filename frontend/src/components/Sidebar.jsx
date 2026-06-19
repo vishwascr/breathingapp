@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Wind, History as HistoryIcon, Settings } from 'lucide-react';
+import { LayoutDashboard, Wind, History as HistoryIcon, Settings, Sparkles } from 'lucide-react';
 
 function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethodModalOpen, challengeActive }) {
   const location = useLocation();
@@ -64,6 +64,13 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
               )}
 
               <li>
+                <NavLink to="/chakra-ascent" className={linkClass} onClick={(e) => handleNavClick(e, '/chakra-ascent')}>
+                  <Sparkles size={20} />
+                  <span>Chakra Ascent</span>
+                </NavLink>
+              </li>
+
+              <li>
                 <NavLink to="/history" className={linkClass} onClick={(e) => handleNavClick(e, '/history')}>
                   <HistoryIcon size={20} />
                   <span>History</span>
@@ -111,6 +118,20 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
               </button>
             </li>
           )}
+          <li className="flex-1 flex justify-center">
+            <NavLink 
+              to="/chakra-ascent" 
+              className={({ isActive }) => 
+                `p-3.5 rounded-[1.2rem] transition-all duration-300 flex items-center justify-center ${
+                  isActive ? 'bg-white/10 text-white shadow-sm' : 'text-white/50 hover:text-white'
+                }`
+              }
+              onClick={(e) => handleNavClick(e, '/chakra-ascent')}
+            >
+              <Sparkles size={24} strokeWidth={1.5} />
+            </NavLink>
+          </li>
+
           <li className="flex-1 flex justify-center">
             <NavLink 
               to="/history" 

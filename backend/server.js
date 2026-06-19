@@ -49,6 +49,16 @@ const settingsSchema = new mongoose.Schema({
 
 const Settings = mongoose.model('Settings', settingsSchema);
 
+// Journal Schema
+const journalSchema = new mongoose.Schema({
+  chakra: { type: String, required: true },
+  question: { type: String, required: true },
+  response: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now }
+});
+
+const Journal = mongoose.model('Journal', journalSchema);
+
 // Routes
 app.get('/api/settings/theme', async (req, res) => {
   try {
@@ -328,6 +338,32 @@ app.post('/api/challenge/reset', async (req, res) => {
   } catch (err) {
     console.error('Error resetting challenge:', err);
     res.status(500).json({ message: 'Internal server error while resetting challenge.' });
+  }
+});
+
+// Journal Routes
+app.post('/api/journal', async (req, res) => {
+  try {
+    const { chakra, question, response } = req.body;
+    if (!chakra || !question || !response) {
+      return res.status(400).json({ message: 'Chakra, question, and response are required.' });
+    }
+    const entry = new Journal({ chakra, question, response });
+    await entry.save();
+    res.status(201).json(entry);
+  } catch (err) {
+    console.error('Error saving journal entry:', err);
+    res.status(500).json({ message: 'Internal server error while saving journal entry.' });
+  }
+});
+
+app.get('/api/journal', async (req, res) => {
+  try {
+    const entries = await Journal.find().sort({ timestamp: -1 });
+    res.json(entries);
+  } catch (err) {
+    console.error('Error fetching journal entries:', err);
+    res.status(500).json({ message: 'Internal server error while fetching journal entries.' });
   }
 });
 
