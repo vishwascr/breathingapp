@@ -386,13 +386,16 @@ function ChakraAscent() {
           )}
         </div>
         
-        <button 
+        <Button 
           onClick={() => setSoundEnabled(prev => !prev)}
-          className="p-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 text-dim transition-all flex items-center justify-center cursor-pointer shrink-0"
+          variant="secondary"
+          size="none"
+          rounded="full"
+          className="p-3 text-dim shrink-0"
           title={soundEnabled ? "Mute Bowl" : "Unmute Bowl"}
         >
           {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-        </button>
+        </Button>
       </header>
 
       {/* Main content body structured exactly like Practice.jsx's focusArea */}
@@ -700,21 +703,27 @@ function ChakraAscent() {
                         {formatTimer(focusTimer)}
                       </h4>
                       <div className="flex gap-3">
-                        <button
+                        <Button
                           onClick={() => setTimerRunning(!timerRunning)}
-                          className="px-5 py-2 bg-accent text-bg font-semibold rounded-squircle-sm hover:bg-indicator transition-all text-xs"
+                          variant="primary"
+                          size="none"
+                          rounded="sm"
+                          className="px-5 py-2 font-semibold text-xs text-bg"
                         >
                           {timerRunning ? 'Pause' : 'Start'}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => {
                             setTimerRunning(false);
                             setFocusTimer(1500);
                           }}
-                          className="px-5 py-2 border border-white/15 text-dim rounded-squircle-sm hover:bg-white/5 transition-all text-xs"
+                          variant="secondary"
+                          size="none"
+                          rounded="sm"
+                          className="px-5 py-2 text-xs"
                         >
                           Reset
-                        </button>
+                        </Button>
                       </div>
                       <p className="text-[0.7rem] text-dim/60 font-light mt-1">Focus on a single, intentional task for 25 minutes. No multi-tasking, no checking notifications.</p>
                     </div>
