@@ -146,6 +146,78 @@
   animation: icon-pulse-glow 5s ease-in-out infinite;
 }
 
+/* 3D Flip Card Utilities */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Premium keyframe animation for simultaneous flip and glide */
+@keyframes flip-glide-in {
+  0% {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(0deg) scale(0.85) translate3d(0, 40px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(180deg) scale(1) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes flip-glide-out {
+  0% {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(180deg) scale(1) translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(0deg) scale(0.85) translate3d(0, 40px, 0);
+  }
+}
+
+.animate-flipGlideIn {
+  animation: flip-glide-in 0.65s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+.animate-flipGlideOut {
+  animation: flip-glide-out 0.55s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+/* GPU Accelerated transitions to guarantee 60FPS */
+.grid-fade-transition {
+  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform, opacity;
+}
+
+.technique-grid-card {
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  will-change: transform;
+}
+
+.technique-grid-card:hover {
+  transform: scale(1.02) translate3d(0, -4px, 0);
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 8px 30px rgba(255, 255, 255, 0.05) !important;
+}
+
+.icon-container-transition {
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.3s ease;
+  will-change: transform;
+}
+
 
 
 

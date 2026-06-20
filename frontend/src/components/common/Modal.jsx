@@ -5,7 +5,7 @@ import Card from './Card';
  * @typedef {Object} ModalProps
  * @property {boolean} isOpen - If the modal should be visible
  * @property {() => void} onClose - Callback when close is requested (backdrop click, Esc key)
- * @property {'sm' | 'md' | 'lg' | 'xl' | '2xl'} [maxWidth='sm'] - Maximum width of the modal
+ * @property {'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '5xl'} [maxWidth='sm'] - Maximum width of the modal
  * @property {'md' | 'xl'} [backdropBlur='md'] - Blur strength for the backdrop
  * @property {string} [backdropOpacity='bg-black/60'] - Background opacity/color for the backdrop
  * @property {string} [zIndex='z-[100]'] - Custom z-index class if needed
@@ -69,6 +69,8 @@ export default function Modal({
     lg: 'max-w-lg',
     xl: 'max-w-xl',
     '2xl': 'max-w-2xl',
+    '4xl': 'max-w-4xl',
+    '5xl': 'max-w-5xl',
   };
 
   const blurClasses = {
