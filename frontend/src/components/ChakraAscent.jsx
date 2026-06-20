@@ -227,6 +227,9 @@ function ChakraAscent() {
   const [answers, setAnswers] = useState([]); // Array of { chakra, question, response }
   const [name, setName] = useState(() => localStorage.getItem('breath-username') || 'Vishwas');
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [sessionRating, setSessionRating] = useState(0);
+  const [historySaved, setHistorySaved] = useState(false);
+  const sessionStartTimeRef = useRef(null);
   
   // Breathing animation states
   const [patternIndex, setPatternIndex] = useState(0);
@@ -413,6 +416,43 @@ function ChakraAscent() {
     setQuestionIndex(0);
     setResponseText('');
     setStage('meditating');
+    setHistorySaved(false);
+    setSessionRating(0);
+    sessionStartTimeRef.current = Date.now();
+  };
+
+  const handleSaveHistory = async (ratingVal) => {
+    setSessionRating(ratingVal);
+    const duration = sessionStartTimeRef.current 
+      ? Math.round((Date.now() - sessionStartTimeRef.current) / 1000) 
+      : 300; // fallback 5 mins
+
+    // Format all answers into a clean readable string for notes
+    const formattedNotes = answers.map(ans => `${ans.chakra}: Q: "${ans.question}" -> A: "${ans.response}"`).join(' | ');
+
+    try {
+      const response = await fetch('/api/history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          duration,
+          pattern: 'Chakra Ascent',
+          inhale: 5,
+          inhaleHold: 0,
+          exhale: 6,
+          exhaleHold: 0,
+          cycles: 7,
+          notes: formattedNotes,
+          cooldownSeconds: 0,
+          rating: ratingVal
+        })
+      });
+      if (response.ok) {
+        setHistorySaved(true);
+      }
+    } catch (e) {
+      console.error("Failed to save Chakra Ascent session to history:", e);
+    }
   };
 
   const handleNextStep = async () => {
@@ -715,6 +755,30 @@ function ChakraAscent() {
                 You have traversed the seven gates. Your breathing is slow, your mind has gained altitude, and you stand as the clear observer of your impulses.
               </p>
             </div>
+
+            {!historySaved ? (
+              <Card variant="default" padding="md" className="text-center flex flex-col items-center gap-4 py-6 border border-accent/20 bg-accent/5 max-w-md mx-auto w-full">
+                <span className="text-[0.65rem] md:text-xs uppercase tracking-[0.2rem] text-dim font-medium">How was your session?</span>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((num) => (
+                    <button 
+                      key={num}
+                      onClick={() => handleSaveHistory(num)}
+                      className={`transition-all duration-300 ${sessionRating >= num ? 'text-accent scale-110' : 'text-dim/40 hover:text-dim hover:scale-105'}`}
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill={sessionRating >= num ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[0.65rem] text-dim/60 font-light">Rate your session to save this Ascent to your history log.</p>
+              </Card>
+            ) : (
+              <div className="text-center text-xs text-accent font-light tracking-widest animate-fadeIn py-4">
+                ✓ Chakra Ascent session saved to your history!
+              </div>
+            )}
 
             {/* Current Self vs Superior Self Card */}
             <Card variant="default" padding="md" className="flex flex-col gap-6">

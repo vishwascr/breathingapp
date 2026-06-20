@@ -141,6 +141,48 @@ app.get('/api/history/export', async (req, res) => {
   }
 });
 
+app.get('/api/journal/export', async (req, res) => {
+  try {
+    const entries = await Journal.find().sort({ timestamp: -1 });
+    
+    // CSV Header
+    const headers = ['Date', 'Time', 'Chakra', 'Question', 'Response'];
+    
+    // CSV Rows
+    const rows = entries.map(item => {
+      const date = new Date(item.timestamp);
+      const formattedDate = date.toISOString().split('T')[0];
+      const formattedTime = date.toTimeString().split(' ')[0];
+      
+      const escapedQuestion = `"${(item.question || '').replace(/"/g, '""')}"`;
+      const escapedResponse = `"${(item.response || '').replace(/"/g, '""')}"`;
+      
+      return [
+        formattedDate,
+        formattedTime,
+        item.chakra,
+        escapedQuestion,
+        escapedResponse
+      ].join(',');
+    });
+    
+    const csvContent = [headers.join(','), ...rows].join('\n');
+    
+    const now = new Date();
+    const year = now.getFullYear().toString().slice(-2);
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const filename = `chakra_journal_history_${year}${month}${day}.csv`;
+    
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.status(200).send(csvContent);
+  } catch (err) {
+    console.error('Error exporting journal:', err);
+    res.status(500).json({ message: 'Internal server error while exporting journal.' });
+  }
+});
+
 app.get('/api/history', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;

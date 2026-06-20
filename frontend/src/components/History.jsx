@@ -34,17 +34,30 @@ function History({ history, hasMore, loadMore, onDelete }) {
     <div className="w-full max-w-4xl mx-auto py-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-12">
         <h1 className="text-4xl font-extralight tracking-tight">Past Journeys</h1>
-        <Button 
-          as="a"
-          href="/api/history/export" 
-          download 
-          variant="secondary"
-          size="none"
-          className="px-6 py-3 text-xs font-light tracking-widest"
-        >
-          <Download size={16} />
-          <span>Export CSV</span>
-        </Button>
+        <div className="flex gap-3">
+          <Button 
+            as="a"
+            href="/api/history/export" 
+            download 
+            variant="secondary"
+            size="none"
+            className="px-6 py-3 text-xs font-light tracking-widest flex items-center gap-2"
+          >
+            <Download size={16} />
+            <span>Export CSV</span>
+          </Button>
+          <Button 
+            as="a"
+            href="/api/journal/export" 
+            download 
+            variant="secondary"
+            size="none"
+            className="px-6 py-3 text-xs font-light tracking-widest flex items-center gap-2"
+          >
+            <Download size={16} />
+            <span>Export Journals</span>
+          </Button>
+        </div>
       </div>
       
       <div className="flex flex-col gap-6">
