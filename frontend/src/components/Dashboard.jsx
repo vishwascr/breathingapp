@@ -94,6 +94,13 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
 
   return (
     <div className="w-full max-w-6xl py-4 md:py-8 relative isolate">
+      {/* Full Page Breathing Glow Animation */}
+      {!challengeActive && (
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+          <div className="absolute top-[-10%] left-[-10%] w-[120vw] h-[120vw] md:w-[80vw] md:h-[80vw] rounded-full bg-[var(--color-accent)]/[0.035] blur-[100px] md:blur-[130px] animate-breath-glow-slow" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[100vw] h-[100vw] md:w-[70vw] md:h-[70vw] rounded-full bg-[var(--color-accent)]/[0.02] blur-[100px] md:blur-[130px] animate-breath-glow-fast" />
+        </div>
+      )}
       <header className="mb-10 md:mb-16 relative z-10">
         <h1 className="text-4xl md:text-7xl font-thin tracking-tight mb-4">{greeting}</h1>
         <p className="text-lg md:text-xl font-light text-dim tracking-wide">
@@ -119,10 +126,10 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
             as="section" 
             variant="accent" 
             padding="lg" 
-            className="z-10 lg:col-span-2 overflow-hidden group"
+            className="z-10 lg:col-span-2 overflow-hidden group animate-card-breath-glow"
           >
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-              <div className="text-center md:text-left">
+              <div className="text-center md:text-left flex-1">
                 <div className="flex items-center gap-3 mb-4 justify-center md:justify-start">
                   <Trophy className="text-accent" size={24} />
                   <h2 className="text-3xl md:text-4xl font-light tracking-tight">The Unlearn Yourself Challenge</h2>
