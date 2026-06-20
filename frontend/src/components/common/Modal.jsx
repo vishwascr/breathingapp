@@ -74,6 +74,7 @@ export default function Modal({
   };
 
   const blurClasses = {
+    none: '',
     md: 'backdrop-blur-md',
     xl: 'backdrop-blur-xl',
   };

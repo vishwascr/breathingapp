@@ -580,7 +580,7 @@ function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive
         onClose={() => setShowInfo(false)}
         maxWidth="2xl"
         zIndex="z-[110]"
-        backdropBlur="md"
+        backdropBlur="none"
         backdropOpacity="bg-black/80"
       >
         <div className="flex justify-between items-center mb-8">

@@ -130,6 +130,7 @@ function PracticeDetail({ selectedMethod, methods, onStart }) {
         isOpen={showInfo}
         onClose={() => setShowInfo(false)}
         maxWidth="md"
+        backdropBlur="none"
       >
         <div className="flex flex-col gap-4 text-left">
           <div className="flex items-center gap-3 border-b border-white/5 pb-4 mb-2">
