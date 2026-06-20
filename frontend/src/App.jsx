@@ -406,6 +406,7 @@ function App() {
         });
         setChallengeActive(false);
         setChallengeStartDate(null);
+        navigate('/');
       }
     } catch (err) {
       console.error('Failed to reset challenge:', err);
@@ -447,18 +448,22 @@ function App() {
     <div className="min-h-dvh text-text transition-colors duration-500 relative isolate overflow-x-hidden">
       {/* UI Layer */}
       <div className="flex flex-col md:flex-row w-full min-h-dvh relative z-10">
-        <Sidebar 
-          isSessionActive={isSessionActive}
-          onNavigateAttempt={(path) => setPendingNav(path)}
-          openMethodModal={() => setIsMethodModalOpen(true)}
-          isMethodModalOpen={isMethodModalOpen}
-          challengeActive={challengeActive}
-          isCollapsed={sidebarCollapsed}
-          onToggleCollapse={toggleSidebar}
-        />
+        {challengeActive && (
+          <Sidebar 
+            isSessionActive={isSessionActive}
+            onNavigateAttempt={(path) => setPendingNav(path)}
+            openMethodModal={() => setIsMethodModalOpen(true)}
+            isMethodModalOpen={isMethodModalOpen}
+            challengeActive={challengeActive}
+            isCollapsed={sidebarCollapsed}
+            onToggleCollapse={toggleSidebar}
+          />
+        )}
         
         <div className={`flex-1 relative isolate min-h-dvh transition-all duration-300 ${
-          sidebarCollapsed ? 'md:ml-20' : 'md:ml-72'
+          !challengeActive 
+            ? 'md:ml-0' 
+            : (sidebarCollapsed ? 'md:ml-20' : 'md:ml-72')
         }`}>
           {/* Subtle Vertical Stripes Background - Fixed to stay behind scrolling content */}
           {showStripes && (
