@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Wind, History as HistoryIcon, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Wind, History as HistoryIcon, Settings } from 'lucide-react';
 
-function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethodModalOpen, challengeActive, isCollapsed, onToggleCollapse, onExpand, onCollapse }) {
+function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethodModalOpen, challengeActive, isCollapsed, onExpand, onCollapse }) {
   const location = useLocation();
 
   const hoverTimerRef = useRef(null);
@@ -16,7 +16,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
     if (isCollapsed) {
       hoverTimerRef.current = setTimeout(() => {
         onExpand();
-      }, 300); // Trigger expansion after 300ms of continuous hover
+      }, 600); // Trigger expansion after 300ms of continuous hover
     }
   };
 
@@ -28,7 +28,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
     if (!isCollapsed && onCollapse) {
       leaveTimerRef.current = setTimeout(() => {
         onCollapse();
-      }, 400); // Trigger collapse after 400ms of mouse absence
+      }, 800); // Trigger collapse after 400ms of mouse absence
     }
   };
 
@@ -90,8 +90,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
     openMethodModal();
   };
 
-  const isMac = typeof window !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
-  const shortcutHint = isMac ? '⌘B' : 'Ctrl+B';
+
 
   return (
     <>
@@ -193,21 +192,6 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
                 Settings
               </span>
             </NavLink>
-            
-            <button
-              onClick={onToggleCollapse}
-              className={linkClass({ isActive: false })}
-              title={isCollapsed ? `Expand Sidebar (${shortcutHint})` : `Collapse Sidebar (${shortcutHint})`}
-            >
-              <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-[22%] transition-all duration-300 border bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20">
-                {isCollapsed ? <ChevronRight size={22} /> : <ChevronLeft size={22} />}
-              </div>
-              <span className={`transition-[opacity,max-width,margin] duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
-                isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
-              }`}>
-                Collapse
-              </span>
-            </button>
           </div>
         </div>
       </div>

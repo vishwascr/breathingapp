@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Card from './Card';
 
 /**
@@ -79,7 +80,7 @@ export default function Modal({
     xl: 'backdrop-blur-xl',
   };
 
-  return (
+  return createPortal(
     <div
       ref={overlayRef}
       onClick={handleBackdropClick}
@@ -92,6 +93,7 @@ export default function Modal({
       >
         {children}
       </Card>
-    </div>
+    </div>,
+    document.body
   );
 }

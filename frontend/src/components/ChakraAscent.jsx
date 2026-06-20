@@ -231,41 +231,49 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
   const [historySaved, setHistorySaved] = useState(false);
   const sessionStartTimeRef = useRef(null);
 
-  // Sync with global session state
+  // Sync with global session state and initialize session start time pure-style inside effect
   useEffect(() => {
     if (setIsSessionActive) {
       setIsSessionActive(stage === 'meditating' || stage === 'transition');
     }
+    if (initialStage === 'meditating' && sessionStartTimeRef.current === null) {
+      sessionStartTimeRef.current = Date.now();
+    }
     return () => {
       if (setIsSessionActive) setIsSessionActive(false);
     };
-  }, [stage, setIsSessionActive]);
-
-  // Handle initialization if starting directly from mediating stage
-  useEffect(() => {
-    if (initialStage === 'meditating') {
-      setAnswers([]);
-      setChakraIndex(0);
-      setQuestionIndex(0);
-      setResponseText('');
-      setHistorySaved(false);
-      setSessionRating(0);
-      sessionStartTimeRef.current = Date.now();
-    }
-  }, [initialStage]);
+  }, [stage, setIsSessionActive, initialStage]);
   
   // Breathing animation states
   const [patternIndex, setPatternIndex] = useState(0);
-  const [secondsLeft, setSecondsLeft] = useState(5);
   const [universalMode, setUniversalMode] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(() => {
+    const pattern = getBreathingPattern(0, false);
+    const phase = pattern[0];
+    return phase ? (phase.phase === 'Natural' ? 9999 : phase.duration) : 5;
+  });
 
-  // Sync state on prop changes (derived state resets)
+  // Sync state on prop/state changes (derived state resets)
   const [prevChakraIndex, setPrevChakraIndex] = useState(chakraIndex);
   const [prevUniversalMode, setPrevUniversalMode] = useState(universalMode);
-  if (chakraIndex !== prevChakraIndex || universalMode !== prevUniversalMode) {
+  const [prevPatternIndex, setPrevPatternIndex] = useState(patternIndex);
+
+  if (chakraIndex !== prevChakraIndex || universalMode !== prevUniversalMode || patternIndex !== prevPatternIndex) {
     setPrevChakraIndex(chakraIndex);
     setPrevUniversalMode(universalMode);
-    setPatternIndex(0);
+    setPrevPatternIndex(patternIndex);
+
+    let nextPatternIndex = patternIndex;
+    if (chakraIndex !== prevChakraIndex || universalMode !== prevUniversalMode) {
+      setPatternIndex(0);
+      nextPatternIndex = 0;
+    }
+
+    const pattern = getBreathingPattern(chakraIndex, universalMode);
+    const phase = pattern[nextPatternIndex];
+    if (phase) {
+      setSecondsLeft(phase.phase === 'Natural' ? 9999 : phase.duration);
+    }
   }
   
   // Post-meditation action modes
@@ -297,14 +305,10 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
 
     const pattern = getBreathingPattern(chakraIndex, universalMode);
     const phase = pattern[patternIndex];
-    if (!phase) return;
-
-    if (phase.phase === 'Natural') {
-      setSecondsLeft(9999);
+    if (!phase || phase.phase === 'Natural') {
       return;
     }
 
-    setSecondsLeft(phase.duration);
     let currentSeconds = phase.duration;
 
     breathTimerRef.current = setInterval(() => {

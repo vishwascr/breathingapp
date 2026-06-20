@@ -256,7 +256,7 @@ const ConsciousWalking = ({ refreshStats }) => {
       </div>
 
       <p className="mt-8 text-xs text-dim italic font-light text-center">
-        "An early-morning walk is a blessing for the whole day."
+        "A 30 minute walk can clear your mind, boost creativity, and reconnect you with the world around you."
       </p>
     </Card>
   );

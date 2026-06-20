@@ -43,9 +43,7 @@ function App() {
   const [historyPage, setHistoryPage] = useState(1);
   const [challengeActive, setChallengeActive] = useState(false);
   const [challengeStartDate, setChallengeStartDate] = useState(null);
-  const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [hasDismissedCompletion, setHasDismissedCompletion] = useState(false);
-  const [completionStats, setCompletionStats] = useState(null);
   const [hasDismissedExpiration, setHasDismissedExpiration] = useState(false);
   const [completionNotes, setCompletionNotes] = useState('');
   const [expirationNotes, setExpirationNotes] = useState('');
@@ -145,15 +143,17 @@ function App() {
 
   const showExpirationModal = !!expirationStats;
 
-  useEffect(() => {
-    if (challengeActive && challengeStartDate && !isSessionActive && !showCompletionModal && !hasDismissedCompletion) {
+  const completionStats = useMemo(() => {
+    if (challengeActive && challengeStartDate && !isSessionActive && !hasDismissedCompletion) {
       const stats = calculateChallengeCompletion();
       if (stats && parseFloat(stats.minutes) >= 30) {
-        setCompletionStats(stats);
-        setShowCompletionModal(true);
+        return stats;
       }
     }
-  }, [challengeActive, challengeStartDate, isSessionActive, calculateChallengeCompletion, showCompletionModal, historyStats.totalSeconds, hasDismissedCompletion]);
+    return null;
+  }, [challengeActive, challengeStartDate, isSessionActive, calculateChallengeCompletion, hasDismissedCompletion]);
+
+  const showCompletionModal = !!completionStats;
 
   const showStripes = ['/', '/history', '/settings'].includes(location.pathname) || (location.pathname.startsWith('/practice') && !isSessionActive);
 
@@ -313,14 +313,8 @@ function App() {
       });
       
       // Refresh stats and first page of history
-      const newStats = await fetchHistoryStats();
+      await fetchHistoryStats();
       fetchHistory(1, false);
-
-      const compStats = calculateChallengeCompletion(newStats);
-      if (compStats && !hasDismissedCompletion) {
-        setCompletionStats(compStats);
-        setShowCompletionModal(true);
-      }
     } catch (err) {
       console.error('Failed to save history:', err);
     }
@@ -445,7 +439,6 @@ function App() {
             isMethodModalOpen={isMethodModalOpen}
             challengeActive={challengeActive}
             isCollapsed={sidebarCollapsed}
-            onToggleCollapse={toggleSidebar}
             onExpand={() => {
               setSidebarCollapsed(false);
             }}
@@ -736,7 +729,6 @@ function App() {
         isOpen={showCompletionModal && !!completionStats}
         onClose={() => {
           setHasDismissedCompletion(true);
-          setShowCompletionModal(false);
         }}
         maxWidth="xl"
         zIndex="z-[110]"
@@ -811,7 +803,6 @@ function App() {
           <Button 
             onClick={() => {
               setHasDismissedCompletion(true);
-              setShowCompletionModal(false);
               resetChallenge(completionNotes, generateCsv);
               setCompletionNotes('');
               navigate('/');

@@ -252,7 +252,7 @@ const ConsciousEating = ({ refreshStats }) => {
       </div>
       
       <p className="mt-8 text-xs text-dim italic font-light text-center">
-        "Mindful eating is a way to rediscover one of life's most pleasurable activities."
+        "Mindful eating helps build awareness, allowing you to appreciate each bite and connect with your body's hunger and fullness cues."
       </p>
     </Card>
   );
