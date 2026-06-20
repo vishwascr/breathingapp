@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Play, Clock, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 import DailyProgress from './DailyProgress';
 import ConsciousEating from './ConsciousEating';
+import ConsciousWalking from './ConsciousWalking';
 import WeeklyGraph from './WeeklyGraph';
 import { Card, Button } from './common';
 
@@ -14,6 +15,14 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
     if (seconds < 60) return { total: Math.round(seconds), unit: 'seconds' };
     if (seconds < 3600) return { total: (seconds / 60).toFixed(1), unit: 'minutes' };
     return { total: (seconds / 3600).toFixed(2), unit: 'hours' };
+  };
+
+  const formatSessionDuration = (session) => {
+    if (session.pattern?.startsWith('Conscious')) {
+      const mins = Math.round(session.duration / 60);
+      return `${mins} minute${mins !== 1 ? 's' : ''}`;
+    }
+    return `${session.duration}s`;
   };
 
   // Calculate Stats using historyStats from backend
@@ -224,6 +233,7 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
             </Card>
 
             <ConsciousEating refreshStats={refreshStats} />
+            <ConsciousWalking refreshStats={refreshStats} />
 
             {lastSessions.length > 0 ? (
               <Card 
@@ -254,7 +264,7 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
                         </div>
                         <div>
                           <span className="block text-[0.65rem] uppercase tracking-widest text-dim mb-1">Duration</span>
-                          <span className="text-xl md:text-2xl font-light">{session.duration}s</span>
+                          <span className="text-xl md:text-2xl font-light">{formatSessionDuration(session)}</span>
                         </div>
                         {session.cooldownSeconds > 0 && (
                           <div>

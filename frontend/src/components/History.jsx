@@ -2,7 +2,11 @@ import { Trash2, Download } from 'lucide-react';
 import { Card, Button } from './common';
 
 function History({ history, hasMore, loadMore, onDelete }) {
-  const formatDuration = (seconds) => {
+  const formatDuration = (seconds, pattern) => {
+    if (pattern?.startsWith('Conscious')) {
+      const mins = Math.round(seconds / 60);
+      return `${mins} minute${mins !== 1 ? 's' : ''}`;
+    }
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
@@ -112,7 +116,7 @@ function History({ history, hasMore, loadMore, onDelete }) {
                   </span>
                 </div>
                 <h3 className="text-2xl font-light mb-4">
-                  {item.duration >= 60 ? formatDuration(item.duration) : `${item.duration} second session`}
+                  {item.duration >= 60 || item.pattern?.startsWith('Conscious') ? formatDuration(item.duration, item.pattern) : `${item.duration} second session`}
                 </h3>
                 
                 {item.notes && (

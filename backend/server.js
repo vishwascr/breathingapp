@@ -472,6 +472,70 @@ app.post('/api/eating', async (req, res) => {
   }
 });
 
+// Conscious Walking Integrated Routes
+app.get('/api/walking', async (req, res) => {
+  try {
+    const { date } = req.query; // Expecting YYYY-MM-DD
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const record = await History.findOne({
+      pattern: 'Conscious Walking',
+      timestamp: { $gte: startOfDay, $lte: endOfDay }
+    });
+    res.json(record);
+  } catch (err) {
+    console.error('Error fetching walking records:', err);
+    res.status(500).json({ message: 'Internal server error while fetching walking records.' });
+  }
+});
+
+app.post('/api/walking', async (req, res) => {
+  try {
+    const { minutes, notes, timestamp } = req.body;
+    const pattern = 'Conscious Walking';
+    const targetDate = new Date(timestamp);
+    
+    // Day bounds for the target date
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    if (minutes > 0) {
+      const record = await History.findOneAndUpdate(
+        { 
+          pattern, 
+          timestamp: { $gte: startOfDay, $lte: endOfDay } 
+        },
+        { 
+          $set: { 
+            duration: minutes * 60, 
+            rating: 5, 
+            notes: notes || '',
+            archived: false,
+            timestamp: targetDate
+          } 
+        },
+        { upsert: true, new: true }
+      );
+      res.json(record);
+    } else {
+      await History.findOneAndDelete({ 
+        pattern, 
+        timestamp: { $gte: startOfDay, $lte: endOfDay } 
+      });
+      res.json({ message: 'Entry removed' });
+    }
+  } catch (err) {
+    console.error('Error updating walking record:', err);
+    res.status(500).json({ message: 'Internal server error while updating walking record.' });
+  }
+});
+
+
 // Debug Simulation Routes
 app.post('/api/debug/expire-challenge', async (req, res) => {
   try {

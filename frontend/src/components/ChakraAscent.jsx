@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Play, ArrowRight, CheckCircle2, RotateCcw, 
-  Volume2, VolumeX, Sparkles, AlertCircle, 
+  Sparkles, AlertCircle, 
   HelpCircle, ChevronRight, PenTool, 
   BookOpen, Droplet, Music, Footprints, Clock
 } from 'lucide-react';
@@ -282,71 +282,6 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
     localStorage.setItem('breath-username', name);
   }, [name]);
 
-  // Audio synthesis helper for Tibetan Singing Bowl
-  const playBowlSound = (frequency = 180, toneType = 'sine', duration = 3) => {
-    if (!soundEnabled) return;
-    try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      
-      // Main fundamental tone
-      const osc1 = audioCtx.createOscillator();
-      const gain1 = audioCtx.createGain();
-      osc1.type = toneType;
-      osc1.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-      
-      // Harmonic overtone 1 (Tibetan bowls have rich overtones)
-      const osc2 = audioCtx.createOscillator();
-      const gain2 = audioCtx.createGain();
-      osc2.type = 'triangle';
-      osc2.frequency.setValueAtTime(frequency * 1.5, audioCtx.currentTime);
-
-      // Harmonic overtone 2 (High shimmer)
-      const osc3 = audioCtx.createOscillator();
-      const gain3 = audioCtx.createGain();
-      osc3.type = 'sine';
-      osc3.frequency.setValueAtTime(frequency * 2, audioCtx.currentTime);
-
-      // Node configuration
-      gain1.gain.setValueAtTime(0.25, audioCtx.currentTime);
-      gain1.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-
-      gain2.gain.setValueAtTime(0.12, audioCtx.currentTime);
-      gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration - 0.5);
-
-      gain3.gain.setValueAtTime(0.08, audioCtx.currentTime);
-      gain3.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration - 1);
-
-      osc1.connect(gain1);
-      osc2.connect(gain2);
-      osc3.connect(gain3);
-
-      gain1.connect(audioCtx.destination);
-      gain2.connect(audioCtx.destination);
-      gain3.connect(audioCtx.destination);
-
-      osc1.start();
-      osc2.start();
-      osc3.start();
-
-      osc1.stop(audioCtx.currentTime + duration);
-      osc2.stop(audioCtx.currentTime + duration);
-      osc3.stop(audioCtx.currentTime + duration);
-    } catch (err) {
-      console.warn("Singing bowl audio context failed:", err);
-    }
-  };
-
-  // Sound triggering on step change
-  useEffect(() => {
-    if (stage === 'meditating') {
-      const frequencies = [144, 162, 180, 216, 240, 270, 324];
-      const toneFreq = frequencies[chakraIndex] || 180;
-      playBowlSound(toneFreq, 'sine', 4);
-    } else if (stage === 'complete') {
-      playBowlSound(324, 'sine', 6);
-      playBowlSound(486, 'triangle', 4);
-    }
-  }, [stage, chakraIndex]);
 
   // Reset pattern index when chakra or mode changes
   useEffect(() => {
@@ -395,19 +330,6 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
         clearInterval(breathTimerRef.current);
         setPatternIndex((prevIdx) => {
           const nextIdx = (prevIdx + 1) % pattern.length;
-          
-          // Play transition tone
-          const nextPhase = pattern[nextIdx];
-          if (soundEnabled && nextPhase) {
-            const frequencies = {
-              Inhale: 220,
-              Hold: 277.18,
-              Exhale: 164.81
-            };
-            const toneType = nextPhase.phase === 'Hold' ? 'sine' : 'triangle';
-            playBowlSound(frequencies[nextPhase.phase] || 220, toneType, 1.5);
-          }
-          
           return nextIdx;
         });
       } else {
@@ -416,7 +338,7 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
     }, 1000);
 
     return () => clearInterval(breathTimerRef.current);
-  }, [stage, isPaused, soundEnabled, chakraIndex, universalMode, patternIndex]);
+  }, [stage, isPaused, chakraIndex, universalMode, patternIndex]);
 
   // Focus Timer Logic (for the Post-Ascent Focus Session)
   useEffect(() => {
@@ -426,7 +348,6 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
       }, 1000);
     } else if (focusTimer === 0) {
       setTimerRunning(false);
-      playBowlSound(440, 'triangle', 4); 
       clearInterval(timerRef.current);
     }
 
@@ -573,17 +494,6 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
               <span className={`transition-colors duration-200 ${universalMode ? 'text-accent font-medium' : ''}`}>Universal</span>
             </div>
           )}
-          
-          <Button 
-            onClick={() => setSoundEnabled(prev => !prev)}
-            variant="secondary"
-            size="none"
-            rounded="full"
-            className="p-3 text-dim shrink-0"
-            title={soundEnabled ? "Mute Bowl" : "Unmute Bowl"}
-          >
-            {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-          </Button>
         </div>
       </header>
 
