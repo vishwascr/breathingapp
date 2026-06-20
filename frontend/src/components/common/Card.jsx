@@ -28,15 +28,15 @@ const Card = forwardRef(
     ref
   ) => {
     // Base classes
-    const baseClasses = 'relative backdrop-blur-3xl';
+    const baseClasses = 'relative';
 
     // Variant classes
     const variants = {
       default: 'glass-panel',
       hoverable: 'glass-panel glass-panel-hover',
-      accent: 'bg-accent/[0.03] border border-accent/20 shadow-[0_0_30px_rgba(var(--color-accent),0.15)] transition-all duration-500',
-      dashed: 'bg-white/[0.02] border border-white/10 border-dashed backdrop-blur-3xl',
-      flat: 'bg-white/[0.015] border border-white/5 shadow-sm backdrop-blur-xl',
+      accent: 'bg-accent/[0.03] border border-accent/20 shadow-[0_0_30px_rgba(var(--color-accent),0.15)] backdrop-blur-sm transition-all duration-500',
+      dashed: 'bg-white/[0.02] border border-white/10 border-dashed backdrop-blur-md',
+      flat: 'bg-white/[0.015] border border-white/5 shadow-sm backdrop-blur-md',
       none: '',
     };
 

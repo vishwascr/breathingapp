@@ -100,10 +100,35 @@ const ConsciousWalking = ({ refreshStats }) => {
   return (
     <Card as="section" variant="hoverable" padding="lg" className="flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2">
-            <Footprints size={16} className="text-dim animate-pulse" />
-            <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Conscious Walking</h3>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="relative w-8 h-8 flex items-center justify-center flex-shrink-0">
+              <svg className="w-8 h-8 transform -rotate-90">
+                <circle
+                  cx="16"
+                  cy="16"
+                  r="12"
+                  className="stroke-white/10"
+                  strokeWidth="2.5"
+                  fill="transparent"
+                />
+                <circle
+                  cx="16"
+                  cy="16"
+                  r="12"
+                  className="stroke-accent transition-all duration-500 ease-out"
+                  strokeWidth="2.5"
+                  fill="transparent"
+                  strokeDasharray={75.4}
+                  strokeDashoffset={75.4 - (Math.min(minutes, 30) / 30) * 75.4}
+                />
+              </svg>
+              <span className="absolute text-[0.6rem] font-medium text-text">{Math.round(minutes)}m</span>
+            </div>
+            
+            <div>
+              <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Conscious Walking</h3>
+            </div>
           </div>
           
           <div className="flex items-center gap-4 bg-white/5 rounded-full px-3 py-1 border border-white/5">
