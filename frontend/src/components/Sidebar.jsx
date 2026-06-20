@@ -82,10 +82,10 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
       <div 
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className={`hidden md:flex md:flex-col md:fixed md:top-0 md:left-0 md:h-dvh border-r border-[color:var(--sidebar-border)] py-10 z-50 transition-[width,min-width,padding,box-shadow,background-color] duration-300 ease-in-out ${
+        className={`hidden md:flex md:flex-col md:fixed md:top-0 md:left-0 md:h-dvh border-r border-white/10 py-10 z-50 transition-[width,min-width,padding,box-shadow] duration-300 ease-in-out bg-bg ${
           isCollapsed 
-            ? 'md:w-20 md:min-w-[80px] md:px-3 shadow-none bg-[var(--sidebar-bg)] backdrop-blur-[var(--sidebar-blur)]' 
-            : 'md:w-72 md:min-w-[280px] md:px-6 shadow-[10px_0_30px_rgba(0,0,0,0.5)] border-r border-white/10 bg-bg'
+            ? 'md:w-20 md:min-w-[80px] md:px-3 shadow-none' 
+            : 'md:w-72 md:min-w-[280px] md:px-6 shadow-[10px_0_30px_rgba(0,0,0,0.5)]'
         }`}
       >
         <div className={`flex items-center mb-14 px-2 overflow-hidden transition-[justify-content,padding] duration-300 ${

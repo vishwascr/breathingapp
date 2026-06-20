@@ -14,9 +14,10 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
   const lastSessions = historyStats.lastSessions || [];
 
   const formatTime = (seconds) => {
-    if (seconds < 60) return { total: Math.round(seconds), unit: 'seconds' };
-    if (seconds < 3600) return { total: (seconds / 60).toFixed(1), unit: 'minutes' };
-    return { total: (seconds / 3600).toFixed(2), unit: 'hours' };
+    const minutes = seconds / 60;
+    if (minutes === 0) return { total: 0, unit: 'mins' };
+    const total = minutes % 1 === 0 ? minutes : parseFloat(minutes.toFixed(1));
+    return { total, unit: 'mins' };
   };
 
   const formatSessionDuration = (session) => {

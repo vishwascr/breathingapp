@@ -631,7 +631,7 @@ function App() {
             setSelectedCard(null);
             setIsClosingDetail(false);
           }}
-          className="absolute top-4 right-4 p-2 rounded-full text-dim hover:text-text hover:bg-white/10 transition-colors z-20 cursor-pointer"
+          className="absolute top-4 right-4 p-2 rounded-full text-text/50 hover:text-text hover:bg-white/10 transition-colors z-20 cursor-pointer"
           title="Close Modal"
         >
           <X size={18} />
@@ -646,7 +646,7 @@ function App() {
           >
             <div className="shrink-0 min-w-0">
               <h3 className="text-xl md:text-2xl font-light mb-2 truncate">Select Technique</h3>
-              <p className="text-dim font-light mb-6 leading-relaxed text-sm md:text-base">
+              <p className="text-text/60 font-light mb-6 leading-relaxed text-sm md:text-base">
                 Choose a breathing method to begin your session.
               </p>
             </div>
@@ -688,7 +688,7 @@ function App() {
                   </div>
 
                   {/* Card Bottom: Simple preview ratio */}
-                  <div className="text-center text-xs text-dim/60 tracking-wider">
+                  <div className="text-center text-xs text-text/40 tracking-wider">
                     {key === 'chakraAscent' ? '7 Levels' : method.pattern ? `${method.pattern.filter(Boolean).join(' • ')} Ratio` : 'Guided'}
                   </div>
                 </div>
@@ -710,7 +710,7 @@ function App() {
                   <div className="flex justify-between items-center w-full mb-4 shrink-0">
                     <button
                       onClick={handleBackClick}
-                      className="flex items-center gap-2 text-xs font-semibold text-dim hover:text-text transition-colors uppercase tracking-wider bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full border border-white/10 cursor-pointer"
+                      className="flex items-center gap-2 text-xs font-semibold text-text/60 hover:text-text transition-colors uppercase tracking-wider bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full border border-white/10 cursor-pointer"
                     >
                       <ChevronLeft size={14} /> Back
                     </button>
@@ -729,14 +729,14 @@ function App() {
                   </div>
 
                   {/* Description */}
-                  <p className="text-xs text-dim leading-relaxed mb-4 font-light shrink-0">
+                  <p className="text-xs text-text/75 leading-relaxed mb-4 font-light shrink-0">
                     {methods[selectedCard].description}
                   </p>
 
                   {/* Procedure Steps */}
                   <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 mb-4 min-h-0 text-left">
                     <h5 className="text-[10px] font-semibold uppercase tracking-wider text-accent mb-2">Procedure Steps</h5>
-                    <ol className="list-decimal pl-5 space-y-2 text-xs text-dim/90 leading-relaxed">
+                    <ol className="list-decimal pl-5 space-y-2 text-xs text-text/65 leading-relaxed">
                       {methods[selectedCard].steps.map((step, idx) => (
                         <li key={idx} className="pl-1 leading-normal">{step}</li>
                       ))}
