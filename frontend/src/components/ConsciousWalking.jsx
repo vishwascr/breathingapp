@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Footprints, Plus, Minus, MessageSquare, ChevronLeft, ChevronRight, Save, Loader2, Check } from 'lucide-react';
+import { Plus, Minus, MessageSquare, ChevronLeft, ChevronRight, Save, Loader2, Check } from 'lucide-react';
 import { Card, Button } from './common';
 
 const ConsciousWalking = ({ refreshStats }) => {

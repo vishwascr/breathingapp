@@ -1,6 +1,6 @@
-import { useState, lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Clock, ChevronLeft, ChevronRight, Trophy, Wind } from 'lucide-react';
+import { Play, Clock, Trophy, Wind } from 'lucide-react';
 import DailyProgress from './DailyProgress';
 import ConsciousEating from './ConsciousEating';
 import ConsciousWalking from './ConsciousWalking';
@@ -8,7 +8,6 @@ import { Card, Button } from './common';
 const WeeklyGraph = lazy(() => import('./WeeklyGraph'));
 
 function Dashboard({ historyStats, methods, openMethodModal, challengeActive, challengeStartDate, startChallenge, refreshStats }) {
-  const [activeStatIndex, setActiveStatIndex] = useState(0);
   const navigate = useNavigate();
 
   const lastSessions = historyStats.lastSessions || [];
@@ -90,9 +89,6 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
   const handleBeginClick = () => {
     openMethodModal();
   };
-
-  const nextStat = () => setActiveStatIndex((prev) => (prev + 1) % stats.length);
-  const prevStat = () => setActiveStatIndex((prev) => (prev - 1 + stats.length) % stats.length);
 
   const greeting = getGreeting();
 

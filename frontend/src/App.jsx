@@ -28,7 +28,6 @@ const getPatternText = (key, method) => {
 
 function App() {
   const [methods, setMethods] = useState(INITIAL_METHODS);
-  const [selectedMethod, setSelectedMethod] = useState(null);
   const [history, setHistory] = useState([]);
   const [historyStats, setHistoryStats] = useState({
     totalSeconds: 0,
@@ -128,10 +127,11 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Auto-collapse sidebar when a new page opens
-  useEffect(() => {
+  const [prevPath, setPrevPath] = useState(location.pathname);
+  if (location.pathname !== prevPath) {
+    setPrevPath(location.pathname);
     setSidebarCollapsed(true);
-  }, [location.pathname]);
+  }
 
   const expirationStats = useMemo(() => {
     if (challengeActive && challengeStartDate && !isSessionActive && !hasDismissedExpiration) {
@@ -422,7 +422,6 @@ function App() {
   };
 
   const handleMethodChange = (methodKey) => {
-    setSelectedMethod(methodKey);
     const routes = {
       '478': '/practice/4-7-8',
       'box': '/practice/box',
@@ -514,6 +513,7 @@ function App() {
                   path="/practice/:methodKey" 
                   element={
                     <Practice 
+                      key={location.pathname}
                       methods={methods} 
                       saveHistory={saveHistory} 
                       setIsSessionActive={setIsSessionActive}

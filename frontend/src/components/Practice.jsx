@@ -30,10 +30,7 @@ function Practice({ methods, saveHistory, setIsSessionActive }) {
     }
   }, [selectedMethodKey, methods, navigate]);
 
-  useEffect(() => {
-    // Reset session started state when methodKey changes
-    setIsSessionStarted(false);
-  }, [methodKey]);
+
 
   if (!selectedMethodKey || !methods[selectedMethodKey]) {
     return null;

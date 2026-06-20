@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Utensils, CheckCircle2, Circle, MessageSquare, ChevronLeft, ChevronRight, Save, Loader2 } from 'lucide-react';
+import { CheckCircle2, Circle, MessageSquare, ChevronLeft, ChevronRight, Save, Loader2 } from 'lucide-react';
 import { Card, Button } from './common';
 
 const ConsciousEating = ({ refreshStats }) => {

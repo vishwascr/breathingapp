@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Wind, Square, Maximize2, Waves, Bell, Sparkles, ArrowRight, Clock, BookOpen, Heart, Moon, Info } from 'lucide-react';
-import { Card, Button, Modal } from './common';
+import { Button, Modal } from './common';
 
 const METHOD_ICONS = {
   '478': Moon,

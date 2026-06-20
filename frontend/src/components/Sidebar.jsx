@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Wind, History as HistoryIcon, Settings, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Wind, History as HistoryIcon, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 
 function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethodModalOpen, challengeActive, isCollapsed, onToggleCollapse, onExpand, onCollapse }) {
   const location = useLocation();

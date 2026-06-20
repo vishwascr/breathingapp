@@ -284,7 +284,7 @@ function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive
     // 2. Base Properties
     let backgroundColor = isPreparing ? '#FFFFFF' : 'var(--color-bg)';
     let color = isPreparing ? '#000000' : '#FFFFFF';
-    let targetScale = 1;
+    let targetScale;
     let transitionDuration = 0.5; // Default transition seconds
     let timingFunction = 'ease-out';
 

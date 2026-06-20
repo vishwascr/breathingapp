@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Play, ArrowRight, CheckCircle2, RotateCcw, 
-  Sparkles, AlertCircle, 
-  HelpCircle, ChevronRight, PenTool, 
-  BookOpen, Droplet, Music, Footprints, Clock
+  ArrowRight, CheckCircle2, RotateCcw, 
+  Sparkles, 
+  ChevronRight, PenTool, 
+  Music, Clock,
+  HelpCircle, Footprints, Droplet
 } from 'lucide-react';
 import { Card, Button, Textarea } from './common';
 
@@ -226,7 +227,6 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
   const [responseText, setResponseText] = useState('');
   const [answers, setAnswers] = useState([]); // Array of { chakra, question, response }
   const [name, setName] = useState('Vishwas');
-  const [soundEnabled, setSoundEnabled] = useState(true);
   const [sessionRating, setSessionRating] = useState(0);
   const [historySaved, setHistorySaved] = useState(false);
   const sessionStartTimeRef = useRef(null);
@@ -256,11 +256,17 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
   
   // Breathing animation states
   const [patternIndex, setPatternIndex] = useState(0);
-  const [currentPhase, setCurrentPhase] = useState('Inhale');
   const [secondsLeft, setSecondsLeft] = useState(5);
-  const [isPaused, setIsPaused] = useState(false);
   const [universalMode, setUniversalMode] = useState(false);
-  const [activeScale, setActiveScale] = useState(1.0);
+
+  // Sync state on prop changes (derived state resets)
+  const [prevChakraIndex, setPrevChakraIndex] = useState(chakraIndex);
+  const [prevUniversalMode, setPrevUniversalMode] = useState(universalMode);
+  if (chakraIndex !== prevChakraIndex || universalMode !== prevUniversalMode) {
+    setPrevChakraIndex(chakraIndex);
+    setPrevUniversalMode(universalMode);
+    setPatternIndex(0);
+  }
   
   // Post-meditation action modes
   const [activeAction, setActiveAction] = useState(null); // null | 'timer' | 'music' | 'walk' | 'water'
@@ -272,35 +278,19 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
 
   const activeChakra = CHAKRAS[chakraIndex];
 
-  // Calculate dynamic breathing parameters
+  // Calculate dynamic breathing parameters (Derived)
   const currentPattern = getBreathingPattern(chakraIndex, universalMode);
   const currentPhaseObj = currentPattern[patternIndex] || currentPattern[0];
+  const currentPhase = currentPhaseObj?.phase || 'Inhale';
   const currentPhaseDuration = currentPhaseObj?.duration || 5;
 
-
-
-  // Reset pattern index when chakra or mode changes
-  useEffect(() => {
-    setPatternIndex(0);
-  }, [chakraIndex, universalMode]);
-
-  // Sync scale with phase for breathing circle animation
-  useEffect(() => {
-    if (stage !== 'meditating') {
-      setActiveScale(1.0);
-      return;
-    }
-    const targetScale = currentPhase === 'Inhale' || currentPhase === 'Hold' ? 2.5 : (currentPhase === 'Natural' ? 1.5 : 1.0);
-    
-    const rafId = requestAnimationFrame(() => {
-      setActiveScale(targetScale);
-    });
-    return () => cancelAnimationFrame(rafId);
-  }, [currentPhase, stage]);
+  const scale = stage !== 'meditating' 
+    ? 1.0 
+    : (currentPhase === 'Inhale' || currentPhase === 'Hold' ? 2.5 : (currentPhase === 'Natural' ? 1.5 : 1.0));
 
   // Breathing loop timer (chakra-specific dynamic counts and phases)
   useEffect(() => {
-    if (stage !== 'meditating' || isPaused) {
+    if (stage !== 'meditating') {
       if (breathTimerRef.current) clearInterval(breathTimerRef.current);
       return;
     }
@@ -310,45 +300,42 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
     if (!phase) return;
 
     if (phase.phase === 'Natural') {
-      setCurrentPhase('Natural');
       setSecondsLeft(9999);
       return;
     }
 
-    setCurrentPhase(phase.phase);
     setSecondsLeft(phase.duration);
-
     let currentSeconds = phase.duration;
 
     breathTimerRef.current = setInterval(() => {
       currentSeconds -= 1;
       if (currentSeconds <= 0) {
         clearInterval(breathTimerRef.current);
-        setPatternIndex((prevIdx) => {
-          const nextIdx = (prevIdx + 1) % pattern.length;
-          return nextIdx;
-        });
+        setPatternIndex((prevIdx) => (prevIdx + 1) % pattern.length);
       } else {
         setSecondsLeft(currentSeconds);
       }
     }, 1000);
 
     return () => clearInterval(breathTimerRef.current);
-  }, [stage, isPaused, chakraIndex, universalMode, patternIndex]);
+  }, [stage, chakraIndex, universalMode, patternIndex]);
 
   // Focus Timer Logic (for the Post-Ascent Focus Session)
   useEffect(() => {
-    if (timerRunning && focusTimer > 0) {
-      timerRef.current = setInterval(() => {
-        setFocusTimer(prev => prev - 1);
-      }, 1000);
-    } else if (focusTimer === 0) {
-      setTimerRunning(false);
-      clearInterval(timerRef.current);
-    }
+    if (!timerRunning) return;
+    
+    timerRef.current = setInterval(() => {
+      setFocusTimer(prev => {
+        if (prev <= 1) {
+          setTimerRunning(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
     return () => clearInterval(timerRef.current);
-  }, [timerRunning, focusTimer]);
+  }, [timerRunning]);
 
   const handleStartAscent = () => {
     setAnswers([]);
@@ -361,7 +348,7 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
     sessionStartTimeRef.current = Date.now();
   };
 
-  const handleSaveHistory = async (ratingVal) => {
+  const handleSaveHistory = useCallback(async (ratingVal) => {
     setSessionRating(ratingVal);
     const duration = sessionStartTimeRef.current 
       ? Math.round((Date.now() - sessionStartTimeRef.current) / 1000) 
@@ -393,7 +380,7 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
     } catch (e) {
       console.error("Failed to save Chakra Ascent session to history:", e);
     }
-  };
+  }, [answers, sessionStartTimeRef]);
 
   const handleNextStep = async () => {
     const currentChakra = CHAKRAS[chakraIndex];
@@ -565,7 +552,7 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
               <div 
                 className="absolute w-20 h-20 md:w-40 md:h-40 rounded-full flex flex-col justify-center items-center text-center font-extralight border border-white/10 z-10 bg-black/50 text-white"
                 style={{
-                  transform: `scale(${activeScale})`,
+                  transform: `scale(${scale})`,
                   transition: currentPhase === 'Natural' ? 'transform 4s ease-in-out' : `transform ${currentPhaseDuration}s ease-in-out`,
                   boxShadow: `0 0 15px 2px ${activeChakra.colorClasses.glowColor}, 0 0 50px 8px ${activeChakra.colorClasses.glowColor}, inset 0 0 10px rgba(255, 255, 255, 0.1)`
                 }}

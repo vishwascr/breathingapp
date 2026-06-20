@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Palette, Timer, Info, Save, Github, Trophy, RefreshCcw, Plus, Minus, ChevronDown } from 'lucide-react';
 import { Card, Button, Textarea, Checkbox } from './common';
 
@@ -56,18 +56,22 @@ function DurationPicker({ value, onChange, label }) {
 
 function MethodSettings({ methodKey, method, onSave }) {
   const [localPattern, setLocalPattern] = useState(method.pattern);
+  const [uniformValue, setUniformValue] = useState(() => {
+    const nz = method.pattern.filter(v => v > 0);
+    return nz[0] || 4;
+  });
+  const [prevMethod, setPrevMethod] = useState(method);
 
-  // Check if pattern is uniform (all non-zero phases are equal)
-  const nonZeroPhases = method.pattern.filter(v => v > 0);
-  const isUniform = nonZeroPhases.every(v => v === nonZeroPhases[0]);
-
-  const [uniformValue, setUniformValue] = useState(nonZeroPhases[0] || 4);
-
-  useEffect(() => {
+  if (method !== prevMethod) {
+    setPrevMethod(method);
     setLocalPattern(method.pattern);
     const nz = method.pattern.filter(v => v > 0);
     setUniformValue(nz[0] || 4);
-  }, [method]);
+  }
+
+  // Check if pattern is uniform (all non-zero phases are equal)
+  const nonZeroPhases = localPattern.filter(v => v > 0);
+  const isUniform = nonZeroPhases.every(v => v === nonZeroPhases[0]);
 
   const handleUniformChange = (val) => {
     setUniformValue(val);
