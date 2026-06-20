@@ -335,7 +335,7 @@ function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes
             <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Breathing Techniques</h3>
           </div>
           {Object.entries(methods)
-            .filter(([key]) => !['478', 'completeBreath'].includes(key))
+            .filter(([key]) => !['478', 'completeBreath', 'chakraAscent'].includes(key))
             .map(([key, method]) => (
             <MethodSettings 
               key={key} 

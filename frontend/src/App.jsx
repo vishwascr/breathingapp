@@ -8,7 +8,6 @@ import Sidebar from './components/Sidebar'
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const FourSevenEightBreathing = lazy(() => import('./components/FourSevenEightBreathing'));
 const BoxBreathing = lazy(() => import('./components/BoxBreathing'));
-const DiaphragmaticBreathing = lazy(() => import('./components/DiaphragmaticBreathing'));
 const CompleteBreath = lazy(() => import('./components/CompleteBreath'));
 const ResonanceBreathing = lazy(() => import('./components/ResonanceBreathing'));
 const AumChanting = lazy(() => import('./components/AumChanting'));
@@ -417,7 +416,7 @@ function App() {
     const routes = {
       '478': '/practice/4-7-8',
       'box': '/practice/box',
-      'deepBelly': '/practice/diaphragmatic',
+      'chakraAscent': '/chakra-ascent',
       'completeBreath': '/practice/complete-breath',
       'resonance': '/practice/resonance',
       'aum': '/practice/aum'
@@ -496,16 +495,7 @@ function App() {
                     />
                   } 
                 />
-                <Route 
-                  path="/practice/diaphragmatic" 
-                  element={
-                    <DiaphragmaticBreathing 
-                      methods={methods} 
-                      saveHistory={saveHistory} 
-                      setIsSessionActive={setIsSessionActive}
-                    />
-                  } 
-                />
+
                 <Route 
                   path="/practice/complete-breath" 
                   element={

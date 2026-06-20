@@ -11,15 +11,15 @@ export const INITIAL_METHODS = {
       'Hold your breath again for 4 seconds.'
     ]
   },
-  deepBelly: { 
-    name: 'Diaphragmatic Breathing', 
-    pattern: [5, 0, 5, 0],
-    description: 'Also known as belly breathing, this technique helps you use your diaphragm correctly and strengthen your lungs.',
+  chakraAscent: { 
+    name: 'Chakra Ascent', 
+    pattern: [0, 0, 0, 0],
+    description: 'A guided meditation journey through the seven energy centers (chakras) to balance the mind and body.',
     steps: [
-      'Sit or lie down in a comfortable position.',
-      'Place one hand on your chest and the other on your abdomen.',
-      'Inhale through your nose, feeling your abdomen rise while your chest remains still.',
-      'Exhale through your nose, feeling your abdomen fall.'
+      'Focus on the Muladhara (Root) chakra at the base of the spine.',
+      'Breathe deeply while chanting the seed mantra (LAM).',
+      'Reflect on stabilization questions to ground yourself.',
+      'Ascend step-by-step through all seven chakras to the Sahasrara (Crown).'
     ]
   },
   '478': { 
