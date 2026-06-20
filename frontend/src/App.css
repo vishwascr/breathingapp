@@ -111,6 +111,41 @@
   animation: card-breath-glow 6s ease-in-out infinite;
 }
 
+.breathe-techniques-btn-custom {
+  border: none !important;
+  box-shadow: none !important;
+  transition: all 0.3s ease;
+}
+
+/* If inactive, make the button color pale and give it a soft translucent overlay */
+.breathe-techniques-btn-custom:not(.bg-accent) {
+  color: var(--color-accent) !important;
+  opacity: 1 !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.breathe-techniques-btn-custom:not(.bg-accent):hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  opacity: 1 !important;
+}
+
+/* Icon glow animation */
+@keyframes icon-pulse-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.2)) drop-shadow(0 0 3px rgba(255, 255, 255, 0.1));
+    opacity: 0.9;
+  }
+  50% {
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.35)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.18));
+    opacity: 1;
+  }
+}
+
+.breathe-techniques-btn-custom svg {
+  color: #ffffff !important;
+  animation: icon-pulse-glow 5s ease-in-out infinite;
+}
+
 
 
 

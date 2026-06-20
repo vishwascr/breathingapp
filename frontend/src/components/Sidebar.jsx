@@ -69,7 +69,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
               {challengeActive && (
                 <li className="relative">
                   <button 
-                    className={linkClass({ isActive: isBreatheActive })}
+                    className={`${linkClass({ isActive: isBreatheActive })} breathe-techniques-btn-custom`}
                     onClick={handleBreatheClick}
                     title={isCollapsed ? "Breathing Techniques" : undefined}
                   >
@@ -132,31 +132,35 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
 
       {/* Mobile Pill Navigation (iOS App Dock Style) */}
       <div 
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] h-16 bg-[var(--mobile-nav-bg)] backdrop-blur-[var(--mobile-nav-blur)] border border-[color:var(--mobile-nav-border)] flex md:hidden flex-row items-center justify-around px-2 z-[100] rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-[420px] h-20 bg-white/[0.08] border border-white/10 flex md:hidden flex-row items-center justify-around px-3 z-[100] rounded-[2.2rem] shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
+        style={{
+          backdropFilter: 'blur(30px)',
+          WebkitBackdropFilter: 'blur(30px)',
+        }}
       >
         <ul className="flex flex-row justify-around items-center w-full list-none p-0 m-0">
           <li className="flex-1 flex justify-center">
             <NavLink 
               to="/" 
               className={({ isActive }) => 
-                `p-3.5 rounded-[1.2rem] transition-all duration-300 flex items-center justify-center ${
-                  isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-105' : 'text-white/50 hover:text-white'
+                `p-4 rounded-[1.4rem] transition-all duration-300 ease-out flex items-center justify-center ${
+                  isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-110 font-medium' : 'text-white/50 hover:text-white active:scale-95'
                 }`
               }
               onClick={(e) => handleNavClick(e, '/')}
             >
-              <LayoutDashboard size={24} strokeWidth={1.5} />
+              <LayoutDashboard size={26} strokeWidth={1.5} />
             </NavLink>
           </li>
           {challengeActive && (
             <li className="flex-1 flex justify-center">
               <button 
-                className={`p-3.5 rounded-[1.2rem] transition-all duration-300 flex items-center justify-center ${
-                  isBreatheActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-105' : 'text-white/50 hover:text-white'
+                className={`p-5 rounded-[1.4rem] transition-all duration-300 ease-out flex items-center justify-center breathe-techniques-btn-custom ${
+                  isBreatheActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-110 font-medium' : 'text-white/50 hover:text-white active:scale-95'
                 }`}
                 onClick={handleBreatheClick}
               >
-                <Wind size={24} strokeWidth={1.5} />
+                <Wind size={26} strokeWidth={2} />
               </button>
             </li>
           )}
@@ -166,26 +170,26 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
             <NavLink 
               to="/history" 
               className={({ isActive }) => 
-                `p-3.5 rounded-[1.2rem] transition-all duration-300 flex items-center justify-center ${
-                  isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-105' : 'text-white/50 hover:text-white'
+                `p-4 rounded-[1.4rem] transition-all duration-300 ease-out flex items-center justify-center ${
+                  isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-110 font-medium' : 'text-white/50 hover:text-white active:scale-95'
                 }`
               }
               onClick={(e) => handleNavClick(e, '/history')}
             >
-              <HistoryIcon size={24} strokeWidth={1.5} />
+              <HistoryIcon size={26} strokeWidth={1.5} />
             </NavLink>
           </li>
           <li className="flex-1 flex justify-center">
             <NavLink 
               to="/settings" 
               className={({ isActive }) => 
-                `p-3.5 rounded-[1.2rem] transition-all duration-300 flex items-center justify-center ${
-                  isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-105' : 'text-white/50 hover:text-white'
+                `p-4 rounded-[1.4rem] transition-all duration-300 ease-out flex items-center justify-center ${
+                  isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-110 font-medium' : 'text-white/50 hover:text-white active:scale-95'
                 }`
               }
               onClick={(e) => handleNavClick(e, '/settings')}
             >
-              <Settings size={24} strokeWidth={1.5} />
+              <Settings size={26} strokeWidth={1.5} />
             </NavLink>
           </li>
         </ul>
