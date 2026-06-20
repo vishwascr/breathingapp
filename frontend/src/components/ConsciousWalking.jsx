@@ -126,7 +126,7 @@ const ConsciousWalking = ({ refreshStats }) => {
         ) : (
           <div className="flex flex-col items-center gap-6">
             {/* Interactive Minutes Adjuster */}
-            <div className="flex items-center justify-center gap-6 w-full py-4">
+            <div className="flex items-center justify-center gap-6 w-full py-2">
               <button
                 onClick={() => adjustMinutes(-5)}
                 disabled={minutes <= 0}
@@ -136,16 +136,9 @@ const ConsciousWalking = ({ refreshStats }) => {
               </button>
 
               <div className="flex flex-col items-center min-w-[120px] relative">
-                <input
-                  type="number"
-                  value={minutes === 0 ? '' : minutes}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value);
-                    setMinutes(isNaN(val) ? 0 : Math.max(0, val));
-                  }}
-                  placeholder="0"
-                  className="w-full text-center bg-transparent border-none text-5xl font-thin text-accent tracking-tighter focus:ring-0 focus:outline-none placeholder:text-dim/20"
-                />
+                <span className="text-6xl font-thin text-accent tracking-tighter select-none">
+                  {minutes}
+                </span>
                 <span className="text-[0.65rem] uppercase tracking-widest text-dim mt-1 font-light">
                   Minutes
                 </span>
@@ -162,20 +155,42 @@ const ConsciousWalking = ({ refreshStats }) => {
               </button>
             </div>
 
-            {/* Quick Logging Presets */}
-            {minutes === 0 && (
-              <div className="flex gap-2 animate-in fade-in duration-300">
-                {[10, 20, 30, 45].map((preset) => (
-                  <button
-                    key={preset}
-                    onClick={() => setMinutes(preset)}
-                    className="px-3 py-1.5 rounded-full text-xs font-light tracking-wider bg-white/5 border border-white/5 hover:border-accent/30 hover:bg-accent/5 hover:text-accent transition-all duration-300"
-                  >
-                    +{preset}m
-                  </button>
-                ))}
+            {/* Custom Range Slider */}
+            <div className="w-full px-6 py-2">
+              <input
+                type="range"
+                min="0"
+                max="60"
+                step="5"
+                value={minutes}
+                onChange={(e) => setMinutes(parseInt(e.target.value))}
+                className="custom-range-slider"
+              />
+              <div className="flex justify-between text-[0.65rem] text-dim/30 mt-2 font-mono tracking-widest">
+                <span>0m</span>
+                <span>15m</span>
+                <span>30m</span>
+                <span>45m</span>
+                <span>60m</span>
               </div>
-            )}
+            </div>
+
+            {/* Quick Logging Presets */}
+            <div className="flex gap-2.5">
+              {[10, 20, 30, 45].map((preset) => (
+                <button
+                  key={preset}
+                  onClick={() => setMinutes(preset)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-light tracking-wider border transition-all duration-300 cursor-pointer ${
+                    minutes === preset
+                      ? 'border-accent bg-accent/15 text-accent font-medium shadow-[0_0_12px_var(--color-accent)]'
+                      : 'bg-white/5 border-white/5 hover:border-accent/30 hover:bg-accent/5 hover:text-accent'
+                  }`}
+                >
+                  +{preset}m
+                </button>
+              ))}
+            </div>
 
             {/* Notes & Save Button */}
             {minutes > 0 && (
