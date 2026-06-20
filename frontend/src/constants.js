@@ -1,6 +1,7 @@
 export const INITIAL_METHODS = {
   box: { 
     name: 'Box Breathing', 
+    category: 'Focus',
     pattern: [4, 4, 4, 4],
     description: 'A powerful stress-reliever used by Navy SEALs. It involves four equal steps of breathing, holding, and exhaling.',
     steps: [
@@ -13,6 +14,7 @@ export const INITIAL_METHODS = {
   },
   chakraAscent: { 
     name: 'Chakra Ascent', 
+    category: 'Spirit',
     pattern: [0, 0, 0, 0],
     description: 'A guided meditation journey through the seven energy centers (chakras) to balance the mind and body.',
     steps: [
@@ -24,6 +26,7 @@ export const INITIAL_METHODS = {
   },
   '478': { 
     name: '4-7-8 Breathing', 
+    category: 'Sleep',
     pattern: [4, 7, 8, 0],
     description: 'A natural tranquilizer for the nervous system. Developed by Dr. Andrew Weil, it is excellent for falling asleep.',
     steps: [
@@ -35,6 +38,7 @@ export const INITIAL_METHODS = {
   },
   completeBreath: {
     name: 'The Complete Breath',
+    category: 'Vitality',
     pattern: [5, 3, 6, 0],
     isNew: true,
     description: 'A foundational practice that fills the entire lungs. It involves a smooth sweep from the diaphragm to the collar-bone.',
@@ -56,6 +60,7 @@ export const INITIAL_METHODS = {
   },
   resonance: {
     name: 'Resonance Breathing',
+    category: 'Balance',
     pattern: [5, 0, 5, 0],
     isNew: true,
     description: 'Breathing at a rate of 5-6 breaths per minute to balance the autonomic nervous system and reduce anxiety.',
@@ -68,6 +73,7 @@ export const INITIAL_METHODS = {
   },
   aum: {
     name: 'Aum Chanting',
+    category: 'Vibration',
     pattern: [4, 4, 4, 5],
     phases: ['Inhale', 'Aaa', 'Uuu', 'Mmmm'],
     description: 'Combines controlled exhalation with sound vibrations to stimulate the vagus nerve and calm the mind.',

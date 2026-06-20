@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import { Trophy, Clock, Calendar, Activity, CheckCircle2, Star, Target, Zap, RefreshCcw, Wind } from 'lucide-react'
+import { Trophy, Clock, Calendar, Activity, CheckCircle2, Star, Target, Zap, RefreshCcw, Wind, X } from 'lucide-react'
 import './App.css'
 import { Modal, Card, Button, Textarea, Checkbox } from './components/common'
 
@@ -11,6 +11,20 @@ const History = lazy(() => import('./components/History'));
 const Settings = lazy(() => import('./components/Settings'));
 
 import { INITIAL_METHODS, THEMES } from './constants'
+
+// Helper to format the breathing ratios/patterns beautifully
+const getPatternText = (key, method) => {
+  if (key === 'chakraAscent') return '7 Levels of Meditation';
+  if (key === 'aum') return 'Inhale 4s • Chanting Exhale 13s';
+  if (!method.pattern || method.pattern.every(v => v === 0)) return 'Guided Meditation';
+  const [inhale, hold, exhale, hold2] = method.pattern;
+  const parts = [];
+  if (inhale > 0) parts.push(`Inhale ${inhale}s`);
+  if (hold > 0) parts.push(`Hold ${hold}s`);
+  if (exhale > 0) parts.push(`Exhale ${exhale}s`);
+  if (hold2 > 0) parts.push(`Hold ${hold2}s`);
+  return parts.join(' • ');
+};
 
 function App() {
   const [methods, setMethods] = useState(() => {
@@ -126,6 +140,7 @@ function App() {
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [pendingNav, setPendingNav] = useState(null);
   const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
+  const [activeCard, setActiveCard] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -587,8 +602,11 @@ function App() {
       {/* Global Method Selection Modal */}
       <Modal
         isOpen={isMethodModalOpen}
-        onClose={() => setIsMethodModalOpen(false)}
-        maxWidth="sm"
+        onClose={() => {
+          setIsMethodModalOpen(false);
+          setActiveCard(null);
+        }}
+        maxWidth="2xl"
         zIndex="z-[100]"
         className="text-center flex flex-col max-h-[90dvh] min-w-0"
       >
@@ -599,32 +617,115 @@ function App() {
           </p>
         </div>
         
-        <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-3 custom-scrollbar min-w-0">
-          {Object.entries(methods).map(([key, method]) => (
-            <Button
-              key={key}
-              variant="secondary"
-              size="none"
-              className="w-full py-3 md:py-4 px-4 flex items-center justify-between gap-3 min-w-0"
-              onClick={() => {
-                handleMethodChange(key);
-                setIsMethodModalOpen(false);
-              }}
-            >
-              <span className="truncate text-left flex-1 min-w-0 pr-2">{method.name}</span>
-              {method.isNew && (
-                <span className="shrink-0 text-[0.6rem] bg-accent text-bg px-2 py-0.5 rounded-full font-bold tracking-widest leading-none">NEW</span>
-              )}
-            </Button>
-          ))}
+        <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 custom-scrollbar min-w-0 pb-4">
+          {Object.entries(methods).map(([key, method]) => {
+            const isExpanded = activeCard === key;
+            return (
+              <div
+                key={key}
+                className="relative overflow-hidden group glass-panel glass-panel-hover rounded-squircle-md h-[240px] flex flex-col justify-between p-5 transition-all duration-500 ease-in-out cursor-pointer"
+                onClick={() => {
+                  setActiveCard(activeCard === key ? null : key);
+                }}
+              >
+                {/* Initial Minimalist View */}
+                <div className="flex flex-col justify-between h-full w-full pointer-events-none">
+                  <div className="flex items-center justify-between w-full">
+                    <span className="bg-accent/10 text-accent border border-accent/20 px-3 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase">
+                      {method.category || 'Meditation'}
+                    </span>
+                    {method.isNew && (
+                      <span className="text-[9px] bg-accent text-bg px-2 py-0.5 rounded-full font-bold tracking-widest leading-none">
+                        NEW
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 flex items-center justify-center py-4">
+                    <h4 className="text-lg font-light text-text tracking-wide text-center">
+                      {method.name}
+                    </h4>
+                  </div>
+
+                  <div className="text-center text-xs text-dim/60 transition-opacity duration-300">
+                    {key === 'chakraAscent' ? '7 Levels' : method.pattern ? `${method.pattern.filter(Boolean).join('-')} Ratio` : 'Guided'}
+                  </div>
+                </div>
+
+                {/* Details Panel: Slides up on hover (desktop) or expand (mobile) */}
+                <div
+                  className={`absolute inset-0 bg-secondary/95 backdrop-blur-md p-4 flex flex-col justify-between transition-transform duration-300 ease-in-out z-10 ${
+                    isExpanded ? 'translate-y-0' : 'translate-y-full group-hover:translate-y-0'
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  {/* Close button for touch screens */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveCard(null);
+                    }}
+                    className="absolute top-3 right-3 p-1.5 rounded-full text-dim hover:text-text hover:bg-white/10 transition-colors md:hidden"
+                  >
+                    <X size={14} />
+                  </button>
+
+                  <div className="flex-1 flex flex-col min-h-0 text-left pt-2">
+                    {/* Header: Name and Ratio */}
+                    <div className="mb-2">
+                      <h4 className="text-sm font-semibold text-text truncate pr-6">{method.name}</h4>
+                      <p className="text-[11px] text-accent font-medium mt-0.5 tracking-wide">
+                        {getPatternText(key, method)}
+                      </p>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-[11px] text-dim line-clamp-2 leading-relaxed mb-2">
+                      {method.description}
+                    </p>
+
+                    {/* Procedure Steps */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 min-h-0 text-[10px]">
+                      <p className="text-accent/80 font-medium mb-1 uppercase tracking-wider text-[9px]">Procedure:</p>
+                      <ol className="list-decimal pl-4 space-y-1 text-dim/90">
+                        {method.steps.map((step, idx) => (
+                          <li key={idx} className="leading-normal">{step}</li>
+                        ))}
+                      </ol>
+                    </div>
+                  </div>
+
+                  {/* Start Button */}
+                  <div className="mt-3 pt-2 border-t border-white/5">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMethodChange(key);
+                        setIsMethodModalOpen(false);
+                        setActiveCard(null);
+                      }}
+                      className="w-full py-2 px-4 rounded-full bg-accent text-bg font-semibold text-xs tracking-wider uppercase hover:bg-indicator transition-all duration-300 transform active:scale-95 shadow-[0_0_15px_rgba(255,255,255,0.05)] cursor-pointer"
+                    >
+                      Begin Flow
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        <div className="shrink-0 mt-4">
+        <div className="shrink-0 mt-2">
           <Button 
-            onClick={() => setIsMethodModalOpen(false)} 
+            onClick={() => {
+              setIsMethodModalOpen(false);
+              setActiveCard(null);
+            }} 
             variant="secondary"
             size="none"
-            className="w-full py-3 text-dim"
+            className="w-full py-3 text-dim hover:text-text"
           >
             Cancel
           </Button>
