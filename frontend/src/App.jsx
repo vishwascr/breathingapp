@@ -460,10 +460,19 @@ function App() {
           />
         )}
         
+        {/* Overlay backdrop for expanded sidebar on desktop */}
+        {challengeActive && !sidebarCollapsed && (
+          <div 
+            className="hidden md:block fixed inset-0 bg-black/40 backdrop-blur-[2px] z-40 transition-opacity duration-300 cursor-pointer"
+            onClick={toggleSidebar}
+            aria-hidden="true"
+          />
+        )}
+        
         <div className={`flex-1 relative isolate min-h-dvh transition-all duration-300 ${
           !challengeActive 
             ? 'md:ml-0' 
-            : (sidebarCollapsed ? 'md:ml-20' : 'md:ml-72')
+            : 'md:ml-20'
         }`}>
           {/* Subtle Vertical Stripes Background - Fixed to stay behind scrolling content */}
           {showStripes && (

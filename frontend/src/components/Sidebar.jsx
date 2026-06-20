@@ -39,7 +39,9 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
     <>
       {/* Desktop Sidebar */}
       <div className={`hidden md:flex md:flex-col md:fixed md:top-0 md:left-0 md:h-dvh bg-[var(--sidebar-bg)] backdrop-blur-[var(--sidebar-blur)] border-r border-[color:var(--sidebar-border)] py-10 z-50 transition-all duration-300 ease-in-out ${
-        isCollapsed ? 'md:w-20 md:min-w-[80px] md:px-3' : 'md:w-72 md:min-w-[280px] md:px-6'
+        isCollapsed 
+          ? 'md:w-20 md:min-w-[80px] md:px-3 shadow-none' 
+          : 'md:w-72 md:min-w-[280px] md:px-6 shadow-[10px_0_30px_rgba(0,0,0,0.5)] border-r border-white/10'
       }`}>
         <div className={`flex items-center mb-14 px-2 overflow-hidden`}>
           <span className="text-2xl font-semibold text-accent leading-none shrink-0 w-6 h-6 flex items-center justify-center animate-pulse">⌘</span>
