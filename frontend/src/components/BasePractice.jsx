@@ -444,7 +444,7 @@ function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive
                 handleStartStop();
               }
             }}
-            className={`absolute w-20 h-20 md:w-40 md:h-40 breath-glow rounded-full z-[2] flex justify-center items-center text-[2.5rem] md:text-[3.5rem] font-light cursor-pointer transition-all duration-1000 ${isCooldown ? 'cooldown-active' : ''}`}
+            className={`absolute w-20 h-20 md:w-40 md:h-40 breath-glow rounded-full z-[2] flex justify-center items-center text-[2.5rem] md:text-[3.5rem] font-light cursor-pointer ${isCooldown ? 'cooldown-active' : ''}`}
             style={getCircleStyle()}
           >
             {countdown !== null ? countdown : (isActive ? <span ref={timeDisplayRef}>{timeLeft}</span> : '')}
@@ -453,7 +453,7 @@ function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive
 
         <div className="flex flex-col items-center w-full max-w-xs mx-auto gap-4 md:gap-10 mb-2 md:mb-0">
           {/* Unified Vertical Stack - Space Reserved */}
-          <div className={`flex flex-col items-center text-center gap-2 transition-all duration-500 min-h-[120px] md:min-h-[160px] justify-center ${isActive ? 'opacity-100' : 'opacity-0 invisible'}`}>
+          <div className={`flex flex-col items-center text-center gap-2 transition-[opacity,visibility] duration-500 min-h-[120px] md:min-h-[160px] justify-center ${isActive ? 'opacity-100' : 'opacity-0 invisible'}`}>
             {/* 1. Phase Text */}
             <div className="text-[1.2rem] md:text-[1.8rem] font-thin text-text uppercase tracking-[0.6rem] md:tracking-[1rem] whitespace-nowrap mb-1">
               {currentPhase}

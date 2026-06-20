@@ -13,12 +13,27 @@
 /* Elegant layered glow for the breath indicator */
 .breath-glow {
   background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  position: relative;
+  will-change: transform;
+  transform: translateZ(0); /* Enable GPU layer compilation */
+  -webkit-font-smoothing: antialiased;
+}
+
+.breath-glow::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
   box-shadow: 
-    0 0 15px 2px var(--indicator-color),
-    0 0 50px 8px var(--indicator-color),
+    0 0 20px 2px var(--indicator-color),
+    0 0 55px 8px var(--indicator-color),
     inset 0 0 10px rgba(255, 255, 255, 0.1);
-  backdrop-blur: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 0.85;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.5s ease, box-shadow 0.5s ease;
+  will-change: opacity;
 }
 
 @keyframes grow-stroke {
@@ -48,20 +63,23 @@
   animation: trophy-glow 3s ease-in-out infinite;
 }
 
-@keyframes cooldown-glow {
-  0%, 100% { 
-    box-shadow: 0 0 15px 2px var(--color-cooldown), 0 0 50px 8px var(--color-cooldown);
-  }
-  50% { 
-    box-shadow: 0 0 40px 10px var(--color-cooldown), 0 0 90px 20px var(--color-cooldown);
-  }
+@keyframes cooldown-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.95; }
 }
 
 .cooldown-active {
-  animation: cooldown-glow 4s ease-in-out infinite;
-  animation-delay: 1.5s; /* Wait for the 1.5s scale transition to finish */
-  border-color: var(--color-cooldown);
-  box-shadow: 0 0 15px 2px var(--color-cooldown), 0 0 50px 8px var(--color-cooldown);
+  border-color: var(--color-cooldown) !important;
+}
+
+.cooldown-active::after {
+  box-shadow: 
+    0 0 25px 4px var(--color-cooldown),
+    0 0 75px 15px var(--color-cooldown),
+    inset 0 0 10px rgba(255, 255, 255, 0.1) !important;
+  animation: cooldown-pulse 3.5s ease-in-out infinite !important;
+  animation-delay: 1.5s;
+  will-change: opacity;
 }
 
 @keyframes breath-glow-slow {
@@ -94,21 +112,27 @@
   animation: breath-glow-fast 7s ease-in-out infinite;
 }
 
-@keyframes card-breath-glow {
-  0%, 100% {
-    box-shadow: 0 0 10px 0px var(--color-accent);
-    border-color: rgba(255, 255, 255, 0.08);
-    background-color: rgba(255, 255, 255, 0.02);
-  }
-  50% {
-    box-shadow: 0 0 25px 4px var(--color-accent);
-    border-color: var(--color-accent);
-    background-color: rgba(255, 255, 255, 0.04);
-  }
+@keyframes card-breath-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.85; }
 }
 
 .animate-card-breath-glow {
-  animation: card-breath-glow 6s ease-in-out infinite;
+  position: relative;
+}
+
+.animate-card-breath-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 20px 2px var(--color-accent);
+  border: 1px solid var(--color-accent);
+  opacity: 0.6;
+  animation: card-breath-pulse 5s ease-in-out infinite;
+  pointer-events: none;
+  will-change: opacity;
+  z-index: 0;
 }
 
 .breathe-techniques-btn-custom {
@@ -117,16 +141,26 @@
   transition: all 0.3s ease;
 }
 
-/* If inactive, make the button color pale and give it a soft translucent overlay */
-.breathe-techniques-btn-custom:not(.bg-accent) {
-  color: var(--color-accent) !important;
-  opacity: 1 !important;
-  background-color: rgba(255, 255, 255, 0.1) !important;
+/* If inactive, make the button color pale and give it a soft translucent overlay on mobile only */
+@media (max-width: 767px) {
+  .breathe-techniques-btn-custom:not(.bg-accent) {
+    color: var(--color-accent) !important;
+    opacity: 1 !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .breathe-techniques-btn-custom:not(.bg-accent):hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    opacity: 1 !important;
+  }
 }
 
-.breathe-techniques-btn-custom:not(.bg-accent):hover {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  opacity: 1 !important;
+@media (min-width: 768px) {
+  .breathe-techniques-btn-custom:not(.bg-accent) {
+    color: var(--color-accent) !important;
+    opacity: 1 !important;
+    background-color: transparent !important;
+  }
 }
 
 /* Icon glow animation */
@@ -160,39 +194,44 @@
   -webkit-backface-visibility: hidden;
 }
 
-/* Premium keyframe animation for simultaneous flip and glide */
-@keyframes flip-glide-in {
+@keyframes quick-flip-in {
   0% {
     opacity: 0;
-    transform: perspective(1000px) rotateY(0deg) scale(0.85) translate3d(0, 40px, 0);
+    transform: rotateY(-45deg) scale(0.92) translate3d(0, 20px, 0);
   }
   100% {
     opacity: 1;
-    transform: perspective(1000px) rotateY(180deg) scale(1) translate3d(0, 0, 0);
+    transform: rotateY(0deg) scale(1) translate3d(0, 0, 0);
   }
 }
 
-@keyframes flip-glide-out {
+@keyframes quick-flip-out {
   0% {
     opacity: 1;
-    transform: perspective(1000px) rotateY(180deg) scale(1) translate3d(0, 0, 0);
+    transform: rotateY(0deg) scale(1) translate3d(0, 0, 0);
   }
   100% {
     opacity: 0;
-    transform: perspective(1000px) rotateY(0deg) scale(0.85) translate3d(0, 40px, 0);
+    transform: rotateY(45deg) scale(0.92) translate3d(0, 20px, 0);
   }
 }
 
-.animate-flipGlideIn {
-  animation: flip-glide-in 0.65s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+.animate-quickFlipIn {
+  animation: quick-flip-in 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards;
   transform-style: preserve-3d;
   will-change: transform, opacity;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transform: translateZ(0);
 }
 
-.animate-flipGlideOut {
-  animation: flip-glide-out 0.55s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+.animate-quickFlipOut {
+  animation: quick-flip-out 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
   transform-style: preserve-3d;
   will-change: transform, opacity;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transform: translateZ(0);
 }
 
 /* GPU Accelerated transitions to guarantee 60FPS */
@@ -201,16 +240,27 @@
   will-change: transform, opacity;
 }
 
+/* Card background for animated cards inside modal, replacing backdrop-filter with solid background to avoid heavy rasterization */
+.flat-card {
+  background-color: var(--color-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 .technique-grid-card {
   transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
   will-change: transform;
 }
 
-.technique-grid-card:hover {
-  transform: scale(1.02) translate3d(0, -4px, 0);
-  border-color: rgba(255, 255, 255, 0.15) !important;
-  background-color: rgba(255, 255, 255, 0.05) !important;
-  box-shadow: 0 8px 30px rgba(255, 255, 255, 0.05) !important;
+@media (hover: hover) {
+  .technique-grid-card:hover {
+    transform: scale(1.025) translate3d(0, -4px, 0);
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45), 0 0 15px rgba(255, 255, 255, 0.05) !important;
+    z-index: 10;
+  }
 }
 
 .icon-container-transition {

@@ -148,7 +148,7 @@ function App() {
     setTimeout(() => {
       setSelectedCard(null);
       setIsClosingDetail(false);
-    }, 550); // Matches 0.55s out animation
+    }, 300); // Matches 0.3s out animation
   }, []);
 
   const navigate = useNavigate();
@@ -482,19 +482,23 @@ function App() {
             challengeActive={challengeActive}
             isCollapsed={sidebarCollapsed}
             onToggleCollapse={toggleSidebar}
+            onExpand={() => {
+              setSidebarCollapsed(false);
+              localStorage.setItem('sidebar-collapsed', 'false');
+            }}
           />
         )}
         
         {/* Overlay backdrop for expanded sidebar on desktop */}
         {challengeActive && !sidebarCollapsed && (
           <div 
-            className="hidden md:block fixed inset-0 bg-black/40 backdrop-blur-[2px] z-40 transition-opacity duration-300 cursor-pointer"
+            className="hidden md:block fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 cursor-pointer"
             onClick={toggleSidebar}
             aria-hidden="true"
           />
         )}
         
-        <div className={`flex-1 relative isolate min-h-dvh transition-all duration-300 ${
+        <div className={`flex-1 relative isolate min-h-dvh transition-[margin-left] duration-300 ${
           !challengeActive 
             ? 'md:ml-0' 
             : 'md:ml-20'
@@ -615,7 +619,6 @@ function App() {
         onClose={() => {
           setIsMethodModalOpen(false);
           setSelectedCard(null);
-          setIsDetailFlipped(false);
         }}
         maxWidth="5xl"
         zIndex="z-[100]"
@@ -637,8 +640,8 @@ function App() {
         <div className="relative flex-1 flex flex-col min-h-0 w-full">
           {/* Grid View Container */}
           <div
-            className={`flex-1 flex flex-col transition-all duration-500 ease-in-out ${
-              selectedCard ? 'opacity-0 scale-95 pointer-events-none absolute inset-0' : 'opacity-100 scale-100'
+            className={`flex-1 flex flex-col grid-fade-transition ${
+              selectedCard ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
             }`}
           >
             <div className="shrink-0 min-w-0">
@@ -648,12 +651,19 @@ function App() {
               </p>
             </div>
             
-            <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 custom-scrollbar min-w-0 pb-4">
+            <div className="flex-1 overflow-y-auto pt-3 pr-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 custom-scrollbar min-w-0 pb-4">
               {Object.entries(methods).map(([key, method]) => (
                 <div
                   key={key}
-                  className="relative overflow-hidden group glass-panel glass-panel-hover rounded-squircle-md h-[220px] flex flex-col justify-between p-6 transition-all duration-500 ease-in-out cursor-pointer hover:border-accent/40 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(255,255,255,0.08)]"
-                  onClick={() => setSelectedCard(key)}
+                  className="relative overflow-hidden group flat-card rounded-squircle-md h-[220px] flex flex-col justify-between p-6 cursor-pointer technique-grid-card"
+                  onClick={() => {
+                    if (window.innerWidth < 768) {
+                      handleMethodChange(key);
+                      setIsMethodModalOpen(false);
+                    } else {
+                      setSelectedCard(key);
+                    }
+                  }}
                 >
                   {/* Card Top: Category & Tags */}
                   <div className="flex items-center justify-between w-full">
@@ -669,10 +679,10 @@ function App() {
                   
                   {/* Card Middle: Pulsing wind icon & Title */}
                   <div className="flex-1 flex flex-col items-center justify-center gap-3 my-2">
-                    <div className="w-10 h-10 border border-accent/15 rounded-full flex items-center justify-center transition-all duration-500 group-hover:border-accent/30 group-hover:scale-105">
-                      <Wind className="w-4.5 h-4.5 text-accent/60 group-hover:text-accent transition-colors" />
+                    <div className="w-10 h-10 border border-accent/15 rounded-full flex items-center justify-center icon-container-transition">
+                      <Wind className="w-4.5 h-4.5 text-accent/60 transition-colors" />
                     </div>
-                    <h4 className="text-lg md:text-xl font-light text-text tracking-wide text-center group-hover:text-accent transition-colors duration-300">
+                    <h4 className="text-lg md:text-xl font-light text-text tracking-wide text-center transition-colors duration-300">
                       {method.name}
                     </h4>
                   </div>
@@ -688,41 +698,14 @@ function App() {
 
           {/* Detailed Glide/Flip View Container */}
           {selectedCard && (
-            <div className="flex-1 flex items-center justify-center h-full min-h-0 py-2 perspective-1000">
+            <div className="absolute inset-0 flex items-center justify-center p-4 z-10 perspective-1000 pointer-events-auto">
               <div
                 className={`relative w-full max-w-xl h-[480px] preserve-3d ${
-                  isClosingDetail ? 'animate-flipGlideOut' : 'animate-flipGlideIn'
+                  isClosingDetail ? 'animate-quickFlipOut' : 'animate-quickFlipIn'
                 }`}
               >
-                {/* FRONT SIDE (Minimalist View) */}
-                <div className="absolute inset-0 backface-hidden glass-panel rounded-squircle-lg p-8 flex flex-col justify-between border border-white/10 bg-secondary/85 backdrop-blur-xl">
-                  <div className="flex items-center justify-between w-full">
-                    <span className="bg-accent/15 text-accent border border-accent/25 px-3.5 py-1.5 rounded-full text-[10px] font-semibold tracking-wider uppercase">
-                      {methods[selectedCard].category || 'Meditation'}
-                    </span>
-                    {methods[selectedCard].isNew && (
-                      <span className="text-[9px] bg-accent text-bg px-2 py-0.5 rounded-full font-bold tracking-widest leading-none">
-                        NEW
-                      </span>
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 flex flex-col items-center justify-center gap-4">
-                    <div className="w-16 h-16 border border-accent/20 rounded-full flex items-center justify-center animate-pulse">
-                      <Wind className="w-8 h-8 text-accent" />
-                    </div>
-                    <h3 className="text-2xl md:text-3xl font-light text-text tracking-wide text-center">
-                      {methods[selectedCard].name}
-                    </h3>
-                  </div>
-
-                  <div className="text-center text-sm text-dim/60 tracking-wider">
-                    {selectedCard === 'chakraAscent' ? '7 Levels' : methods[selectedCard].pattern ? `${methods[selectedCard].pattern.filter(Boolean).join(' • ')} Ratio` : 'Guided'}
-                  </div>
-                </div>
-
-                {/* BACK SIDE (Detailed View - rotated 180deg) */}
-                <div className="absolute inset-0 backface-hidden [transform:rotateY(180deg)] glass-panel rounded-squircle-lg p-8 flex flex-col justify-between border border-white/10 bg-secondary/85 backdrop-blur-xl">
+                {/* Detailed View Card (Direct reveal with a quick 3D flip-in) */}
+                <div className="absolute inset-0 flat-card rounded-squircle-lg p-8 flex flex-col justify-between">
                   {/* Close detailed view button in the top left */}
                   <div className="flex justify-between items-center w-full mb-4 shrink-0">
                     <button

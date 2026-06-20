@@ -95,22 +95,22 @@ export const INITIAL_METHODS = {
 
 export const THEMES = {
   noir: {
-    name: 'Noir (Night)',
+    name: 'Simple grayscale',
     colors: {
-      bg: '#000000',
-      accent: '#91936A',
-      indicator: '#D3D4C2',
-      glass: '#1A1A17',
-      text: '#E8E9E0',
-      secondary: '#21211B',
-      dim: '#BDBEA5',
-      cooldown: '#91936A',
-      sidebarBg: 'rgba(255, 255, 255, 0.08)',
+      bg: '#0a0a0a',
+      accent: '#cccccc',
+      indicator: '#eaeaea',
+      glass: '#161616',
+      text: '#dddddd',
+      secondary: '#242424',
+      dim: '#8c8c8c',
+      cooldown: '#7a7a7a',
+      sidebarBg: 'rgba(22, 22, 22, 0.65)',
       sidebarBlur: '20px',
-      sidebarBorder: 'rgba(255, 255, 255, 0.1)',
-      mobileNavBg: 'rgba(255, 255, 255, 0.08)',
+      sidebarBorder: 'rgba(255, 255, 255, 0.05)',
+      mobileNavBg: 'rgba(22, 22, 22, 0.65)',
       mobileNavBlur: '24px',
-      mobileNavBorder: 'rgba(255, 255, 255, 0.1)'
+      mobileNavBorder: 'rgba(255, 255, 255, 0.05)'
     }
   },
   mint: {
