@@ -225,7 +225,7 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [responseText, setResponseText] = useState('');
   const [answers, setAnswers] = useState([]); // Array of { chakra, question, response }
-  const [name, setName] = useState(() => localStorage.getItem('breath-username') || 'Vishwas');
+  const [name, setName] = useState('Vishwas');
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [sessionRating, setSessionRating] = useState(0);
   const [historySaved, setHistorySaved] = useState(false);
@@ -277,10 +277,6 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
   const currentPhaseObj = currentPattern[patternIndex] || currentPattern[0];
   const currentPhaseDuration = currentPhaseObj?.duration || 5;
 
-  // Save username to localStorage when changed
-  useEffect(() => {
-    localStorage.setItem('breath-username', name);
-  }, [name]);
 
 
   // Reset pattern index when chakra or mode changes

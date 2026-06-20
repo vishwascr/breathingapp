@@ -27,25 +27,7 @@ const getPatternText = (key, method) => {
 };
 
 function App() {
-  const [methods, setMethods] = useState(() => {
-    const saved = localStorage.getItem('breath-methods');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        const merged = { ...INITIAL_METHODS };
-        for (const key in parsed) {
-          if (merged[key]) {
-            merged[key] = { ...merged[key], pattern: parsed[key].pattern };
-          }
-        }
-        return merged;
-      } catch (e) {
-        console.error('Failed to parse saved methods:', e);
-        return INITIAL_METHODS;
-      }
-    }
-    return INITIAL_METHODS;
-  });
+  const [methods, setMethods] = useState(INITIAL_METHODS);
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [history, setHistory] = useState([]);
   const [historyStats, setHistoryStats] = useState({
@@ -109,20 +91,12 @@ function App() {
     return null;
   }, [getChallengeStats]);
 
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('breath-theme') || 'noir';
-  });
+  const [theme, setTheme] = useState('noir');
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    return localStorage.getItem('sidebar-collapsed') === 'true';
-  });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   const toggleSidebar = useCallback(() => {
-    setSidebarCollapsed(prev => {
-      const next = !prev;
-      localStorage.setItem('sidebar-collapsed', String(next));
-      return next;
-    });
+    setSidebarCollapsed(prev => !prev);
   }, []);
 
   useEffect(() => {
@@ -153,6 +127,11 @@ function App() {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Auto-collapse sidebar when a new page opens
+  useEffect(() => {
+    setSidebarCollapsed(true);
+  }, [location.pathname]);
 
   const expirationStats = useMemo(() => {
     if (challengeActive && challengeStartDate && !isSessionActive && !hasDismissedExpiration) {
@@ -220,7 +199,6 @@ function App() {
           const loadedTheme = themeData.theme;
           if (loadedTheme) {
             setTheme(loadedTheme);
-            localStorage.setItem('breath-theme', loadedTheme);
           }
           // If no theme from API, we already have it from localStorage or 'noir'
 
@@ -238,7 +216,6 @@ function App() {
 
   useEffect(() => {
     if (!theme) return;
-    localStorage.setItem('breath-theme', theme);
     const root = document.documentElement;
     const colors = THEMES[theme].colors;
     root.style.setProperty('--color-bg', colors.bg);
@@ -277,7 +254,6 @@ function App() {
   const updateTheme = async (newTheme) => {
     try {
       setTheme(newTheme);
-      localStorage.setItem('breath-theme', newTheme);
       await fetch('/api/settings/theme', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -439,21 +415,10 @@ function App() {
   };
 
   const updateMethodPattern = (methodKey, newPattern) => {
-    setMethods(prev => {
-      const updated = {
-        ...prev,
-        [methodKey]: { ...prev[methodKey], pattern: newPattern }
-      };
-      
-      // Save only patterns to localStorage
-      const toSave = {};
-      for (const key in updated) {
-        toSave[key] = { pattern: updated[key].pattern };
-      }
-      localStorage.setItem('breath-methods', JSON.stringify(toSave));
-      
-      return updated;
-    });
+    setMethods(prev => ({
+      ...prev,
+      [methodKey]: { ...prev[methodKey], pattern: newPattern }
+    }));
   };
 
   const handleMethodChange = (methodKey) => {
@@ -484,7 +449,9 @@ function App() {
             onToggleCollapse={toggleSidebar}
             onExpand={() => {
               setSidebarCollapsed(false);
-              localStorage.setItem('sidebar-collapsed', 'false');
+            }}
+            onCollapse={() => {
+              setSidebarCollapsed(true);
             }}
           />
         )}

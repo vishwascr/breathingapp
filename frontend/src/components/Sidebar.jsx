@@ -2,16 +2,21 @@ import { useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Wind, History as HistoryIcon, Settings, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
-function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethodModalOpen, challengeActive, isCollapsed, onToggleCollapse, onExpand }) {
+function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethodModalOpen, challengeActive, isCollapsed, onToggleCollapse, onExpand, onCollapse }) {
   const location = useLocation();
 
   const hoverTimerRef = useRef(null);
+  const leaveTimerRef = useRef(null);
 
   const handleMouseEnter = () => {
+    if (leaveTimerRef.current) {
+      clearTimeout(leaveTimerRef.current);
+      leaveTimerRef.current = null;
+    }
     if (isCollapsed) {
       hoverTimerRef.current = setTimeout(() => {
         onExpand();
-      }, 2000); // Trigger expansion after 2s of continuous hover
+      }, 300); // Trigger expansion after 300ms of continuous hover
     }
   };
 
@@ -19,6 +24,11 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
     if (hoverTimerRef.current) {
       clearTimeout(hoverTimerRef.current);
       hoverTimerRef.current = null;
+    }
+    if (!isCollapsed && onCollapse) {
+      leaveTimerRef.current = setTimeout(() => {
+        onCollapse();
+      }, 400); // Trigger collapse after 400ms of mouse absence
     }
   };
 
@@ -28,12 +38,19 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
       clearTimeout(hoverTimerRef.current);
       hoverTimerRef.current = null;
     }
+    if (isCollapsed && leaveTimerRef.current) {
+      clearTimeout(leaveTimerRef.current);
+      leaveTimerRef.current = null;
+    }
   }, [isCollapsed]);
 
   useEffect(() => {
     return () => {
       if (hoverTimerRef.current) {
         clearTimeout(hoverTimerRef.current);
+      }
+      if (leaveTimerRef.current) {
+        clearTimeout(leaveTimerRef.current);
       }
     };
   }, []);
@@ -101,15 +118,15 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
         
         <div className="w-full flex-1 flex flex-col justify-between">
           <div>
-            <ul className="flex flex-col gap-2 list-none p-0 m-0 w-full">
+            <ul className="flex flex-col gap-3 list-none p-0 m-0 w-full">
               <li>
                 <NavLink to="/" className={linkClass} onClick={(e) => handleNavClick(e, '/')} title={isCollapsed ? "Dashboard" : undefined}>
-                  <div className={`flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-[22%] transition-all duration-300 border ${
+                  <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-[22%] transition-all duration-300 border ${
                     isDashboardActive 
                       ? 'bg-accent text-bg border-accent/20 shadow-md shadow-accent/20' 
                       : 'bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20'
                   }`}>
-                    <LayoutDashboard size={18} />
+                    <LayoutDashboard size={22} />
                   </div>
                   <span className={`transition-[opacity,max-width,margin] duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
                     isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
@@ -126,12 +143,12 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
                     onClick={handleBreatheClick}
                     title={isCollapsed ? "Breathing Techniques" : undefined}
                   >
-                    <div className={`flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-[22%] transition-all duration-300 border ${
+                    <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-[22%] transition-all duration-300 border ${
                       isBreatheActive 
                         ? 'bg-accent text-bg border-accent/20 shadow-md shadow-accent/20' 
                         : 'bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20'
                     }`}>
-                      <Wind size={18} />
+                      <Wind size={22} />
                     </div>
                     <span className={`transition-[opacity,max-width,margin] duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
                       isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
@@ -144,12 +161,12 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
 
               <li>
                 <NavLink to="/history" className={linkClass} onClick={(e) => handleNavClick(e, '/history')} title={isCollapsed ? "History" : undefined}>
-                  <div className={`flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-[22%] transition-all duration-300 border ${
+                  <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-[22%] transition-all duration-300 border ${
                     isHistoryActive 
                       ? 'bg-accent text-bg border-accent/20 shadow-md shadow-accent/20' 
                       : 'bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20'
                   }`}>
-                    <HistoryIcon size={18} />
+                    <HistoryIcon size={22} />
                   </div>
                   <span className={`transition-[opacity,max-width,margin] duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
                     isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
@@ -161,14 +178,14 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
             </ul>
           </div>
 
-          <div className="mt-auto pt-4 border-t border-white/5 flex flex-col gap-2">
+          <div className="mt-auto pt-4 border-t border-white/5 flex flex-col gap-3">
             <NavLink to="/settings" className={linkClass} onClick={(e) => handleNavClick(e, '/settings')} title={isCollapsed ? "Settings" : undefined}>
-              <div className={`flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-[22%] transition-all duration-300 border ${
+              <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-[22%] transition-all duration-300 border ${
                 isSettingsActive 
                   ? 'bg-accent text-bg border-accent/20 shadow-md shadow-accent/20' 
                   : 'bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20'
               }`}>
-                <Settings size={18} />
+                <Settings size={22} />
               </div>
               <span className={`transition-[opacity,max-width,margin] duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
                 isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
@@ -182,8 +199,8 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
               className={linkClass({ isActive: false })}
               title={isCollapsed ? `Expand Sidebar (${shortcutHint})` : `Collapse Sidebar (${shortcutHint})`}
             >
-              <div className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-[22%] transition-all duration-300 border bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20">
-                {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+              <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-[22%] transition-all duration-300 border bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20">
+                {isCollapsed ? <ChevronRight size={22} /> : <ChevronLeft size={22} />}
               </div>
               <span className={`transition-[opacity,max-width,margin] duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
                 isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'

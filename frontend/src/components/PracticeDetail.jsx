@@ -22,7 +22,7 @@ const METHOD_BENEFITS = {
 
 function PracticeDetail({ selectedMethod, methods, onStart }) {
   const method = methods[selectedMethod];
-  const [name, setName] = useState(() => localStorage.getItem('breath-username') || 'Vishwas');
+  const [name, setName] = useState('Vishwas');
   const [showInfo, setShowInfo] = useState(false);
 
   if (!method) return null;
@@ -33,7 +33,6 @@ function PracticeDetail({ selectedMethod, methods, onStart }) {
   const handleNameChange = (e) => {
     const val = e.target.value;
     setName(val);
-    localStorage.setItem('breath-username', val);
   };
 
   // Format pattern text
