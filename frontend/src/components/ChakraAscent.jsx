@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Play, ArrowRight, CheckCircle2, RotateCcw, 
@@ -165,6 +165,57 @@ const CHAKRAS = [
   }
 ];
 
+const getBreathingPattern = (cIndex, isUniversal) => {
+  if (isUniversal) {
+    return [
+      { phase: 'Inhale', duration: 5 },
+      { phase: 'Exhale', duration: 6 }
+    ];
+  }
+
+  // Chakra-specific patterns
+  switch (cIndex) {
+    case 0: // Root (Muladhara)
+      return [
+        { phase: 'Inhale', duration: 4 },
+        { phase: 'Exhale', duration: 6 }
+      ];
+    case 1: // Sacral (Svadhisthana)
+      return [
+        { phase: 'Inhale', duration: 5 },
+        { phase: 'Exhale', duration: 5 }
+      ];
+    case 2: // Solar Plexus (Manipura)
+      return [
+        { phase: 'Inhale', duration: 6 },
+        { phase: 'Hold', duration: 2 },
+        { phase: 'Exhale', duration: 6 }
+      ];
+    case 3: // Heart (Anahata)
+      return [
+        { phase: 'Inhale', duration: 4 },
+        { phase: 'Hold', duration: 4 },
+        { phase: 'Exhale', duration: 6 }
+      ];
+    case 4: // Throat (Vishuddha)
+      return [
+        { phase: 'Inhale', duration: 5 },
+        { phase: 'Exhale', duration: 7, note: 'Optional humming (Ham) during exhale' }
+      ];
+    case 5: // Third Eye (Ajna)
+      return [
+        { phase: 'Inhale', duration: 6 },
+        { phase: 'Hold', duration: 6 },
+        { phase: 'Exhale', duration: 6 }
+      ];
+    case 6: // Crown (Sahasrara)
+    default:
+      return [
+        { phase: 'Natural', duration: 9999 } // Natural breathing, no countdown
+      ];
+  }
+};
+
 function ChakraAscent() {
   const navigate = useNavigate();
   
@@ -178,9 +229,12 @@ function ChakraAscent() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   
   // Breathing animation states
-  const [isInhaling, setIsInhaling] = useState(true);
+  const [patternIndex, setPatternIndex] = useState(0);
+  const [currentPhase, setCurrentPhase] = useState('Inhale');
   const [secondsLeft, setSecondsLeft] = useState(5);
   const [isPaused, setIsPaused] = useState(false);
+  const [universalMode, setUniversalMode] = useState(false);
+  const [activeScale, setActiveScale] = useState(1.0);
   
   // Post-meditation action modes
   const [activeAction, setActiveAction] = useState(null); // null | 'timer' | 'music' | 'walk' | 'water'
@@ -191,6 +245,11 @@ function ChakraAscent() {
   const breathTimerRef = useRef(null);
 
   const activeChakra = CHAKRAS[chakraIndex];
+
+  // Calculate dynamic breathing parameters
+  const currentPattern = getBreathingPattern(chakraIndex, universalMode);
+  const currentPhaseObj = currentPattern[patternIndex] || currentPattern[0];
+  const currentPhaseDuration = currentPhaseObj?.duration || 5;
 
   // Save username to localStorage when changed
   useEffect(() => {
@@ -263,31 +322,75 @@ function ChakraAscent() {
     }
   }, [stage, chakraIndex]);
 
-  // Breathing loop timer (5s inhale, 5s exhale)
+  // Reset pattern index when chakra or mode changes
+  useEffect(() => {
+    setPatternIndex(0);
+  }, [chakraIndex, universalMode]);
+
+  // Sync scale with phase for breathing circle animation
+  useEffect(() => {
+    if (stage !== 'meditating') {
+      setActiveScale(1.0);
+      return;
+    }
+    const targetScale = currentPhase === 'Inhale' || currentPhase === 'Hold' ? 2.5 : (currentPhase === 'Natural' ? 1.5 : 1.0);
+    
+    const rafId = requestAnimationFrame(() => {
+      setActiveScale(targetScale);
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, [currentPhase, stage]);
+
+  // Breathing loop timer (chakra-specific dynamic counts and phases)
   useEffect(() => {
     if (stage !== 'meditating' || isPaused) {
       if (breathTimerRef.current) clearInterval(breathTimerRef.current);
       return;
     }
 
+    const pattern = getBreathingPattern(chakraIndex, universalMode);
+    const phase = pattern[patternIndex];
+    if (!phase) return;
+
+    if (phase.phase === 'Natural') {
+      setCurrentPhase('Natural');
+      setSecondsLeft(9999);
+      return;
+    }
+
+    setCurrentPhase(phase.phase);
+    setSecondsLeft(phase.duration);
+
+    let currentSeconds = phase.duration;
+
     breathTimerRef.current = setInterval(() => {
-      setSecondsLeft((prev) => {
-        if (prev <= 1) {
-          setIsInhaling((inhale) => {
-            if (soundEnabled) {
-              const transitionFreq = !inhale ? 220 : 165;
-              playBowlSound(transitionFreq, 'sine', 1.5);
-            }
-            return !inhale;
-          });
-          return 5;
-        }
-        return prev - 1;
-      });
+      currentSeconds -= 1;
+      if (currentSeconds <= 0) {
+        clearInterval(breathTimerRef.current);
+        setPatternIndex((prevIdx) => {
+          const nextIdx = (prevIdx + 1) % pattern.length;
+          
+          // Play transition tone
+          const nextPhase = pattern[nextIdx];
+          if (soundEnabled && nextPhase) {
+            const frequencies = {
+              Inhale: 220,
+              Hold: 277.18,
+              Exhale: 164.81
+            };
+            const toneType = nextPhase.phase === 'Hold' ? 'sine' : 'triangle';
+            playBowlSound(frequencies[nextPhase.phase] || 220, toneType, 1.5);
+          }
+          
+          return nextIdx;
+        });
+      } else {
+        setSecondsLeft(currentSeconds);
+      }
     }, 1000);
 
     return () => clearInterval(breathTimerRef.current);
-  }, [stage, isPaused, soundEnabled]);
+  }, [stage, isPaused, soundEnabled, chakraIndex, universalMode, patternIndex]);
 
   // Focus Timer Logic (for the Post-Ascent Focus Session)
   useEffect(() => {
@@ -386,16 +489,39 @@ function ChakraAscent() {
           )}
         </div>
         
-        <Button 
-          onClick={() => setSoundEnabled(prev => !prev)}
-          variant="secondary"
-          size="none"
-          rounded="full"
-          className="p-3 text-dim shrink-0"
-          title={soundEnabled ? "Mute Bowl" : "Unmute Bowl"}
-        >
-          {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-        </Button>
+        <div className="flex items-center gap-3 shrink-0">
+          {/* Universal Mode toggle */}
+          {['intro', 'meditating'].includes(stage) && (
+            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1.5 text-[0.7rem] md:text-xs text-dim">
+              <span className={`transition-colors duration-200 ${!universalMode ? 'text-accent font-medium' : ''}`}>Chakra Cycles</span>
+              <button
+                onClick={() => setUniversalMode(prev => !prev)}
+                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+                  universalMode ? 'bg-accent' : 'bg-white/10'
+                }`}
+                title="Toggle Universal Mode"
+              >
+                <span
+                  className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-300 ${
+                    universalMode ? 'translate-x-[18px]' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+              <span className={`transition-colors duration-200 ${universalMode ? 'text-accent font-medium' : ''}`}>Universal</span>
+            </div>
+          )}
+          
+          <Button 
+            onClick={() => setSoundEnabled(prev => !prev)}
+            variant="secondary"
+            size="none"
+            rounded="full"
+            className="p-3 text-dim shrink-0"
+            title={soundEnabled ? "Mute Bowl" : "Unmute Bowl"}
+          >
+            {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+          </Button>
+        </div>
       </header>
 
       {/* Main content body structured exactly like Practice.jsx's focusArea */}
@@ -468,15 +594,20 @@ function ChakraAscent() {
             <div className="relative w-[250px] h-[250px] md:w-[450px] md:h-[450px] flex justify-center items-center shrink-0">
               {/* Core scale circle mirroring Practice.jsx exactly */}
               <div 
-                className="absolute w-20 h-20 md:w-40 md:h-40 rounded-full flex flex-col justify-center items-center text-center font-extralight border border-white/10 z-10 transition-transform duration-[5000ms] ease-linear bg-black/50 text-white"
+                className="absolute w-20 h-20 md:w-40 md:h-40 rounded-full flex flex-col justify-center items-center text-center font-extralight border border-white/10 z-10 bg-black/50 text-white"
                 style={{
-                  transform: `scale(${isInhaling ? 2.5 : 1})`,
+                  transform: `scale(${activeScale})`,
+                  transition: currentPhase === 'Natural' ? 'transform 4s ease-in-out' : `transform ${currentPhaseDuration}s ease-in-out`,
                   boxShadow: `0 0 15px 2px ${activeChakra.colorClasses.glowColor}, 0 0 50px 8px ${activeChakra.colorClasses.glowColor}, inset 0 0 10px rgba(255, 255, 255, 0.1)`
                 }}
               >
-                <span className="text-[2rem] md:text-[3.5rem] font-light leading-none">
-                  {secondsLeft}
-                </span>
+                {currentPhase === 'Natural' ? (
+                  <Sparkles className={`w-8 h-8 md:w-12 md:h-12 ${activeChakra.colorClasses.accent} animate-pulse`} />
+                ) : (
+                  <span className="text-[2rem] md:text-[3.5rem] font-light leading-none animate-fadeIn">
+                    {secondsLeft}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -487,8 +618,15 @@ function ChakraAscent() {
               <div className="flex flex-col items-center text-center gap-2 min-h-[140px] md:min-h-[180px] justify-center">
                 {/* Dynamic Breath Phase & Mantra */}
                 <div className="text-[1.2rem] md:text-[1.8rem] font-thin text-text uppercase tracking-[0.6rem] md:tracking-[1rem] whitespace-nowrap mb-1">
-                  {isInhaling ? 'Inhale' : 'Exhale'} — {activeChakra.mantra}
+                  {currentPhase} — {activeChakra.mantra}
                 </div>
+                
+                {/* Optional humming notice for Throat Chakra Exhale */}
+                {chakraIndex === 4 && currentPhase === 'Exhale' && (
+                  <div className="text-xs text-accent animate-pulse font-light tracking-wide mt-1">
+                    (Optional: hum the sound "Ham" during exhale)
+                  </div>
+                )}
 
                 {/* Chakra info */}
                 <div className="text-[0.65rem] md:text-[0.75rem] font-medium tracking-[0.2rem] text-dim uppercase">
