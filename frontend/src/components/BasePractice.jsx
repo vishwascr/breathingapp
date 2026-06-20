@@ -11,7 +11,7 @@ const GUIDANCE = {
   'Exhale': 'Exhale slowly through your nose.'
 };
 
-function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) {
+function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive }) {
   const navigate = useNavigate();
   
   // Use a safer way to get initial time left
@@ -634,4 +634,4 @@ function Practice({ selectedMethod, methods, saveHistory, setIsSessionActive }) 
   )
 }
 
-export default Practice;
+export default BasePractice;

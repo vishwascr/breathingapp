@@ -12,7 +12,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
       isActive ? activeClass : inactiveClass
     }`;
 
-  const isBreatheActive = isMethodModalOpen || location.pathname === '/practice';
+  const isBreatheActive = isMethodModalOpen || location.pathname.startsWith('/practice');
 
   const handleNavClick = (e, path) => {
     if (isSessionActive) {

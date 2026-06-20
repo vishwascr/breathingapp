@@ -6,7 +6,12 @@ import { Modal, Card, Button, Textarea, Checkbox } from './components/common'
 
 import Sidebar from './components/Sidebar'
 const Dashboard = lazy(() => import('./components/Dashboard'));
-const Practice = lazy(() => import('./components/Practice'));
+const FourSevenEightBreathing = lazy(() => import('./components/FourSevenEightBreathing'));
+const BoxBreathing = lazy(() => import('./components/BoxBreathing'));
+const DiaphragmaticBreathing = lazy(() => import('./components/DiaphragmaticBreathing'));
+const CompleteBreath = lazy(() => import('./components/CompleteBreath'));
+const ResonanceBreathing = lazy(() => import('./components/ResonanceBreathing'));
+const AumChanting = lazy(() => import('./components/AumChanting'));
 const History = lazy(() => import('./components/History'));
 const Settings = lazy(() => import('./components/Settings'));
 const ChakraAscent = lazy(() => import('./components/ChakraAscent'));
@@ -409,7 +414,15 @@ function App() {
 
   const handleMethodChange = (methodKey) => {
     setSelectedMethod(methodKey);
-    navigate('/practice');
+    const routes = {
+      '478': '/practice/4-7-8',
+      'box': '/practice/box',
+      'deepBelly': '/practice/diaphragmatic',
+      'completeBreath': '/practice/complete-breath',
+      'resonance': '/practice/resonance',
+      'aum': '/practice/aum'
+    };
+    navigate(routes[methodKey] || '/');
   };
 
   return (
@@ -441,7 +454,7 @@ function App() {
           )}
           
           <main className={`w-full flex justify-center relative z-10 ${
-            location.pathname === '/practice' 
+            location.pathname.startsWith('/practice') 
               ? 'h-dvh overflow-hidden p-6 md:p-12' 
               : 'min-h-dvh p-6 md:p-12 pb-32 md:pb-12 items-start'
           }`}>
@@ -464,10 +477,59 @@ function App() {
                   />
                 } />
                 <Route 
-                  path="/practice" 
+                  path="/practice/4-7-8" 
                   element={
-                    <Practice 
-                      selectedMethod={selectedMethod} 
+                    <FourSevenEightBreathing 
+                      methods={methods} 
+                      saveHistory={saveHistory} 
+                      setIsSessionActive={setIsSessionActive}
+                    />
+                  } 
+                />
+                <Route 
+                  path="/practice/box" 
+                  element={
+                    <BoxBreathing 
+                      methods={methods} 
+                      saveHistory={saveHistory} 
+                      setIsSessionActive={setIsSessionActive}
+                    />
+                  } 
+                />
+                <Route 
+                  path="/practice/diaphragmatic" 
+                  element={
+                    <DiaphragmaticBreathing 
+                      methods={methods} 
+                      saveHistory={saveHistory} 
+                      setIsSessionActive={setIsSessionActive}
+                    />
+                  } 
+                />
+                <Route 
+                  path="/practice/complete-breath" 
+                  element={
+                    <CompleteBreath 
+                      methods={methods} 
+                      saveHistory={saveHistory} 
+                      setIsSessionActive={setIsSessionActive}
+                    />
+                  } 
+                />
+                <Route 
+                  path="/practice/resonance" 
+                  element={
+                    <ResonanceBreathing 
+                      methods={methods} 
+                      saveHistory={saveHistory} 
+                      setIsSessionActive={setIsSessionActive}
+                    />
+                  } 
+                />
+                <Route 
+                  path="/practice/aum" 
+                  element={
+                    <AumChanting 
                       methods={methods} 
                       saveHistory={saveHistory} 
                       setIsSessionActive={setIsSessionActive}
