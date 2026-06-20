@@ -216,11 +216,11 @@ const getBreathingPattern = (cIndex, isUniversal) => {
   }
 };
 
-function ChakraAscent() {
+function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
   const navigate = useNavigate();
   
   // State
-  const [stage, setStage] = useState('intro'); // 'intro' | 'meditating' | 'transition' | 'complete'
+  const [stage, setStage] = useState(initialStage); // 'intro' | 'meditating' | 'transition' | 'complete'
   const [chakraIndex, setChakraIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [responseText, setResponseText] = useState('');
@@ -230,6 +230,29 @@ function ChakraAscent() {
   const [sessionRating, setSessionRating] = useState(0);
   const [historySaved, setHistorySaved] = useState(false);
   const sessionStartTimeRef = useRef(null);
+
+  // Sync with global session state
+  useEffect(() => {
+    if (setIsSessionActive) {
+      setIsSessionActive(stage === 'meditating' || stage === 'transition');
+    }
+    return () => {
+      if (setIsSessionActive) setIsSessionActive(false);
+    };
+  }, [stage, setIsSessionActive]);
+
+  // Handle initialization if starting directly from mediating stage
+  useEffect(() => {
+    if (initialStage === 'meditating') {
+      setAnswers([]);
+      setChakraIndex(0);
+      setQuestionIndex(0);
+      setResponseText('');
+      setHistorySaved(false);
+      setSessionRating(0);
+      sessionStartTimeRef.current = Date.now();
+    }
+  }, [initialStage]);
   
   // Breathing animation states
   const [patternIndex, setPatternIndex] = useState(0);

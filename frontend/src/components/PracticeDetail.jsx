@@ -1,0 +1,137 @@
+import { useState } from 'react';
+import { Wind, Square, Maximize2, Waves, Bell, Sparkles, ArrowRight, Clock, BookOpen, Heart, Moon } from 'lucide-react';
+import { Card, Button } from './common';
+
+const METHOD_ICONS = {
+  '478': Moon,
+  'box': Square,
+  'completeBreath': Maximize2,
+  'resonance': Waves,
+  'aum': Bell,
+  'chakraAscent': Sparkles
+};
+
+const METHOD_BENEFITS = {
+  '478': 'Specifically designed to trigger the parasympathetic nervous system, act as a natural nervous system tranquilizer, and assist with falling asleep.',
+  'box': 'Designed to clear the mind, settle the nervous system, and heighten concentration. Widely utilized by Navy SEALs for stress management.',
+  'completeBreath': 'Designed to maximize lung capacity, increase oxygenation in the bloodstream, and establish deep diaphragmatic control.',
+  'resonance': 'Designed to balance the autonomic nervous system, reduce biological anxiety metrics, and establish heart rate coherence.',
+  'aum': 'Combines controlled exhalation with sound vibrations to stimulate the vagus nerve and induce deep mental tranquility.',
+  'chakraAscent': 'Designed to observe and dismantle cravings, overthinking, anxiety, or procrastination in real time.'
+};
+
+function PracticeDetail({ selectedMethod, methods, onStart }) {
+  const method = methods[selectedMethod];
+  const [name, setName] = useState(() => localStorage.getItem('breath-username') || 'Vishwas');
+
+  if (!method) return null;
+
+  const IconComponent = METHOD_ICONS[selectedMethod] || Wind;
+  const benefitText = METHOD_BENEFITS[selectedMethod] || 'Focus on your breath and find your center.';
+
+  const handleNameChange = (e) => {
+    const val = e.target.value;
+    setName(val);
+    localStorage.setItem('breath-username', val);
+  };
+
+  // Format pattern text
+  const getPatternText = () => {
+    if (selectedMethod === 'chakraAscent') {
+      return 'Sequentially breathe through 7 energy centers with slow 5s inhale/exhale pacing.';
+    }
+    if (selectedMethod === 'aum') {
+      return 'Breathe in for 4s, then chant A-U-M sequentially on the exhale.';
+    }
+    const pattern = method.pattern || [4, 4, 4, 4];
+    const phases = ['Inhale', 'Hold', 'Exhale', 'Hold'];
+    return pattern
+      .map((val, idx) => val > 0 ? `${phases[idx]}: ${val}s` : null)
+      .filter(Boolean)
+      .join(' • ');
+  };
+
+  return (
+    <div className="w-full flex flex-col gap-8 md:gap-12 animate-fadeIn max-w-xl mx-auto py-6 text-center">
+      {/* Visual Header */}
+      <div className="flex justify-center mb-2">
+        <div className="w-16 h-16 rounded-full bg-accent/15 flex items-center justify-center animate-pulse">
+          <IconComponent className="text-accent w-8 h-8" />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl md:text-6xl font-thin tracking-widest text-text uppercase">
+          {method.name}
+        </h1>
+        <p className="text-dim font-light text-base md:text-lg leading-relaxed max-w-sm mx-auto">
+          {method.description}
+        </p>
+      </div>
+
+      {/* Info Cards (Pacing & Benefits) */}
+      <div className="w-full flex flex-col gap-3 text-left">
+        <div className="flex items-start gap-4 p-4 rounded-squircle-sm bg-white/[0.02] border border-white/5">
+          <Clock className="text-accent w-5 h-5 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <span className="block text-[0.65rem] uppercase tracking-widest text-dim/60 font-semibold mb-1">Pattern & Pacing</span>
+            <p className="text-xs text-dim font-light leading-relaxed">
+              {getPatternText()}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-4 p-4 rounded-squircle-sm bg-white/[0.02] border border-white/5">
+          <Heart className="text-accent w-5 h-5 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <span className="block text-[0.65rem] uppercase tracking-widest text-dim/60 font-semibold mb-1">Focus & Benefit</span>
+            <p className="text-xs text-dim font-light leading-relaxed">
+              {benefitText}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Customizer Name */}
+      <div className="w-full flex flex-col gap-2 items-center mb-2">
+        <label className="text-[0.65rem] uppercase tracking-widest text-dim/60 font-bold">Your Name (for personalization)</label>
+        <input 
+          type="text" 
+          value={name} 
+          onChange={handleNameChange}
+          placeholder="Enter your name"
+          className="w-full max-w-xs text-center border-b border-white/20 focus:border-accent py-2 text-text font-light bg-transparent focus:outline-none"
+        />
+      </div>
+
+      <div className="w-full">
+        <Button 
+          onClick={onStart}
+          variant="primary"
+          size="none"
+          className="w-full py-5 text-base tracking-widest uppercase font-medium"
+        >
+          <span>Begin Session</span>
+          <ArrowRight size={18} />
+        </Button>
+      </div>
+
+      {/* Instructions below the button */}
+      <div className="w-full flex flex-col gap-3 text-left mt-4 border-t border-white/5 pt-8">
+        <div className="flex items-start gap-4 p-4 rounded-squircle-sm bg-white/[0.02] border border-white/5">
+          <BookOpen className="text-accent w-5 h-5 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <span className="block text-[0.65rem] uppercase tracking-widest text-dim/60 font-semibold mb-1">Instructions</span>
+            <ul className="text-xs text-dim font-light leading-relaxed list-disc list-inside space-y-1">
+              {method.steps && method.steps.map((step, idx) => (
+                <li key={idx}>{step}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default PracticeDetail;

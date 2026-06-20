@@ -6,14 +6,9 @@ import { Modal, Card, Button, Textarea, Checkbox } from './components/common'
 
 import Sidebar from './components/Sidebar'
 const Dashboard = lazy(() => import('./components/Dashboard'));
-const FourSevenEightBreathing = lazy(() => import('./components/FourSevenEightBreathing'));
-const BoxBreathing = lazy(() => import('./components/BoxBreathing'));
-const CompleteBreath = lazy(() => import('./components/CompleteBreath'));
-const ResonanceBreathing = lazy(() => import('./components/ResonanceBreathing'));
-const AumChanting = lazy(() => import('./components/AumChanting'));
+const Practice = lazy(() => import('./components/Practice'));
 const History = lazy(() => import('./components/History'));
 const Settings = lazy(() => import('./components/Settings'));
-const ChakraAscent = lazy(() => import('./components/ChakraAscent'));
 
 import { INITIAL_METHODS, THEMES } from './constants'
 
@@ -132,7 +127,7 @@ function App() {
     }
   }, [challengeActive, challengeStartDate, isSessionActive, calculateChallengeCompletion, showCompletionModal, historyStats.totalSeconds, hasDismissedCompletion]);
 
-  const showStripes = ['/', '/history', '/settings', '/chakra-ascent'].includes(location.pathname);
+  const showStripes = ['/', '/history', '/settings'].includes(location.pathname) || (location.pathname.startsWith('/practice') && !isSessionActive);
 
   const confirmEndSession = () => {
     const target = pendingNav;
@@ -416,7 +411,7 @@ function App() {
     const routes = {
       '478': '/practice/4-7-8',
       'box': '/practice/box',
-      'chakraAscent': '/chakra-ascent',
+      'chakraAscent': '/practice/chakra-ascent',
       'completeBreath': '/practice/complete-breath',
       'resonance': '/practice/resonance',
       'aum': '/practice/aum'
@@ -453,7 +448,7 @@ function App() {
           )}
           
           <main className={`w-full flex justify-center relative z-10 ${
-            location.pathname.startsWith('/practice') 
+            (location.pathname.startsWith('/practice') && isSessionActive) 
               ? 'h-dvh overflow-hidden p-6 md:p-12' 
               : 'min-h-dvh p-6 md:p-12 pb-32 md:pb-12 items-start'
           }`}>
@@ -476,50 +471,9 @@ function App() {
                   />
                 } />
                 <Route 
-                  path="/practice/4-7-8" 
+                  path="/practice/:methodKey" 
                   element={
-                    <FourSevenEightBreathing 
-                      methods={methods} 
-                      saveHistory={saveHistory} 
-                      setIsSessionActive={setIsSessionActive}
-                    />
-                  } 
-                />
-                <Route 
-                  path="/practice/box" 
-                  element={
-                    <BoxBreathing 
-                      methods={methods} 
-                      saveHistory={saveHistory} 
-                      setIsSessionActive={setIsSessionActive}
-                    />
-                  } 
-                />
-
-                <Route 
-                  path="/practice/complete-breath" 
-                  element={
-                    <CompleteBreath 
-                      methods={methods} 
-                      saveHistory={saveHistory} 
-                      setIsSessionActive={setIsSessionActive}
-                    />
-                  } 
-                />
-                <Route 
-                  path="/practice/resonance" 
-                  element={
-                    <ResonanceBreathing 
-                      methods={methods} 
-                      saveHistory={saveHistory} 
-                      setIsSessionActive={setIsSessionActive}
-                    />
-                  } 
-                />
-                <Route 
-                  path="/practice/aum" 
-                  element={
-                    <AumChanting 
+                    <Practice 
                       methods={methods} 
                       saveHistory={saveHistory} 
                       setIsSessionActive={setIsSessionActive}
@@ -548,10 +502,6 @@ function App() {
                     />
                   }
                   />
-                <Route 
-                  path="/chakra-ascent" 
-                  element={<ChakraAscent />} 
-                />
               </Routes>
             </Suspense>
           </main>
