@@ -99,6 +99,30 @@ function App() {
     return localStorage.getItem('breath-theme') || 'noir';
   });
 
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    return localStorage.getItem('sidebar-collapsed') === 'true';
+  });
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('sidebar-collapsed', String(next));
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        toggleSidebar();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleSidebar]);
+
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [pendingNav, setPendingNav] = useState(null);
   const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
@@ -429,9 +453,13 @@ function App() {
           openMethodModal={() => setIsMethodModalOpen(true)}
           isMethodModalOpen={isMethodModalOpen}
           challengeActive={challengeActive}
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={toggleSidebar}
         />
         
-        <div className="flex-1 relative isolate min-h-dvh md:ml-72">
+        <div className={`flex-1 relative isolate min-h-dvh transition-all duration-300 ${
+          sidebarCollapsed ? 'md:ml-20' : 'md:ml-72'
+        }`}>
           {/* Subtle Vertical Stripes Background - Fixed to stay behind scrolling content */}
           {showStripes && (
             <div className="fixed inset-0 flex pointer-events-none z-0">
@@ -448,8 +476,10 @@ function App() {
           )}
           
           <main className={`w-full flex justify-center relative z-10 ${
-            (location.pathname.startsWith('/practice') && isSessionActive) 
-              ? 'h-dvh overflow-hidden p-6 md:p-12' 
+            location.pathname.startsWith('/practice')
+              ? (isSessionActive 
+                  ? 'h-dvh overflow-hidden p-6 md:p-12' 
+                  : 'min-h-dvh md:h-dvh md:overflow-hidden p-6 md:p-12 pb-32 md:pb-12 items-start md:items-center')
               : 'min-h-dvh p-6 md:p-12 pb-32 md:pb-12 items-start'
           }`}>
             <Suspense fallback={

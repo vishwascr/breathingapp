@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Wind, Square, Maximize2, Waves, Bell, Sparkles, ArrowRight, Clock, BookOpen, Heart, Moon } from 'lucide-react';
-import { Card, Button } from './common';
+import { Wind, Square, Maximize2, Waves, Bell, Sparkles, ArrowRight, Clock, BookOpen, Heart, Moon, Info } from 'lucide-react';
+import { Card, Button, Modal } from './common';
 
 const METHOD_ICONS = {
   '478': Moon,
@@ -23,6 +23,7 @@ const METHOD_BENEFITS = {
 function PracticeDetail({ selectedMethod, methods, onStart }) {
   const method = methods[selectedMethod];
   const [name, setName] = useState(() => localStorage.getItem('breath-username') || 'Vishwas');
+  const [showInfo, setShowInfo] = useState(false);
 
   if (!method) return null;
 
@@ -61,9 +62,18 @@ function PracticeDetail({ selectedMethod, methods, onStart }) {
       </div>
 
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl md:text-6xl font-thin tracking-widest text-text uppercase">
-          {method.name}
-        </h1>
+        <div className="flex items-center justify-center gap-3">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-thin tracking-widest text-text uppercase">
+            {method.name}
+          </h1>
+          <button 
+            onClick={() => setShowInfo(true)}
+            className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-dim hover:text-text transition-all cursor-pointer shrink-0"
+            title="View Instructions"
+          >
+            <Info size={20} className="md:size-[24px]" />
+          </button>
+        </div>
         <p className="text-dim font-light text-base md:text-lg leading-relaxed max-w-sm mx-auto">
           {method.description}
         </p>
@@ -116,20 +126,29 @@ function PracticeDetail({ selectedMethod, methods, onStart }) {
         </Button>
       </div>
 
-      {/* Instructions below the button */}
-      <div className="w-full flex flex-col gap-3 text-left mt-4 border-t border-white/5 pt-8">
-        <div className="flex items-start gap-4 p-4 rounded-squircle-sm bg-white/[0.02] border border-white/5">
-          <BookOpen className="text-accent w-5 h-5 shrink-0 mt-0.5" />
-          <div className="flex-1 min-w-0">
-            <span className="block text-[0.65rem] uppercase tracking-widest text-dim/60 font-semibold mb-1">Instructions</span>
-            <ul className="text-xs text-dim font-light leading-relaxed list-disc list-inside space-y-1">
-              {method.steps && method.steps.map((step, idx) => (
-                <li key={idx}>{step}</li>
-              ))}
-            </ul>
+      {/* Modal containing instructions */}
+      <Modal
+        isOpen={showInfo}
+        onClose={() => setShowInfo(false)}
+        maxWidth="md"
+      >
+        <div className="flex flex-col gap-4 text-left">
+          <div className="flex items-center gap-3 border-b border-white/5 pb-4 mb-2">
+            <BookOpen className="text-accent" size={24} />
+            <h2 className="text-xl font-light tracking-wide">{method.name} Instructions</h2>
+          </div>
+          <ul className="text-sm text-dim font-light leading-relaxed list-disc list-inside space-y-3">
+            {method.steps && method.steps.map((step, idx) => (
+              <li key={idx} className="pl-2 -indent-5">{step}</li>
+            ))}
+          </ul>
+          <div className="flex justify-end mt-4">
+            <Button onClick={() => setShowInfo(false)} variant="secondary" size="sm">
+              Close
+            </Button>
           </div>
         </div>
-      </div>
+      </Modal>
     </div>
   );
 }
