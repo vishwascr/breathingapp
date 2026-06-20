@@ -420,7 +420,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-dvh text-text transition-colors duration-500 relative isolate">
+    <div className="min-h-dvh text-text transition-colors duration-500 relative isolate overflow-x-hidden">
       {/* UI Layer */}
       <div className="flex flex-col md:flex-row w-full min-h-dvh relative z-10">
         <Sidebar 

@@ -44,6 +44,7 @@ html {
   min-height: 100%;
   width: 100%;
   color-scheme: dark;
+  overflow-x: hidden;
 }
 
 @layer base {
@@ -52,10 +53,11 @@ html {
     background: var(--color-bg);
     min-height: 100dvh;
     -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
   }
 
   #root {
-    @apply w-full m-0 p-0;
+    @apply w-full m-0 p-0 overflow-x-hidden;
     min-height: 100dvh;
   }
 
