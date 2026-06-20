@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { 
   ResponsiveContainer, 
   AreaChart, 
@@ -112,4 +112,4 @@ const WeeklyGraph = ({ practicedDates }) => {
   );
 };
 
-export default WeeklyGraph;
+export default memo(WeeklyGraph);

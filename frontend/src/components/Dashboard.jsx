@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Play, Clock, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 import DailyProgress from './DailyProgress';
 import ConsciousEating from './ConsciousEating';
 import ConsciousWalking from './ConsciousWalking';
-import WeeklyGraph from './WeeklyGraph';
 import { Card, Button } from './common';
+const WeeklyGraph = lazy(() => import('./WeeklyGraph'));
 
 function Dashboard({ historyStats, methods, openMethodModal, challengeActive, challengeStartDate, startChallenge, refreshStats }) {
   const [activeStatIndex, setActiveStatIndex] = useState(0);
@@ -104,7 +104,13 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
         {(lastSessions.length > 0 || Object.keys(historyStats.practicedDates || {}).length > 0) && (
           <div className="lg:col-span-2">
-            <WeeklyGraph practicedDates={historyStats.practicedDates || {}} />
+            <Suspense fallback={
+              <Card variant="flat" padding="md" className="h-[200px] flex items-center justify-center text-dim text-xs tracking-widest uppercase animate-pulse">
+                Loading Flow Graph...
+              </Card>
+            }>
+              <WeeklyGraph practicedDates={historyStats.practicedDates || {}} />
+            </Suspense>
           </div>
         )}
 

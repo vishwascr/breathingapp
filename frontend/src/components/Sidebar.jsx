@@ -8,8 +8,8 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
   const inactiveClass = 'text-text opacity-60 hover:bg-white/5 hover:opacity-100';
 
   const linkClass = ({ isActive }) => 
-    `w-full text-left border border-transparent p-3 md:p-4 rounded-full md:rounded-squircle-md cursor-pointer transition-all duration-300 text-base flex items-center ${
-      isCollapsed ? 'justify-center' : 'justify-center md:justify-start md:gap-4'
+    `w-full text-left border border-transparent rounded-full md:rounded-squircle-md cursor-pointer transition-all duration-300 text-base flex items-center ${
+      isCollapsed ? 'md:p-3' : 'md:p-4'
     } ${
       isActive ? activeClass : inactiveClass
     }`;
@@ -39,49 +39,62 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
     <>
       {/* Desktop Sidebar */}
       <div className={`hidden md:flex md:flex-col md:fixed md:top-0 md:left-0 md:h-dvh bg-[var(--sidebar-bg)] backdrop-blur-[var(--sidebar-blur)] border-r border-[color:var(--sidebar-border)] py-10 z-50 transition-all duration-300 ease-in-out ${
-        isCollapsed ? 'md:w-20 md:px-3' : 'md:w-72 md:min-w-[280px] md:px-6'
+        isCollapsed ? 'md:w-20 md:min-w-[80px] md:px-3' : 'md:w-72 md:min-w-[280px] md:px-6'
       }`}>
-        <div className={`flex items-center mb-14 transition-all duration-300 ${isCollapsed ? 'justify-center' : 'justify-start gap-4 px-2'}`}>
-          <span className="text-2xl font-semibold text-accent leading-none">⌘</span>
-          {!isCollapsed && (
-            <h2 className="font-extralight tracking-widest text-lg text-text uppercase whitespace-nowrap overflow-hidden transition-opacity duration-300">
-              The Breath App
-            </h2>
-          )}
+        <div className={`flex items-center mb-14 px-2 overflow-hidden`}>
+          <span className="text-2xl font-semibold text-accent leading-none shrink-0 w-6 h-6 flex items-center justify-center animate-pulse">⌘</span>
+          <h2 className={`font-extralight tracking-widest text-lg text-text uppercase whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
+            isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
+          }`}>
+            The Breath App
+          </h2>
         </div>
         
         <div className="w-full flex-1 flex flex-col justify-between">
           <div>
-            {!isCollapsed && (
-              <h3 className="text-[0.75rem] uppercase tracking-[2px] text-dim mb-5 pl-2 font-medium">Menu</h3>
-            )}
             <ul className="flex flex-col gap-2 list-none p-0 m-0 w-full">
               <li>
                 <NavLink to="/" className={linkClass} onClick={(e) => handleNavClick(e, '/')} title={isCollapsed ? "Dashboard" : undefined}>
-                  <LayoutDashboard size={20} />
-                  {!isCollapsed && <span>Dashboard</span>}
+                  <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
+                    <LayoutDashboard size={20} />
+                  </div>
+                  <span className={`transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
+                    isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
+                  }`}>
+                    Dashboard
+                  </span>
                 </NavLink>
               </li>
               
               {challengeActive && (
                 <li className="relative">
                   <button 
-                    className={`w-full text-left border border-transparent p-3 md:p-4 rounded-full md:rounded-squircle-md cursor-pointer transition-all duration-300 text-base flex items-center ${
-                      isCollapsed ? 'justify-center' : 'justify-center md:justify-start md:gap-4'
-                    } ${isBreatheActive ? activeClass : inactiveClass}`}
+                    className={linkClass({ isActive: isBreatheActive })}
                     onClick={handleBreatheClick}
                     title={isCollapsed ? "Breathing Techniques" : undefined}
                   >
-                    <Wind size={20} />
-                    {!isCollapsed && <span>Breathing Techniques</span>}
+                    <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
+                      <Wind size={20} />
+                    </div>
+                    <span className={`transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
+                      isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
+                    }`}>
+                      Breathing Techniques
+                    </span>
                   </button>
                 </li>
               )}
 
               <li>
                 <NavLink to="/history" className={linkClass} onClick={(e) => handleNavClick(e, '/history')} title={isCollapsed ? "History" : undefined}>
-                  <HistoryIcon size={20} />
-                  {!isCollapsed && <span>History</span>}
+                  <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
+                    <HistoryIcon size={20} />
+                  </div>
+                  <span className={`transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
+                    isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
+                  }`}>
+                    History
+                  </span>
                 </NavLink>
               </li>
             </ul>
@@ -89,19 +102,29 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
 
           <div className="mt-auto pt-4 border-t border-white/5 flex flex-col gap-2">
             <NavLink to="/settings" className={linkClass} onClick={(e) => handleNavClick(e, '/settings')} title={isCollapsed ? "Settings" : undefined}>
-              <Settings size={20} />
-              {!isCollapsed && <span>Settings</span>}
+              <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
+                <Settings size={20} />
+              </div>
+              <span className={`transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
+                isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
+              }`}>
+                Settings
+              </span>
             </NavLink>
             
             <button
               onClick={onToggleCollapse}
-              className={`w-full text-left border border-transparent p-3 md:p-4 rounded-full md:rounded-squircle-md cursor-pointer transition-all duration-300 text-base flex items-center text-text opacity-60 hover:bg-white/5 hover:opacity-100 ${
-                isCollapsed ? 'justify-center' : 'justify-center md:justify-start md:gap-4'
-              }`}
+              className={linkClass({ isActive: false })}
               title={isCollapsed ? `Expand Sidebar (${shortcutHint})` : `Collapse Sidebar (${shortcutHint})`}
             >
-              {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-              {!isCollapsed && <span>Collapse</span>}
+              <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
+                {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+              </div>
+              <span className={`transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
+                isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
+              }`}>
+                Collapse
+              </span>
             </button>
           </div>
         </div>

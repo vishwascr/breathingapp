@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PracticeDetail from './PracticeDetail';
 import BasePractice from './BasePractice';
-import ChakraAscent from './ChakraAscent';
+const ChakraAscent = lazy(() => import('./ChakraAscent'));
 
 const URL_TO_METHOD_KEY = {
   '4-7-8': '478',
@@ -51,10 +51,16 @@ function Practice({ methods, saveHistory, setIsSessionActive }) {
 
   if (selectedMethodKey === 'chakraAscent') {
     return (
-      <ChakraAscent
-        initialStage="meditating"
-        setIsSessionActive={setIsSessionActive}
-      />
+      <Suspense fallback={
+        <div className="flex items-center justify-center p-20 text-accent animate-pulse">
+          Loading Chakra Ascent...
+        </div>
+      }>
+        <ChakraAscent
+          initialStage="meditating"
+          setIsSessionActive={setIsSessionActive}
+        />
+      </Suspense>
     );
   }
 

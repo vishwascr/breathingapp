@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from './common';
 
@@ -127,4 +127,4 @@ function DailyProgress({ practicedDates, challengeStartDate }) {
   );
 }
 
-export default DailyProgress;
+export default memo(DailyProgress);

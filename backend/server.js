@@ -208,9 +208,19 @@ app.get('/api/history', async (req, res) => {
   }
 });
 
+// Simple in-memory cache for dashboard stats
+const statsCache = new Map();
+const clearStatsCache = () => statsCache.clear();
+
 app.get('/api/history/stats', async (req, res) => {
   try {
     const timezone = req.headers['x-timezone'] || 'UTC';
+    
+    // Serve from cache if available
+    if (statsCache.has(timezone)) {
+      return res.json(statsCache.get(timezone));
+    }
+
     const totalStats = await History.aggregate([
       { $match: { archived: { $ne: true } } },
       {
@@ -268,7 +278,7 @@ app.get('/api/history/stats', async (req, res) => {
       return acc;
     }, {});
 
-    res.json({
+    const statsResult = {
       totalSeconds: overall.totalSeconds,
       totalCooldownSeconds: overall.totalCooldownSeconds,
       totalAums: overall.totalAums,
@@ -277,7 +287,10 @@ app.get('/api/history/stats', async (req, res) => {
       methodTotals,
       lastSessions: stats.lastSessions || [],
       practicedDates
-    });
+    };
+
+    statsCache.set(timezone, statsResult);
+    res.json(statsResult);
   } catch (err) {
     console.error('Error fetching stats:', err);
     res.status(500).json({ message: 'Internal server error while fetching stats.' });
@@ -302,6 +315,7 @@ app.post('/api/challenge/start', async (req, res) => {
   try {
     // Hard delete history instead of archiving
     await History.deleteMany({});
+    clearStatsCache();
     
     // Set challenge settings
     await Settings.findOneAndUpdate(
@@ -365,6 +379,7 @@ app.post('/api/challenge/reset', async (req, res) => {
 
     // Hard delete all history
     await History.deleteMany({});
+    clearStatsCache();
     
     await Settings.findOneAndUpdate(
       { key: 'challengeActive' },
@@ -431,6 +446,7 @@ app.get('/api/eating', async (req, res) => {
 
 app.post('/api/eating', async (req, res) => {
   try {
+    clearStatsCache();
     const { meal, value, notes, timestamp } = req.body;
     const pattern = `Conscious Eating - ${meal}`;
     const targetDate = new Date(timestamp);
@@ -494,6 +510,7 @@ app.get('/api/walking', async (req, res) => {
 
 app.post('/api/walking', async (req, res) => {
   try {
+    clearStatsCache();
     const { minutes, notes, timestamp } = req.body;
     const pattern = 'Conscious Walking';
     const targetDate = new Date(timestamp);
@@ -539,6 +556,7 @@ app.post('/api/walking', async (req, res) => {
 // Debug Simulation Routes
 app.post('/api/debug/expire-challenge', async (req, res) => {
   try {
+    clearStatsCache();
     const thirtyOneDaysAgo = new Date();
     thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 31);
     
@@ -561,6 +579,7 @@ app.post('/api/debug/expire-challenge', async (req, res) => {
 
 app.post('/api/debug/complete-challenge', async (req, res) => {
   try {
+    clearStatsCache();
     const now = new Date();
     const thirtyOneDaysAgo = new Date();
     thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 31);
@@ -629,6 +648,7 @@ app.post('/api/history', async (req, res) => {
 
   try {
     const newHistory = await historyItem.save();
+    clearStatsCache();
     res.status(201).json(newHistory);
   } catch (err) {
     console.error('Error saving history:', err);
@@ -643,6 +663,7 @@ app.delete('/api/history/:id', async (req, res) => {
     if (!result) {
       return res.status(404).json({ message: 'History item not found.' });
     }
+    clearStatsCache();
     res.json({ message: 'History item deleted successfully.' });
   } catch (err) {
     console.error('Error deleting history item:', err);
