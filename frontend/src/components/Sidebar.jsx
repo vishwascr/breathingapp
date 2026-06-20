@@ -85,7 +85,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
 
       {/* Mobile Pill Navigation (iOS App Dock Style) */}
       <div 
-        className="fixed bottom-[env(safe-area-inset-bottom,0.5rem)] left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] h-16 bg-[var(--mobile-nav-bg)] backdrop-blur-[var(--mobile-nav-blur)] border border-[color:var(--mobile-nav-border)] flex md:hidden flex-row items-center justify-around px-2 z-[100] rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] h-16 bg-[var(--mobile-nav-bg)] backdrop-blur-[var(--mobile-nav-blur)] border border-[color:var(--mobile-nav-border)] flex md:hidden flex-row items-center justify-around px-2 z-[100] rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
       >
         <ul className="flex flex-row justify-around items-center w-full list-none p-0 m-0">
           <li className="flex-1 flex justify-center">
