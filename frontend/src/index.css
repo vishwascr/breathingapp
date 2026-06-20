@@ -73,3 +73,29 @@ html {
     @apply bg-white/5 backdrop-blur-sm border border-white/20 text-text p-2 rounded-squircle-sm text-center text-base focus:outline-none focus:border-text;
   }
 }
+
+@utility glass-panel {
+  background-color: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+@utility glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@utility glass-panel-hover:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+}
+
+@utility glow-accent {
+  box-shadow: 0 0 20px 2px var(--color-accent);
+}
+
+@utility glow-indicator {
+  box-shadow: 0 0 20px 2px var(--color-indicator);
+}

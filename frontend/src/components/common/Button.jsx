@@ -37,10 +37,10 @@ const Button = forwardRef(
 
     // Variant classes
     const variants = {
-      primary: 'btn-primary font-medium text-bg bg-accent backdrop-blur-md shadow-lg hover:bg-indicator disabled:opacity-20 disabled:cursor-not-allowed border border-white/10',
-      secondary: 'bg-white/5 border border-white/10 text-dim hover:text-white hover:bg-white/10 disabled:opacity-10 disabled:cursor-not-allowed',
-      danger: 'bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30 transition-all duration-300',
-      ghost: 'bg-white/5 hover:bg-white/10 text-text disabled:opacity-10 disabled:cursor-not-allowed',
+      primary: 'btn-primary font-medium text-bg bg-accent backdrop-blur-md shadow-lg hover:bg-indicator hover:scale-[1.02] hover:shadow-[0_0_20px_var(--color-accent)] active:scale-[0.98] disabled:opacity-20 disabled:cursor-not-allowed border border-white/10 transition-all duration-300',
+      secondary: 'glass-panel text-dim hover:text-white hover:bg-white/10 hover:border-white/25 active:scale-[0.98] disabled:opacity-10 disabled:cursor-not-allowed transition-all duration-300',
+      danger: 'bg-red-500/10 border border-red-500/25 text-red-400 hover:bg-red-500/20 active:scale-[0.98] transition-all duration-300',
+      ghost: 'text-dim hover:text-white hover:bg-white/5 disabled:opacity-10 disabled:cursor-not-allowed transition-all duration-300',
       none: '',
     };
 

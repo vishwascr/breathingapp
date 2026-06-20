@@ -93,7 +93,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
               to="/" 
               className={({ isActive }) => 
                 `p-3.5 rounded-[1.2rem] transition-all duration-300 flex items-center justify-center ${
-                  isActive ? 'bg-white/10 text-white shadow-sm' : 'text-white/50 hover:text-white'
+                  isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-105' : 'text-white/50 hover:text-white'
                 }`
               }
               onClick={(e) => handleNavClick(e, '/')}
@@ -105,7 +105,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
             <li className="flex-1 flex justify-center">
               <button 
                 className={`p-3.5 rounded-[1.2rem] transition-all duration-300 flex items-center justify-center ${
-                  isBreatheActive ? 'bg-white/10 text-white shadow-sm' : 'text-white/50 hover:text-white'
+                  isBreatheActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-105' : 'text-white/50 hover:text-white'
                 }`}
                 onClick={handleBreatheClick}
               >
@@ -120,7 +120,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
               to="/history" 
               className={({ isActive }) => 
                 `p-3.5 rounded-[1.2rem] transition-all duration-300 flex items-center justify-center ${
-                  isActive ? 'bg-white/10 text-white shadow-sm' : 'text-white/50 hover:text-white'
+                  isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-105' : 'text-white/50 hover:text-white'
                 }`
               }
               onClick={(e) => handleNavClick(e, '/history')}
@@ -133,7 +133,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
               to="/settings" 
               className={({ isActive }) => 
                 `p-3.5 rounded-[1.2rem] transition-all duration-300 flex items-center justify-center ${
-                  isActive ? 'bg-white/10 text-white shadow-sm' : 'text-white/50 hover:text-white'
+                  isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-105' : 'text-white/50 hover:text-white'
                 }`
               }
               onClick={(e) => handleNavClick(e, '/settings')}

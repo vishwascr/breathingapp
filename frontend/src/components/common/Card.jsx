@@ -32,11 +32,11 @@ const Card = forwardRef(
 
     // Variant classes
     const variants = {
-      default: 'bg-white/5 border border-white/10 shadow-xl',
-      hoverable: 'bg-white/5 border border-white/10 shadow-xl hover:bg-white/10 hover:border-white/20 transition-all duration-300',
-      accent: 'bg-accent/5 border border-accent/20 shadow-2xl transition-all duration-500',
-      dashed: 'bg-white/5 border border-white/10 border-dashed',
-      flat: 'bg-white/5 border border-white/5 shadow-sm',
+      default: 'glass-panel',
+      hoverable: 'glass-panel glass-panel-hover',
+      accent: 'bg-accent/[0.03] border border-accent/20 shadow-[0_0_30px_rgba(var(--color-accent),0.15)] transition-all duration-500',
+      dashed: 'bg-white/[0.02] border border-white/10 border-dashed backdrop-blur-3xl',
+      flat: 'bg-white/[0.015] border border-white/5 shadow-sm backdrop-blur-xl',
       none: '',
     };
 
