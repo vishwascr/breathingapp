@@ -157,17 +157,6 @@ const ConsciousEating = ({ refreshStats }) => {
           </div>
         </div>
         
-        <div className="flex items-center gap-4 bg-white/5 rounded-full px-3 py-1 border border-white/5">
-          <button onClick={() => changeDate(-1)} className="text-dim hover:text-text transition-colors">
-            <ChevronLeft size={16} />
-          </button>
-          <span className="text-xs font-medium tracking-widest uppercase min-w-[80px] text-center">
-            {formatDate(currentDate)}
-          </span>
-          <button onClick={() => changeDate(1)} className="text-dim hover:text-text transition-colors">
-            <ChevronRight size={16} />
-          </button>
-        </div>
       </div>
       
       <div className="grid gap-6">
