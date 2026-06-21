@@ -3,6 +3,16 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
+// Process-Level Exception & Rejection Handlers
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('CRITICAL: Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('CRITICAL: Uncaught Exception thrown:', err);
+  // Keep the process alive but log the error. In production, a process manager like PM2 should handle restarts.
+});
+
 const app = express();
 const PORT = process.env.PORT || 3005;
 
@@ -14,10 +24,39 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB Compass'))
-  .catch(err => console.error('Could not connect to MongoDB:', err));
+// MongoDB Connection & Event Listeners
+const mongoUri = process.env.MONGODB_URI;
+
+if (!mongoUri) {
+  console.error('FATAL: MONGODB_URI is not defined in the environment or .env file.');
+  process.exit(1);
+}
+
+mongoose.connection.on('connected', () => {
+  console.log('Successfully connected to MongoDB database');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+  if (mongoUri.includes('localhost')) {
+    console.warn('TIP: Since you are using "localhost", if MongoDB fails to connect, try replacing it with "127.0.0.1" in your .env file to bypass IPv6 resolution issues.');
+  }
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.warn('MongoDB connection lost. Mongoose will automatically attempt to reconnect.');
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('MongoDB successfully reconnected.');
+});
+
+// Perform Connection with standard timeouts
+mongoose.connect(mongoUri, {
+  serverSelectionTimeoutMS: 5000, // Fail fast (5s) instead of hanging (30s) if the database is down
+}).catch(() => {
+  // Connection error is already captured and logged by the 'error' event listener above
+});
 
 // History Schema
 const historySchema = new mongoose.Schema({
