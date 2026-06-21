@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Palette, Timer, Info, Save, Github, Trophy, RefreshCcw, Plus, Minus, ChevronDown } from 'lucide-react';
+import { Timer, Info, Save, Github, Trophy, RefreshCcw, Plus, Minus, ChevronDown } from 'lucide-react';
 import { Card, Button, Textarea, Checkbox } from './common';
+import ThemeManager from './ThemeManager';
 
 const PHASE_LABELS = ['Inhale', 'Hold', 'Exhale', 'Hold'];
 
@@ -180,7 +181,20 @@ function MethodSettings({ methodKey, method, onSave }) {
   );
 }
 
-function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes, challengeActive, resetChallenge }) {
+function Settings({
+  methods,
+  updateMethodPattern,
+  currentTheme,
+  themeRegistry,
+  onSelectTheme,
+  onImportTheme,
+  onExportTheme,
+  onRemoveTheme,
+  onSaveCustomTheme,
+  isBuiltinTheme,
+  challengeActive,
+  resetChallenge,
+}) {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetNotes, setResetNotes] = useState('');
   const [generateCsv, setGenerateCsv] = useState(false);
@@ -216,48 +230,16 @@ function Settings({ methods, updateMethodPattern, currentTheme, setTheme, themes
       <h1 className="text-4xl font-extralight mb-12 tracking-tight">Settings</h1>
       
       <div className="flex flex-col gap-10">
-        <Card as="section" variant="default" padding="md">
-          <div className="flex items-center gap-3 mb-8">
-            <Palette size={18} className="text-dim" />
-            <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Theme</h3>
-          </div>
-          <div className="flex flex-col gap-3">
-            {Object.entries(themes).map(([key, themeInfo]) => (
-              <button
-                key={key}
-                className={`w-full p-5 rounded-squircle-md border transition-all duration-500 flex items-center justify-between group ${
-                  currentTheme === key 
-                  ? 'bg-accent border-white/20 text-bg shadow-xl' 
-                  : 'bg-white/5 border-transparent text-dim hover:bg-white/10'
-                }`}
-                onClick={() => setTheme(key)}
-              >
-                <div className="flex flex-col items-start gap-1">
-                  <span className={`text-lg font-light tracking-wide ${currentTheme === key ? 'text-bg' : 'text-text'}`}>
-                    {themeInfo.name}
-                  </span>
-                  {currentTheme === key && (
-                    <span className="text-[0.6rem] uppercase tracking-widest font-bold opacity-60">Active Theme</span>
-                  )}
-                </div>
-                
-                {/* Color Swatches */}
-                <div className="flex gap-2 p-1.5 bg-black/10 rounded-full border border-white/5">
-                  <div 
-                    className="w-5 h-5 rounded-full border border-white/10 shadow-sm" 
-                    style={{ backgroundColor: themeInfo.colors.bg }}
-                    title="Background"
-                  />
-                  <div 
-                    className="w-5 h-5 rounded-full border border-white/10 shadow-sm" 
-                    style={{ backgroundColor: themeInfo.colors.accent }}
-                    title="Accent"
-                  />
-                </div>
-              </button>
-            ))}
-          </div>
-        </Card>
+        <ThemeManager
+          registry={themeRegistry}
+          activeKey={currentTheme}
+          onSelect={onSelectTheme}
+          onImport={onImportTheme}
+          onExport={onExportTheme}
+          onRemove={onRemoveTheme}
+          onSaveCustom={onSaveCustomTheme}
+          isBuiltin={isBuiltinTheme}
+        />
 
         {challengeActive && (
           <Card as="section" variant="accent" padding="md" className="animate-fadeIn">

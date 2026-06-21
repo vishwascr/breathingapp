@@ -10,7 +10,8 @@ const Practice = lazy(() => import('./components/Practice'));
 const History = lazy(() => import('./components/History'));
 const Settings = lazy(() => import('./components/Settings'));
 
-import { INITIAL_METHODS, THEMES } from './constants'
+import { INITIAL_METHODS } from './constants'
+import { useTheme } from './themes'
 
 // Helper to format the breathing ratios/patterns beautifully
 const getPatternText = (key, method) => {
@@ -88,7 +89,17 @@ function App() {
     return null;
   }, [getChallengeStats]);
 
-  const [theme, setTheme] = useState('noir');
+  // ── Theme system (replaces old useState + THEMES constant) ────────────────
+  const {
+    registry: themeRegistry,
+    activeKey: theme,
+    selectTheme,
+    importTheme,
+    exportTheme,
+    removeTheme,
+    saveCustomTheme,
+    isBuiltin: isBuiltinTheme,
+  } = useTheme();
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
@@ -214,55 +225,9 @@ function App() {
     return () => { isMounted = false; };
   }, []); // Run once on mount
 
-  useEffect(() => {
-    if (!theme) return;
-    const root = document.documentElement;
-    const colors = THEMES[theme].colors;
-    root.style.setProperty('--color-bg', colors.bg);
-    root.style.setProperty('--color-accent', colors.accent);
-    root.style.setProperty('--indicator-color', colors.indicator);
-    root.style.setProperty('--glass-color', colors.glass);
-    root.style.setProperty('--color-text', colors.text);
-    root.style.setProperty('--color-secondary', colors.secondary);
-    root.style.setProperty('--color-dim', colors.dim);
-    
-    // Cooldown Specific Color (Scalable approach using theme constant)
-    root.style.setProperty('--color-cooldown', colors.cooldown || colors.accent);
-    
-    // Sidebar & Navigation Specifics (for removing glass effects)
-    root.style.setProperty('--sidebar-bg', colors.sidebarBg);
-    root.style.setProperty('--sidebar-blur', colors.sidebarBlur);
-    root.style.setProperty('--sidebar-border', colors.sidebarBorder);
-    root.style.setProperty('--mobile-nav-bg', colors.mobileNavBg);
-    root.style.setProperty('--mobile-nav-blur', colors.mobileNavBlur);
-    root.style.setProperty('--mobile-nav-border', colors.mobileNavBorder);
+  // CSS variable application is now handled inside useTheme() — no useEffect needed here.
 
-    // Update meta theme-color for mobile browser chrome
-    const updateMeta = (content) => {
-      let meta = document.querySelector('meta[name="theme-color"]');
-      if (!meta) {
-        meta = document.createElement('meta');
-        meta.setAttribute('name', 'theme-color');
-        document.head.appendChild(meta);
-      }
-      meta.setAttribute('content', content);
-    };
-    
-    updateMeta(colors.bg);
-  }, [theme]);
-
-  const updateTheme = async (newTheme) => {
-    try {
-      setTheme(newTheme);
-      await fetch('/api/settings/theme', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ theme: newTheme })
-      });
-    } catch (err) {
-      console.error('Failed to save theme:', err);
-    }
-  };
+  // Theme selection is now handled by selectTheme() from useTheme() — server sync included.
 
   const fetchHistoryStats = async () => {
     try {
@@ -528,8 +493,13 @@ function App() {
                       methods={methods}
                       updateMethodPattern={updateMethodPattern}
                       currentTheme={theme}
-                      setTheme={updateTheme}
-                      themes={THEMES}
+                      themeRegistry={themeRegistry}
+                      onSelectTheme={selectTheme}
+                      onImportTheme={importTheme}
+                      onExportTheme={exportTheme}
+                      onRemoveTheme={removeTheme}
+                      onSaveCustomTheme={saveCustomTheme}
+                      isBuiltinTheme={isBuiltinTheme}
                       challengeActive={challengeActive}
                       resetChallenge={resetChallenge}
                     />
