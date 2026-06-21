@@ -409,39 +409,6 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
               />
             </Card>
 
-            {/* Freestyle Dedicated PiP */}
-            <Card 
-              as="section" 
-              variant="accent" 
-              padding="lg" 
-              className="flex flex-col gap-4 overflow-hidden relative group"
-            >
-              <div className="flex items-center gap-2 relative z-10">
-                <PictureInPicture2 size={18} className="text-accent group-hover:scale-110 transition-transform" />
-                <h3 className="text-sm uppercase tracking-widest font-medium">Freestyle</h3>
-              </div>
-              <p className="text-xs text-text/80 font-light relative z-10">
-                A dedicated unguided session in a floating window. No numbers, no instructions. Just breathe.
-              </p>
-              <Button 
-                variant="primary"
-                className="w-full py-4 mt-2 relative z-10 flex items-center justify-center gap-2"
-                onClick={isFreestyleActive ? stopFreestyle : startFreestyle}
-              >
-                {isFreestyleActive ? (
-                  <>
-                    <Clock size={16} fill="currentColor" />
-                    End Session
-                  </>
-                ) : (
-                  <>
-                    <Play size={16} fill="currentColor" />
-                    Begin Session
-                  </>
-                )}
-              </Button>
-            </Card>
-
             {/* Breathing Techniques Quick Start Card */}
             <Card 
               as="section" 
@@ -486,67 +453,39 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
               </div>
             </Card>
 
-            {/* Recent Sessions List */}
-            {lastSessions.length > 0 ? (
-              <Card 
-                as="section" 
-                variant="hoverable" 
-                padding="lg" 
-                className="flex flex-col gap-6"
+            {/* Freestyle Dedicated PiP */}
+            <Card 
+              as="section" 
+              variant="accent" 
+              padding="lg" 
+              className="flex flex-col gap-4 overflow-hidden relative group"
+            >
+              <div className="flex items-center gap-2 relative z-10">
+                <PictureInPicture2 size={18} className="text-accent group-hover:scale-110 transition-transform" />
+                <h3 className="text-sm uppercase tracking-widest font-medium">Freestyle</h3>
+              </div>
+              <p className="text-xs text-text/80 font-light relative z-10">
+                A dedicated unguided session in a floating window. No numbers, no instructions. Just breathe.
+              </p>
+              <Button 
+                variant="primary"
+                className="w-full py-4 mt-2 relative z-10 flex items-center justify-center gap-2"
+                onClick={isFreestyleActive ? stopFreestyle : startFreestyle}
               >
-                <div className="flex items-center gap-2">
-                  <Clock size={16} className="text-dim" />
-                  <h3 className="text-xs uppercase tracking-[0.2rem] text-dim font-medium">Recent Sessions</h3>
-                </div>
-                
-                <div className="space-y-6">
-                  {lastSessions.map((session, idx) => (
-                    <div key={session._id} className={idx !== 0 ? "pt-6 border-t border-white/5" : ""}>
-                      <div className="flex flex-col gap-2 mb-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-lg font-light">{session.pattern}</span>
-                          {session.inhale !== undefined && (
-                            <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-dim/60 uppercase tracking-tighter">
-                              {session.inhale}-{session.inhaleHold}-{session.exhale}-{session.exhaleHold}s
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex gap-4 text-[0.7rem] text-dim/80">
-                          <div>
-                            <span className="uppercase tracking-widest text-[0.6rem] text-dim mr-1">Duration:</span>
-                            <span className="font-light">{formatSessionDuration(session)}</span>
-                          </div>
-                          {session.cooldownSeconds > 0 && (
-                            <div>
-                              <span className="uppercase tracking-widest text-[0.6rem] text-dim mr-1">Hold:</span>
-                              <span className="font-light text-accent">{session.cooldownSeconds}s</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      {session.notes && (
-                        <p className="text-text/70 text-xs font-light italic leading-relaxed line-clamp-2">
-                          "{session.notes}"
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            ) : (
-              <Card 
-                as="section" 
-                variant="dashed" 
-                padding="lg" 
-                className="flex flex-col items-center justify-center text-center py-10"
-              >
-                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-3">
-                  <Clock size={18} className="text-dim" />
-                </div>
-                <h3 className="text-xs uppercase tracking-widest text-dim font-medium mb-1">No History</h3>
-                <p className="text-xs font-light text-text/60 max-w-[200px]">Complete your first session to see your stats here.</p>
-              </Card>
-            )}
+                {isFreestyleActive ? (
+                  <>
+                    <Clock size={16} fill="currentColor" />
+                    End Session
+                  </>
+                ) : (
+                  <>
+                    <Play size={16} fill="currentColor" />
+                    Begin Session
+                  </>
+                )}
+              </Button>
+            </Card>
+
 
           </div>
           
