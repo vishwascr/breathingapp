@@ -682,7 +682,7 @@ function App() {
                         setSelectedCard(null);
                         setIsClosingDetail(false);
                       }}
-                      className="w-full py-3 px-6 rounded-full bg-accent text-bg font-bold text-xs tracking-widest uppercase hover:bg-indicator transition-all duration-300 transform active:scale-98 shadow-[0_0_20px_rgba(var(--color-accent),0.25)] cursor-pointer text-center"
+                      className="w-full py-3 px-6 rounded-md bg-accent text-bg font-bold text-xs tracking-widest uppercase hover:bg-indicator transition-all duration-300 transform active:scale-98 shadow-[0_0_20px_rgba(var(--color-accent),0.25)] cursor-pointer text-center"
                     >
                       Begin Practice
                     </button>

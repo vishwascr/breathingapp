@@ -57,7 +57,7 @@ const Button = forwardRef(
       md: 'rounded-squircle-md',
       sm: 'rounded-squircle-sm',
       lg: 'rounded-squircle-lg',
-      full: 'rounded-full',
+      full: 'rounded-squircle-md',
       none: '',
     };
 

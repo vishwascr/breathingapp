@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Play, Square, Save, X, CheckCircle2, Maximize, Minimize, Info } from 'lucide-react'
 import { Modal, Button, Textarea } from './common'
+import { useTheme } from '../themes'
 
 const PHASES = ['Inhale', 'Hold', 'Exhale', 'Hold'];
 
@@ -13,6 +14,9 @@ const GUIDANCE = {
 
 function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive }) {
   const navigate = useNavigate();
+  const { activeEntry } = useTheme();
+  const themeBorderRadius = activeEntry?.definition?.typography?.borderRadius ?? 16;
+  const svgRx = themeBorderRadius * 2.875;
   
   // Use a safer way to get initial time left
   const initialTime = (selectedMethod && methods[selectedMethod]) ? methods[selectedMethod].pattern[0] : 4;
@@ -377,7 +381,7 @@ function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive
 
               <rect 
                 ref={pathRef}
-                x="0" y="0" width="450" height="450" rx="46"
+                x="0" y="0" width="450" height="450" rx={svgRx}
                 className="fill-none stroke-none"
               />
 
@@ -414,7 +418,7 @@ function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive
                     return (
                       <rect 
                         key={`stroke-${cum}`}
-                        x="0" y="0" width="450" height="450" rx="46" pathLength="100"
+                        x="0" y="0" width="450" height="450" rx={svgRx} pathLength="100"
                         className={className}
                         style={style}
                       />

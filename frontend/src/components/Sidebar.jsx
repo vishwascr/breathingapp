@@ -194,11 +194,9 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
             </NavLink>
           </div>
         </div>
-      </div>
-
-      {/* Mobile Pill Navigation (iOS App Dock Style) */}
+      </div>      {/* Mobile Pill Navigation (iOS App Dock Style) */}
       <div 
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-[420px] h-20 bg-white/[0.08] border border-white/10 flex md:hidden flex-row items-center justify-around px-3 z-[100] rounded-[2.2rem] shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-[420px] h-20 bg-white/[0.08] border border-white/10 flex md:hidden flex-row items-center justify-around px-3 z-[100] rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
         style={{
           backdropFilter: 'blur(30px)',
           WebkitBackdropFilter: 'blur(30px)',
@@ -209,7 +207,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
             <NavLink 
               to="/" 
               className={({ isActive }) => 
-                `p-4 rounded-[1.4rem] transition-all duration-300 ease-out flex items-center justify-center ${
+                `p-4 rounded-2xl transition-all duration-300 ease-out flex items-center justify-center ${
                   isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-110 font-medium' : 'text-white/50 hover:text-white active:scale-95'
                 }`
               }
@@ -221,7 +219,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
           {challengeActive && (
             <li className="flex-1 flex justify-center">
               <button 
-                className={`p-5 rounded-[1.4rem] transition-all duration-300 ease-out flex items-center justify-center breathe-techniques-btn-custom ${
+                className={`p-5 rounded-2xl transition-all duration-300 ease-out flex items-center justify-center breathe-techniques-btn-custom ${
                   isBreatheActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-110 font-medium' : 'text-white/50 hover:text-white active:scale-95'
                 }`}
                 onClick={handleBreatheClick}
@@ -236,7 +234,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
             <NavLink 
               to="/history" 
               className={({ isActive }) => 
-                `p-4 rounded-[1.4rem] transition-all duration-300 ease-out flex items-center justify-center ${
+                `p-4 rounded-2xl transition-all duration-300 ease-out flex items-center justify-center ${
                   isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-110 font-medium' : 'text-white/50 hover:text-white active:scale-95'
                 }`
               }
@@ -249,7 +247,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
             <NavLink 
               to="/settings" 
               className={({ isActive }) => 
-                `p-4 rounded-[1.4rem] transition-all duration-300 ease-out flex items-center justify-center ${
+                `p-4 rounded-2xl transition-all duration-300 ease-out flex items-center justify-center ${
                   isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-110 font-medium' : 'text-white/50 hover:text-white active:scale-95'
                 }`
               }
