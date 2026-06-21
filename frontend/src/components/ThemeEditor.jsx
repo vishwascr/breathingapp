@@ -801,7 +801,7 @@ export default function ThemeEditor({ isOpen, onClose, baseEntry, isBuiltin: isB
                 <input
                   type="range"
                   min={0}
-                  max={40}
+                  max={20}
                   step={2}
                   value={typography.borderRadius !== undefined ? typography.borderRadius : 16}
                   onChange={(e) => setTypoField('borderRadius', parseInt(e.target.value))}

@@ -156,9 +156,9 @@ export const ThemeTypographyV1Schema = z
      *   sm = borderRadius px
      *   md = borderRadius * 1.5 px
      *   lg = borderRadius * 2.5 px
-     * Range: 0 (sharp) – 40 (very round).
+     *   Range: 0 (sharp) – 20 (very round).
      */
-    borderRadius: z.number().min(0).max(40).optional(),
+    borderRadius: z.number().min(0).max(20).optional(),
 
     /**
      * Whether glow / bloom shadow effects are rendered.
