@@ -46,7 +46,7 @@ function PracticeDetail({ selectedMethod, methods, onStart }) {
   };
 
   return (
-    <div className="w-full flex flex-col md:hidden gap-8 md:gap-12 animate-fadeIn max-w-xl mx-auto py-6 text-center">
+    <div className="w-full flex flex-col gap-8 md:gap-12 animate-fadeIn max-w-xl mx-auto py-6 text-center">
       {/* Visual Header */}
       <div className="flex justify-center mb-2">
         <div className="w-16 h-16 rounded-full bg-accent/15 flex items-center justify-center animate-pulse">

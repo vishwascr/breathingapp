@@ -49,9 +49,25 @@ const LS_IMPORTED_THEMES = 'theme:importedThemes'; // JSON array of ThemeFile ob
  * }}
  */
 export function useTheme() {
-  // ── 1. Seed registry from built-ins ────────────────────────────────────────
+  // ── 1. Seed registry from built-ins + persisted imported themes ────────────
   const [registry, setRegistry] = useState(() => {
-    return BUILTIN_THEME_KEYS.map(buildBuiltinRegistryEntry);
+    const builtins = BUILTIN_THEME_KEYS.map(buildBuiltinRegistryEntry);
+    try {
+      const stored = localStorage.getItem(LS_IMPORTED_THEMES);
+      if (stored) {
+        const files = JSON.parse(stored);
+        if (Array.isArray(files)) {
+          const importedEntries = files.map(buildImportedRegistryEntry);
+          const existingKeys = new Set(builtins.map((e) => e.key));
+          const fresh = importedEntries.filter((e) => !existingKeys.has(e.key));
+          return [...builtins, ...fresh];
+        }
+      }
+    } catch {
+      // Corrupted storage — reset silently.
+      localStorage.removeItem(LS_IMPORTED_THEMES);
+    }
+    return builtins;
   });
 
   // ── 2. Restore active key ──────────────────────────────────────────────────
@@ -61,28 +77,6 @@ export function useTheme() {
 
   // ── 3. Track whether the DOM has been hydrated (avoid double-apply) ────────
   const domHydratedRef = useRef(false);
-
-  // ── 4. Load persisted imported themes on mount ─────────────────────────────
-  useEffect(() => {
-    const stored = localStorage.getItem(LS_IMPORTED_THEMES);
-    if (!stored) return;
-
-    try {
-      const files = JSON.parse(stored);
-      if (!Array.isArray(files)) return;
-
-      const importedEntries = files.map(buildImportedRegistryEntry);
-      setRegistry((prev) => {
-        // Merge: built-ins first, then imported (dedup by key)
-        const existingKeys = new Set(prev.map((e) => e.key));
-        const fresh = importedEntries.filter((e) => !existingKeys.has(e.key));
-        return [...prev, ...fresh];
-      });
-    } catch {
-      // Corrupted storage — reset silently.
-      localStorage.removeItem(LS_IMPORTED_THEMES);
-    }
-  }, []);
 
   // ── 5. Apply theme to DOM whenever activeKey or registry changes ───────────
   useEffect(() => {

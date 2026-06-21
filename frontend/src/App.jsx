@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense, lazy } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { Trophy, Clock, Calendar, Activity, CheckCircle2, Star, Target, Zap, RefreshCcw, Wind, X, ChevronLeft } from 'lucide-react'
 import './App.css'
@@ -100,6 +100,11 @@ function App() {
     saveCustomTheme,
     isBuiltin: isBuiltinTheme,
   } = useTheme();
+
+  const selectThemeRef = useRef(selectTheme);
+  useEffect(() => {
+    selectThemeRef.current = selectTheme;
+  }, [selectTheme]);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
@@ -209,7 +214,7 @@ function App() {
           // Process Theme
           const loadedTheme = themeData.theme;
           if (loadedTheme) {
-            setTheme(loadedTheme);
+            selectThemeRef.current(loadedTheme);
           }
           // If no theme from API, we already have it from localStorage or 'noir'
 
