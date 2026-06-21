@@ -217,7 +217,7 @@ const getBreathingPattern = (cIndex, isUniversal) => {
   }
 };
 
-function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
+function ChakraAscent({ initialStage = 'intro', setIsSessionActive, saveHistory }) {
   const navigate = useNavigate();
   
   // State
@@ -231,6 +231,8 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
   const [sessionRating, setSessionRating] = useState(0);
   const [historySaved, setHistorySaved] = useState(false);
   const sessionStartTimeRef = useRef(null);
+  const [sessionDuration, setSessionDuration] = useState(0);
+  const [completedLevels, setCompletedLevels] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
   const [currentNote, setCurrentNote] = useState('');
   const [showNotesInput, setShowNotesInput] = useState(false);
@@ -404,9 +406,6 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
 
   const handleSaveHistory = async () => {
     if (sessionRating === 0) return;
-    const duration = sessionStartTimeRef.current 
-      ? Math.round((Date.now() - sessionStartTimeRef.current) / 1000) 
-      : 300; // fallback 5 mins
 
     // Format all reflections into notes
     const formattedNotes = answers.map(ans => `${ans.chakra}: Q: "${ans.question}" -> A: "${ans.response}"`).join(' | ');
@@ -415,25 +414,40 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
       : formattedNotes;
 
     try {
-      const response = await fetch('/api/history', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          duration,
-          pattern: 'Chakra Ascent',
-          inhale: 5,
-          inhaleHold: 0,
-          exhale: 6,
-          exhaleHold: 0,
-          cycles: chakraIndex + 1,
-          notes: finalNote,
-          cooldownSeconds: 0,
-          rating: sessionRating
-        })
-      });
-      if (response.ok) {
-        setShowSummary(false);
-        navigate('/history');
+      if (saveHistory) {
+        await saveHistory(
+          sessionDuration,
+          'Chakra Ascent',
+          finalNote,
+          completedLevels,
+          0,
+          sessionRating,
+          5,
+          0,
+          6,
+          0
+        );
+      } else {
+        const response = await fetch('/api/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            duration: sessionDuration,
+            pattern: 'Chakra Ascent',
+            inhale: 5,
+            inhaleHold: 0,
+            exhale: 6,
+            exhaleHold: 0,
+            cycles: completedLevels,
+            notes: finalNote,
+            cooldownSeconds: 0,
+            rating: sessionRating
+          })
+        });
+        if (response.ok) {
+          setShowSummary(false);
+          navigate('/history');
+        }
       }
     } catch (e) {
       console.error("Failed to save Chakra Ascent session to history:", e);
@@ -483,16 +497,15 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
           setStage('meditating');
         }, 2200);
       } else {
+        const duration = sessionStartTimeRef.current 
+          ? Math.round((Date.now() - sessionStartTimeRef.current) / 1000) 
+          : 300;
+        setSessionDuration(duration);
+        setCompletedLevels(chakraIndex + 1);
         setShowSummary(true);
         setStage('intro');
       }
     }
-  };
-
-  const formatTimer = (seconds) => {
-    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const s = (seconds % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
   };
 
   return (
@@ -705,6 +718,11 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
                 {responseText.trim() === '' && (
                   <Button
                     onClick={() => {
+                      const duration = sessionStartTimeRef.current 
+                        ? Math.round((Date.now() - sessionStartTimeRef.current) / 1000) 
+                        : 300;
+                      setSessionDuration(duration);
+                      setCompletedLevels(chakraIndex + 1);
                       setShowSummary(true);
                       setStage('intro');
                     }}
@@ -781,13 +799,13 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
         </div>
         
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mb-8 text-sm md:text-base font-light text-text/80 tracking-wide text-center">
-          <span>{sessionStartTimeRef.current ? Math.round((Date.now() - sessionStartTimeRef.current) / 1000) : 300}s</span>
+          <span>{sessionDuration}s</span>
           <span className="opacity-20 text-[0.6rem]">•</span>
           <span>Chakra Ascent</span>
           <span className="opacity-20 text-[0.6rem]">•</span>
           <span>7 Levels</span>
           <span className="opacity-20 text-[0.6rem]">•</span>
-          <span>{chakraIndex + 1} Levels Completed</span>
+          <span>{completedLevels} Levels Completed</span>
         </div>
         
         <div className="mb-6 flex flex-col items-center gap-3">

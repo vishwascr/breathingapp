@@ -56,6 +56,7 @@ function Practice({ methods, saveHistory, setIsSessionActive }) {
         <ChakraAscent
           initialStage="meditating"
           setIsSessionActive={setIsSessionActive}
+          saveHistory={saveHistory}
         />
       </Suspense>
     );
