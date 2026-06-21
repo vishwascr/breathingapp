@@ -22,18 +22,12 @@ const METHOD_BENEFITS = {
 
 function PracticeDetail({ selectedMethod, methods, onStart }) {
   const method = methods[selectedMethod];
-  const [name, setName] = useState('Vishwas');
   const [showInfo, setShowInfo] = useState(false);
 
   if (!method) return null;
 
   const IconComponent = METHOD_ICONS[selectedMethod] || Wind;
   const benefitText = METHOD_BENEFITS[selectedMethod] || 'Focus on your breath and find your center.';
-
-  const handleNameChange = (e) => {
-    const val = e.target.value;
-    setName(val);
-  };
 
   // Format pattern text
   const getPatternText = () => {
@@ -52,7 +46,7 @@ function PracticeDetail({ selectedMethod, methods, onStart }) {
   };
 
   return (
-    <div className="w-full flex flex-col gap-8 md:gap-12 animate-fadeIn max-w-xl mx-auto py-6 text-center">
+    <div className="w-full flex flex-col md:hidden gap-8 md:gap-12 animate-fadeIn max-w-xl mx-auto py-6 text-center">
       {/* Visual Header */}
       <div className="flex justify-center mb-2">
         <div className="w-16 h-16 rounded-full bg-accent/15 flex items-center justify-center animate-pulse">
@@ -99,18 +93,6 @@ function PracticeDetail({ selectedMethod, methods, onStart }) {
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Customizer Name */}
-      <div className="w-full flex flex-col gap-2 items-center mb-2">
-        <label className="text-[0.65rem] uppercase tracking-widest text-dim/60 font-bold">Your Name (for personalization)</label>
-        <input 
-          type="text" 
-          value={name} 
-          onChange={handleNameChange}
-          placeholder="Enter your name"
-          className="w-full max-w-xs text-center border-b border-white/20 focus:border-accent py-2 text-text font-light bg-transparent focus:outline-none"
-        />
       </div>
 
       <div className="w-full">
