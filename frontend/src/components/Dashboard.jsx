@@ -1,16 +1,167 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Clock, Trophy, Wind } from 'lucide-react';
+import { Play, Clock, Trophy, Wind, PictureInPicture2, Save } from 'lucide-react';
 import DailyProgress from './DailyProgress';
 import ConsciousEating from './ConsciousEating';
 import ConsciousWalking from './ConsciousWalking';
-import { Card, Button } from './common';
+import { Card, Button, Modal, Textarea } from './common';
 const WeeklyGraph = lazy(() => import('./WeeklyGraph'));
 
-function Dashboard({ historyStats, methods, openMethodModal, challengeActive, challengeStartDate, startChallenge, refreshStats }) {
+function Dashboard({ historyStats, methods, openMethodModal, challengeActive, challengeStartDate, startChallenge, refreshStats, saveHistory }) {
   const navigate = useNavigate();
 
   const lastSessions = historyStats.lastSessions || [];
+
+  // Freestyle PiP Logic
+  const pipCanvasRef = useRef(null);
+  const pipVideoRef = useRef(null);
+  const [isFreestyleActive, setIsFreestyleActive] = useState(false);
+  const freestyleStateRef = useRef({
+    active: false,
+    startTime: 0,
+    countdown: 3
+  });
+  const workerRef = useRef(null);
+
+  // Summary Modal State
+  const [showSummary, setShowSummary] = useState(false);
+  const [freestyleDuration, setFreestyleDuration] = useState(0);
+  const [sessionRating, setSessionRating] = useState(0);
+  const [currentNote, setCurrentNote] = useState('');
+  const [showNotesInput, setShowNotesInput] = useState(false);
+
+  // Worker for accurate background tracking
+  useEffect(() => {
+    const blob = new Blob([`
+      let t;
+      self.onmessage = function(e) {
+        if (e.data === 'start') {
+          t = setInterval(() => postMessage('tick'), 1000);
+        } else if (e.data === 'stop') {
+          clearInterval(t);
+        }
+      };
+    `], { type: 'application/javascript' });
+    workerRef.current = new Worker(URL.createObjectURL(blob));
+
+    workerRef.current.onmessage = () => {
+      const state = freestyleStateRef.current;
+      if (!state.active) return;
+      
+      if (state.countdown > 0) {
+        state.countdown -= 1;
+      }
+    };
+
+    return () => workerRef.current.terminate();
+  }, []);
+
+  // PiP Canvas Rendering Loop
+  useEffect(() => {
+    if (!pipCanvasRef.current || !pipVideoRef.current) return;
+    const canvas = pipCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    canvas.width = 300;
+    canvas.height = 300;
+
+    let rafId;
+
+    const renderPip = () => {
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      const state = freestyleStateRef.current;
+      
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      if (!state.active) {
+        ctx.font = '300 24px sans-serif';
+        ctx.fillText('FREESTYLE', canvas.width / 2, canvas.height / 2);
+      } else if (state.countdown > 0) {
+        ctx.font = '300 24px sans-serif';
+        ctx.fillText('GET READY', canvas.width / 2, canvas.height / 2 - 30);
+        ctx.font = '600 56px sans-serif';
+        ctx.fillText(state.countdown.toString(), canvas.width / 2, canvas.height / 2 + 20);
+      } else {
+        ctx.font = '300 28px sans-serif';
+        ctx.fillText('Session in', canvas.width / 2, canvas.height / 2 - 15);
+        ctx.fillText('progress', canvas.width / 2, canvas.height / 2 + 25);
+      }
+    };
+
+    renderPip();
+    rafId = setInterval(renderPip, 1000 / 30);
+
+    if (!pipVideoRef.current.srcObject) {
+      pipVideoRef.current.srcObject = canvas.captureStream(30);
+    }
+
+    return () => clearInterval(rafId);
+  }, []);
+
+  const stopFreestyle = async () => {
+    const state = freestyleStateRef.current;
+    if (!state.active) return;
+
+    const duration = state.countdown > 0 ? 0 : Math.floor((Date.now() - state.startTime) / 1000) - 3;
+    
+    state.active = false;
+    setIsFreestyleActive(false);
+    workerRef.current.postMessage('stop');
+
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture().catch(console.error);
+    }
+
+    if (duration > 0 && saveHistory) {
+      setFreestyleDuration(duration);
+      setSessionRating(0);
+      setCurrentNote('');
+      setShowNotesInput(false);
+      setShowSummary(true);
+    }
+  };
+
+  const handleSaveSession = async () => {
+    if (saveHistory) {
+      await saveHistory(freestyleDuration, 'Freestyle', currentNote, 0, 0, sessionRating, 0, 0, 0, 0);
+      if (refreshStats) refreshStats();
+    }
+    setShowSummary(false);
+  };
+
+  const startFreestyle = async () => {
+    if (!pipVideoRef.current) return;
+
+    freestyleStateRef.current = {
+      active: true,
+      startTime: Date.now(),
+      countdown: 3
+    };
+    setIsFreestyleActive(true);
+    workerRef.current.postMessage('start');
+
+    try {
+      const playPromise = pipVideoRef.current.play();
+      if (playPromise !== undefined) playPromise.catch(console.error);
+
+      if (pipVideoRef.current.requestPictureInPicture) {
+        await pipVideoRef.current.requestPictureInPicture();
+      } else if (pipVideoRef.current.webkitSetPresentationMode) {
+        pipVideoRef.current.webkitSetPresentationMode('picture-in-picture');
+      }
+
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('pause', stopFreestyle);
+        navigator.mediaSession.setActionHandler('stop', stopFreestyle);
+      }
+    } catch (err) {
+      console.error("PiP failed", err);
+      stopFreestyle();
+    }
+  };
 
   const formatTime = (seconds) => {
     const minutes = seconds / 60;
@@ -94,6 +245,10 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
 
   return (
     <div className="w-full max-w-7xl md:max-w-[1400px] py-4 md:py-8 px-4 md:px-8 relative isolate">
+      {/* Hidden PiP Elements */}
+      <canvas ref={pipCanvasRef} style={{ position: 'fixed', bottom: 0, right: 0, width: '300px', height: '300px', zIndex: -9999, pointerEvents: 'none', opacity: 0.001 }} />
+      <video ref={pipVideoRef} muted playsInline autoPlay style={{ position: 'fixed', bottom: 0, right: 0, width: '300px', height: '300px', zIndex: -9999, pointerEvents: 'none', opacity: 0.001 }} />
+      
       {/* Background Blob Mesh (Atmospheric Layer) - Optimized with radial gradients, no blur filters */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 select-none">
         <div 
@@ -254,6 +409,39 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
               />
             </Card>
 
+            {/* Freestyle Dedicated PiP */}
+            <Card 
+              as="section" 
+              variant="accent" 
+              padding="lg" 
+              className="flex flex-col gap-4 overflow-hidden relative group"
+            >
+              <div className="flex items-center gap-2 relative z-10">
+                <PictureInPicture2 size={18} className="text-accent group-hover:scale-110 transition-transform" />
+                <h3 className="text-sm uppercase tracking-widest font-medium">Freestyle</h3>
+              </div>
+              <p className="text-xs text-text/80 font-light relative z-10">
+                A dedicated unguided session in a floating window. No numbers, no instructions. Just breathe.
+              </p>
+              <Button 
+                variant="primary"
+                className="w-full py-4 mt-2 relative z-10 flex items-center justify-center gap-2"
+                onClick={isFreestyleActive ? stopFreestyle : startFreestyle}
+              >
+                {isFreestyleActive ? (
+                  <>
+                    <Clock size={16} fill="currentColor" />
+                    End Session
+                  </>
+                ) : (
+                  <>
+                    <Play size={16} fill="currentColor" />
+                    Begin Session
+                  </>
+                )}
+              </Button>
+            </Card>
+
             {/* Breathing Techniques Quick Start Card */}
             <Card 
               as="section" 
@@ -364,6 +552,88 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
           
         </div>
       )}
+
+      {/* Freestyle Summary Modal */}
+      <Modal
+        isOpen={showSummary}
+        onClose={() => {}} // Force user to use buttons
+        maxWidth="md"
+        zIndex="z-[100]"
+        backdropBlur="sm"
+      >
+        <div className="flex flex-col items-center text-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-thin tracking-tight mb-2">Session Complete</h2>
+          <p className="text-dim text-sm tracking-wide">Freestyle breathing</p>
+        </div>
+
+        <div className="flex justify-center gap-4 mb-8 text-sm md:text-base font-light tracking-widest uppercase">
+          <span>{freestyleDuration}s</span>
+          <span className="opacity-20 text-[0.6rem]">•</span>
+          <span>Freestyle</span>
+        </div>
+        
+        <div className="mb-6 flex flex-col items-center gap-3">
+          <span className="text-[0.65rem] md:text-xs uppercase tracking-[0.2rem] text-dim font-medium">How was your session?</span>
+          <div className="flex items-center gap-2">
+            {[1, 2, 3, 4, 5].map((num) => (
+              <button 
+                key={num}
+                onClick={() => setSessionRating(num)}
+                className={`transition-all duration-300 ${sessionRating >= num ? 'text-accent scale-110' : 'text-dim/40 hover:text-dim hover:scale-105'}`}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill={sessionRating >= num ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                </svg>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-8 flex flex-col items-center">
+          {!showNotesInput ? (
+            <Button 
+              onClick={() => setShowNotesInput(true)}
+              variant="secondary"
+              size="none"
+              rounded="full"
+              className="text-[0.65rem] md:text-xs tracking-[0.2rem] text-accent/60 hover:text-accent px-6 py-2.5"
+            >
+              + Add a note
+            </Button>
+          ) : (
+            <div className="w-full animate-fadeIn">
+              <Textarea 
+                autoFocus
+                value={currentNote}
+                onChange={(e) => setCurrentNote(e.target.value)}
+                placeholder="How do you feel?"
+                className="min-h-[80px] md:min-h-[100px]"
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <Button 
+            onClick={handleSaveSession}
+            disabled={sessionRating === 0}
+            variant="primary"
+            size="none"
+            className="w-full py-4 font-medium flex items-center justify-center gap-2"
+          >
+            <Save size={18} />
+            <span>Save Journey</span>
+          </Button>
+          <Button 
+            onClick={() => setShowSummary(false)} 
+            variant="secondary"
+            size="none"
+            className="w-full py-3 text-xs tracking-widest font-light"
+          >
+            Discard Session
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

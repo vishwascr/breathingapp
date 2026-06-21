@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ArrowRight, CheckCircle2, RotateCcw, 
+  ArrowRight, CheckCircle2, 
   Sparkles, 
   ChevronRight, ChevronLeft, PenTool, 
-  Music, Clock,
-  HelpCircle, Footprints, Droplet, Save
+  Clock, HelpCircle, Save
 } from 'lucide-react';
-import { Card, Button, Textarea, Modal } from './common';
+import { Button, Textarea, Modal } from './common';
 
 const CHAKRAS = [
   {
@@ -229,7 +228,6 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive, saveHistory 
   const [answers, setAnswers] = useState([]); // Array of { chakra, question, response }
   const [name, setName] = useState('Vishwas');
   const [sessionRating, setSessionRating] = useState(0);
-  const [historySaved, setHistorySaved] = useState(false);
   const sessionStartTimeRef = useRef(null);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [completedLevels, setCompletedLevels] = useState(0);
@@ -282,12 +280,6 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive, saveHistory 
     }
   }
   
-  // Post-meditation action modes
-  const [activeAction, setActiveAction] = useState(null); // null | 'timer' | 'music' | 'walk' | 'water'
-  const [focusTimer, setFocusTimer] = useState(1500); // 25 minutes default
-  const [timerRunning, setTimerRunning] = useState(false);
-
-  const timerRef = useRef(null);
   const breathTimerRef = useRef(null);
 
   const activeChakra = CHAKRAS[chakraIndex];
@@ -330,22 +322,7 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive, saveHistory 
     return () => clearInterval(breathTimerRef.current);
   }, [stage, chakraIndex, universalMode, patternIndex, countdownVal]);
 
-  // Focus Timer Logic (for the Post-Ascent Focus Session)
-  useEffect(() => {
-    if (!timerRunning) return;
-    
-    timerRef.current = setInterval(() => {
-      setFocusTimer(prev => {
-        if (prev <= 1) {
-          setTimerRunning(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
 
-    return () => clearInterval(timerRef.current);
-  }, [timerRunning]);
 
   const navigateToChakra = useCallback((newIndex) => {
     if (newIndex >= 0 && newIndex < CHAKRAS.length) {
@@ -399,7 +376,6 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive, saveHistory 
     setResponseText('');
     setStage('meditating');
     setCountdownVal(3);
-    setHistorySaved(false);
     setSessionRating(0);
     sessionStartTimeRef.current = Date.now();
   };
@@ -510,13 +486,13 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive, saveHistory 
 
   return (
     <div 
-      className="w-full h-full flex flex-col pt-4 pb-24 px-6 md:pt-12 md:pb-12 relative bg-[var(--color-bg)] select-none"
+      className="w-full h-full flex flex-col pt-4 pb-24 px-6 md:pt-4 md:pb-4 relative bg-[var(--color-bg)] select-none"
       style={{
         background: `radial-gradient(circle at center, ${stage === 'meditating' ? activeChakra.colorClasses.glowColor : 'rgba(255,255,255,0.01)'} 0%, rgba(0,0,0,0) 70%)`
       }}
     >
       {/* Header toolbar matching Practice.jsx */}
-      <header className="w-full max-w-5xl mx-auto mb-4 md:mb-6 flex justify-between items-start shrink-0 z-20">
+      <header className="w-full max-w-5xl mx-auto mb-2 md:mb-2 flex justify-between items-start shrink-0 z-20">
         <div className="flex items-center gap-3">
           <h2 className="text-[1.1rem] uppercase tracking-widest opacity-60 md:text-4xl md:font-extralight md:tracking-tight md:opacity-100 md:normal-case text-text text-left">
             Chakra Ascent
@@ -616,7 +592,7 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive, saveHistory 
 
         {/* STAGE 2: MEDITATING */}
         {stage === 'meditating' && (
-          <div className="flex-1 flex flex-col items-center justify-between py-4 md:py-8 w-full max-w-5xl mx-auto min-h-0">
+          <div className="flex-1 flex flex-col items-center justify-center gap-4 md:gap-8 w-full max-w-5xl mx-auto min-h-0">
             
             {/* Navigation & Pulsing Breathing Ring Layout */}
             <div className="flex items-center justify-center gap-4 md:gap-12 w-full max-w-4xl min-h-0 select-none">
@@ -635,10 +611,10 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive, saveHistory 
               </button>
 
               {/* Pulsing Breathing Ring matching size/layout in Practice.jsx */}
-              <div className="relative w-[210px] h-[210px] md:w-[410px] md:h-[410px] flex justify-center items-center shrink-0">
+              <div className="relative w-[210px] h-[210px] md:w-[min(500px,55vh)] md:h-[min(500px,55vh)] flex justify-center items-center shrink-0">
                 {/* Core scale circle mirroring Practice.jsx exactly */}
                 <div 
-                  className="absolute w-20 h-20 md:w-40 md:h-40 rounded-full flex flex-col justify-center items-center text-center font-extralight border border-white/10 z-10 bg-black/50 text-white"
+                  className="absolute w-20 h-20 md:w-44 md:h-44 rounded-full flex flex-col justify-center items-center text-center font-extralight border border-white/10 z-10 bg-black/50 text-white"
                   style={{
                     transform: `scale(${scale})`,
                     transition: countdownVal > 0 ? 'transform 0.3s ease-out' : (currentPhase === 'Natural' ? 'transform 4s ease-in-out' : `transform ${currentPhaseDuration}s ease-in-out`),
@@ -670,10 +646,10 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive, saveHistory 
             </div>
 
             {/* Inquiries and Input Stack matching Practice.jsx text stack */}
-            <div className="flex flex-col items-center w-full max-w-xl mx-auto gap-3 md:gap-5 mb-2 md:mb-0">
+            <div className="flex flex-col items-center w-full max-w-xl mx-auto gap-3 md:gap-4 shrink-0">
               
               {/* Unified Vertical Stack - Space Reserved */}
-              <div className="flex flex-col items-center text-center gap-2 min-h-[110px] md:min-h-[140px] justify-center">
+              <div className="flex flex-col items-center text-center gap-2 min-h-[100px] md:min-h-[110px] justify-center">
                 {/* Dynamic Breath Phase & Mantra */}
                 <div className="text-[1.2rem] md:text-[1.8rem] font-thin text-text uppercase tracking-[0.6rem] md:tracking-[1rem] whitespace-nowrap mb-1">
                   {countdownVal > 0 ? 'PREPARE' : `${currentPhase} — ${activeChakra.mantra}`}

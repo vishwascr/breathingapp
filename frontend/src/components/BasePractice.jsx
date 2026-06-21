@@ -54,9 +54,6 @@ function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive
   const containerRef = useRef(null);
   const timeDisplayRef = useRef(null);
   const headRef = useRef(null);
-  const pipCanvasRef = useRef(null);
-  const pipVideoRef = useRef(null);
-  const pipRafRef = useRef(null);
 
   // Countdown timer logic
   useEffect(() => {
@@ -102,6 +99,31 @@ function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive
       clearInterval(sessionTimerRef.current);
     }
     return () => clearInterval(sessionTimerRef.current);
+  }, [isActive]);
+
+  // Anti-throttling Web Worker to prevent Safari background suspension
+  useEffect(() => {
+    if (!isActive) return;
+    const blob = new Blob([`
+      let t;
+      self.onmessage = function(e) {
+        if (e.data === 'start') {
+          t = setInterval(() => postMessage('tick'), 250);
+        } else if (e.data === 'stop') {
+          clearInterval(t);
+        }
+      };
+    `], { type: 'application/javascript' });
+    const worker = new Worker(URL.createObjectURL(blob));
+    worker.postMessage('start');
+    
+    // Just receiving the message wakes the main thread's event loop
+    worker.onmessage = () => {}; 
+    
+    return () => {
+      worker.postMessage('stop');
+      worker.terminate();
+    };
   }, [isActive]);
 
   useEffect(() => {
@@ -242,8 +264,6 @@ function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive
   const handleStartStop = () => {
     if (document.pictureInPictureElement) {
       document.exitPictureInPicture().catch(console.error);
-    } else if (pipVideoRef.current && pipVideoRef.current.webkitPresentationMode === 'picture-in-picture') {
-      pipVideoRef.current.webkitSetPresentationMode('inline');
     }
     if (isActive || countdown !== null) {
       const methodName = methods[selectedMethod].name;
@@ -351,109 +371,8 @@ function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive
 
   const currentPhase = isCooldown ? 'Cooldown' : ((methods[selectedMethod].phases && methods[selectedMethod].phases[phaseState.index]) || PHASES[phaseState.index]);
 
-  // PiP Canvas Rendering
-  useEffect(() => {
-    if (!pipCanvasRef.current || !pipVideoRef.current) return;
-
-    const canvas = pipCanvasRef.current;
-    const ctx = canvas.getContext('2d');
-    canvas.width = 300;
-    canvas.height = 300;
-
-    if (!pipVideoRef.current.srcObject) {
-      pipVideoRef.current.srcObject = canvas.captureStream(30);
-    }
-
-    const renderPip = () => {
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      const displayPhase = currentPhase;
-      let displayTime = countdown !== null ? countdown : timeLeft;
-      if (countdown === null && timeDisplayRef.current) {
-         displayTime = timeDisplayRef.current.innerText;
-      }
-      
-      ctx.fillStyle = '#FFFFFF';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      
-      const isPreparing = countdown !== null || !isActive;
-
-      if (!isActive && countdown === null) {
-        ctx.font = '300 24px sans-serif';
-        ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
-      } else if (isPreparing) {
-        ctx.font = '300 24px sans-serif';
-        ctx.fillText('GET READY', canvas.width / 2, canvas.height / 2 - 20);
-        ctx.font = '600 48px sans-serif';
-        ctx.fillText(displayTime, canvas.width / 2, canvas.height / 2 + 30);
-      } else {
-        ctx.font = '300 32px sans-serif';
-        ctx.fillText(displayPhase.toUpperCase(), canvas.width / 2, canvas.height / 2 - 20);
-        ctx.font = '600 48px sans-serif';
-        ctx.fillText(displayTime, canvas.width / 2, canvas.height / 2 + 30);
-      }
-      
-      pipRafRef.current = requestAnimationFrame(renderPip);
-    };
-
-    if (isActive) {
-      pipRafRef.current = requestAnimationFrame(renderPip);
-    } else {
-      renderPip();
-      cancelAnimationFrame(pipRafRef.current);
-    }
-
-    return () => {
-      if (pipRafRef.current) cancelAnimationFrame(pipRafRef.current);
-    };
-  }, [isActive, countdown, currentPhase, timeLeft]);
-
-  const togglePip = async () => {
-    if (!pipVideoRef.current) return;
-    
-    const isSafariPip = pipVideoRef.current.webkitPresentationMode === 'picture-in-picture';
-    
-    if (document.pictureInPictureElement || isSafariPip) {
-      if (document.exitPictureInPicture) {
-        await document.exitPictureInPicture();
-      } else if (pipVideoRef.current.webkitSetPresentationMode) {
-        pipVideoRef.current.webkitSetPresentationMode('inline');
-      }
-    } else {
-      try {
-        // Do not await play()! Awaiting consumes the user gesture in Safari.
-        const playPromise = pipVideoRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(console.error);
-        }
-
-        if (pipVideoRef.current.requestPictureInPicture) {
-          // Some browsers still require await here, but the call itself starts synchronously
-          await pipVideoRef.current.requestPictureInPicture();
-        } else if (pipVideoRef.current.webkitSupportsPresentationMode && typeof pipVideoRef.current.webkitSetPresentationMode === 'function') {
-          pipVideoRef.current.webkitSetPresentationMode('picture-in-picture');
-        }
-        
-        if ('mediaSession' in navigator) {
-          navigator.mediaSession.setActionHandler('pause', () => {
-            handleStartStop();
-          });
-          navigator.mediaSession.setActionHandler('stop', () => {
-            handleStartStop();
-          });
-        }
-      } catch (err) {
-        console.error("PiP failed", err);
-      }
-    }
-  };
-
   return (
     <div ref={containerRef} className="w-full h-full flex flex-col pt-4 pb-24 px-6 md:pt-4 md:pb-4 relative bg-[var(--color-bg)]">
-      <canvas ref={pipCanvasRef} style={{ display: 'none' }} />
-      <video ref={pipVideoRef} muted playsInline autoPlay style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '300px', height: '300px', opacity: 0, pointerEvents: 'none' }} />
       <header className="w-full max-w-5xl mx-auto mb-2 md:mb-2 flex justify-between items-start shrink-0">
         <div className="flex items-center gap-3">
           <h2 className="text-[1.1rem] uppercase tracking-widest opacity-60 md:text-4xl md:font-extralight md:tracking-tight md:opacity-100 md:normal-case text-text text-left">
@@ -468,15 +387,6 @@ function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive
           </button>
         </div>
         <div className="flex gap-2">
-          {isActive && (
-            <button 
-              onClick={togglePip}
-              className="hidden md:flex p-3 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all items-center justify-center shrink-0"
-              title="Picture in Picture"
-            >
-              <PictureInPicture2 size={24} />
-            </button>
-          )}
           <button 
             onClick={toggleFullscreen}
             className="hidden md:flex p-3 rounded-full bg-white/5 hover:bg-white/10 text-dim transition-all items-center justify-center shrink-0"
