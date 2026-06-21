@@ -39,29 +39,16 @@ const COLOR_GROUPS = [
       { key: 'bg',        label: 'Background',      hint: 'App / page background' },
       { key: 'accent',    label: 'Accent',           hint: 'Primary brand / CTA color' },
       { key: 'indicator', label: 'Indicator',        hint: 'Breathing ring / progress' },
-      { key: 'glass',     label: 'Glass Surface',    hint: 'Card / panel background' },
-      { key: 'text',      label: 'Text',             hint: 'Primary body text' },
-      { key: 'secondary', label: 'Secondary',        hint: 'Card / input surfaces' },
-      { key: 'dim',       label: 'Dim',              hint: 'Muted / hint text' },
-      { key: 'cooldown',  label: 'Cooldown',         hint: 'Cooldown-phase ring' },
     ],
   },
   {
     id: 'sidebar',
     label: 'Sidebar',
-    tokens: [
-      { key: 'sidebarBg',     label: 'Background',  hint: 'Sidebar panel fill', hasBlur: false },
-      { key: 'sidebarBorder', label: 'Border',       hint: 'Sidebar edge line', hasBlur: false },
-    ],
     blur: { key: 'sidebarBlur', label: 'Blur' },
   },
   {
     id: 'mobilenav',
     label: 'Mobile Nav',
-    tokens: [
-      { key: 'mobileNavBg',     label: 'Background', hint: 'Bottom nav panel fill' },
-      { key: 'mobileNavBorder', label: 'Border',      hint: 'Bottom nav edge line' },
-    ],
     blur: { key: 'mobileNavBlur', label: 'Blur' },
   },
 ];
@@ -123,6 +110,166 @@ function cssToHex(css = '') {
     if (/^#[0-9a-fA-F]{6}$/.test(hex)) return hex;
   } catch { /* ignore */ }
   return '#000000';
+}
+
+function hexToRgb(hex) {
+  const cleaned = hex.replace(/^#/, '');
+  let r, g, b;
+  if (cleaned.length === 3) {
+    r = parseInt(cleaned[0] + cleaned[0], 16);
+    g = parseInt(cleaned[1] + cleaned[1], 16);
+    b = parseInt(cleaned[2] + cleaned[2], 16);
+  } else if (cleaned.length === 6 || cleaned.length === 8) {
+    r = parseInt(cleaned.substring(0, 2), 16);
+    g = parseInt(cleaned.substring(2, 4), 16);
+    b = parseInt(cleaned.substring(4, 6), 16);
+  } else {
+    return { r: 128, g: 128, b: 128 };
+  }
+  return { r, g, b };
+}
+
+function rgbToHex({ r, g, b }) {
+  const clamp = (val) => Math.max(0, Math.min(255, Math.round(val)));
+  return '#' + [clamp(r), clamp(g), clamp(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+
+function getLuminance({ r, g, b }) {
+  const a = [r, g, b].map(function (v) {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+}
+
+function mix(color1, color2, weight) {
+  const rgb1 = hexToRgb(color1);
+  const rgb2 = hexToRgb(color2);
+  return {
+    r: rgb1.r * (1 - weight) + rgb2.r * weight,
+    g: rgb1.g * (1 - weight) + rgb2.g * weight,
+    b: rgb1.b * (1 - weight) + rgb2.b * weight
+  };
+}
+
+function rgbToHsl({ r, g, b }) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h, s, l = (max + min) / 2;
+
+  if (max === min) {
+    h = s = 0;
+  } else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return { h: h * 360, s: s * 100, l: l * 100 };
+}
+
+function hslToRgb({ h, s, l }) {
+  h /= 360; s /= 100; l /= 100;
+  let r, g, b;
+
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }
+  return { r: r * 255, g: g * 255, b: b * 255 };
+}
+
+function hexToRgba(hex, alpha) {
+  const { r, g, b } = hexToRgb(hex);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function calculateDerivedColors(bg, accent, indicator) {
+  if (!bg) bg = '#000000';
+  if (!accent) accent = '#ffffff';
+  if (!indicator) indicator = '#ffffff';
+
+  // Ensure colors are in hex form before performing math
+  const bgHex = cssToHex(bg);
+  const accentHex = cssToHex(accent);
+  const indicatorHex = cssToHex(indicator);
+
+  const bgRgb = hexToRgb(bgHex);
+  const bgLum = getLuminance(bgRgb);
+  const isDark = bgLum < 0.5;
+
+  // 1. Text color (off-white tinted by indicator if dark, off-black if light)
+  const text = isDark
+    ? rgbToHex(mix('#ffffff', indicatorHex, 0.04))
+    : rgbToHex(mix('#000000', indicatorHex, 0.08));
+
+  // 2. Dim / muted text
+  const dim = isDark
+    ? rgbToHex(mix(bgHex, text, 0.65))
+    : rgbToHex(mix(bgHex, text, 0.55));
+
+  // 3. Secondary surface
+  const secondary = isDark
+    ? rgbToHex(mix(bgHex, '#ffffff', 0.09))
+    : rgbToHex(mix(bgHex, '#000000', 0.07));
+
+  // 4. Glass color
+  const glass = isDark
+    ? rgbToHex(mix(bgHex, '#ffffff', 0.05))
+    : rgbToHex(mix(bgHex, '#000000', 0.04));
+
+  // 5. Cooldown color
+  const indHsl = rgbToHsl(hexToRgb(indicatorHex));
+  let coolRgb;
+  if (indHsl.s < 10) {
+    coolRgb = hslToRgb({ h: indHsl.h, s: indHsl.s, l: 48 });
+  } else {
+    const hueShift = (indHsl.h >= 100 && indHsl.h <= 250) ? 30 : -30;
+    let targetHue = (indHsl.h + hueShift + 360) % 360;
+    coolRgb = hslToRgb({
+      h: targetHue,
+      s: Math.max(20, indHsl.s * 0.85),
+      l: Math.max(30, Math.min(indHsl.l * 0.8, 65))
+    });
+  }
+  const cooldown = rgbToHex(coolRgb);
+
+  // 6. Sidebar / Mobile Nav backgrounds (semi-transparent glass)
+  const sidebarBg = hexToRgba(glass, 0.7);
+  const mobileNavBg = hexToRgba(glass, 0.7);
+
+  // 7. Sidebar / Mobile Nav borders (subtle accent tint)
+  const sidebarBorder = hexToRgba(accentHex, 0.12);
+  const mobileNavBorder = hexToRgba(accentHex, 0.12);
+
+  return {
+    text,
+    dim,
+    secondary,
+    glass,
+    cooldown,
+    sidebarBg,
+    sidebarBorder,
+    mobileNavBg,
+    mobileNavBorder
+  };
 }
 
 /** Whether the value is a plain hex color (picker can control fully). */
@@ -293,7 +440,12 @@ export default function ThemeEditor({ isOpen, onClose, baseEntry, isBuiltin: isB
     setName(isBuiltinProp ? `${def.name} (Custom)` : def.name);
     setDescription(def.description ?? '');
     setAuthor(def.author ?? '');
-    setColors({ ...def.colors });
+    
+    const baseColors = { ...def.colors };
+    const derived = calculateDerivedColors(baseColors.bg, baseColors.accent, baseColors.indicator);
+    Object.assign(baseColors, derived);
+    
+    setColors(baseColors);
     setTypography({ ...(def.typography ?? {}) });
     setErrors({});
     setLivePreview(false);
@@ -319,7 +471,14 @@ export default function ThemeEditor({ isOpen, onClose, baseEntry, isBuiltin: isB
 
   // ── Color setter ──────────────────────────────────────────────────────────
   const setColor = useCallback((key, val) => {
-    setColors((prev) => ({ ...prev, [key]: val }));
+    setColors((prev) => {
+      const next = { ...prev, [key]: val };
+      if (key === 'bg' || key === 'accent' || key === 'indicator') {
+        const derived = calculateDerivedColors(next.bg, next.accent, next.indicator);
+        Object.assign(next, derived);
+      }
+      return next;
+    });
     // Clear per-token error
     setErrors((prev) => {
       const next = { ...prev };
@@ -502,7 +661,7 @@ export default function ThemeEditor({ isOpen, onClose, baseEntry, isBuiltin: isB
           {COLOR_GROUPS.map((group) => (
             <Section key={group.id} icon={Sliders} title={group.label} defaultOpen={true}>
               <div className="flex flex-col gap-5">
-                {group.tokens.map(({ key, label, hint }) => (
+                {group.tokens?.map(({ key, label, hint }) => (
                   <ColorRow
                     key={key}
                     tokenKey={key}
