@@ -344,8 +344,8 @@ function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive
   const currentPhase = isCooldown ? 'Cooldown' : ((methods[selectedMethod].phases && methods[selectedMethod].phases[phaseState.index]) || PHASES[phaseState.index]);
 
   return (
-    <div ref={containerRef} className="w-full h-full flex flex-col pt-4 pb-24 px-6 md:pt-12 md:pb-12 relative bg-[var(--color-bg)]">
-      <header className="w-full max-w-5xl mx-auto mb-4 md:mb-6 flex justify-between items-start shrink-0">
+    <div ref={containerRef} className="w-full h-full flex flex-col pt-4 pb-24 px-6 md:pt-4 md:pb-4 relative bg-[var(--color-bg)]">
+      <header className="w-full max-w-5xl mx-auto mb-2 md:mb-2 flex justify-between items-start shrink-0">
         <div className="flex items-center gap-3">
           <h2 className="text-[1.1rem] uppercase tracking-widest opacity-60 md:text-4xl md:font-extralight md:tracking-tight md:opacity-100 md:normal-case text-text text-left">
             {methods[selectedMethod].name}
@@ -367,9 +367,9 @@ function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive
         </button>
       </header>
 
-      <div ref={focusAreaRef} className="flex-1 flex flex-col items-center justify-center gap-4 md:gap-14 w-full max-w-5xl mx-auto min-h-0 pt-12 md:pt-0">
+      <div ref={focusAreaRef} className="flex-1 flex flex-col items-center justify-center gap-6 md:gap-8 w-full max-w-5xl mx-auto min-h-0">
 
-        <div className="relative w-[250px] h-[250px] md:w-[450px] md:h-[450px] flex justify-center items-center shrink-0">
+        <div className="relative w-[250px] h-[250px] md:w-[min(550px,60vh)] md:h-[min(550px,60vh)] flex justify-center items-center shrink-0">
           <div 
             className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-2xl border border-white/10 rounded-squircle-lg shadow-2xl transition-opacity duration-500"
             style={{ opacity: selectedMethod === 'box' ? 1 : 0 }}
@@ -457,16 +457,16 @@ function BasePractice({ selectedMethod, methods, saveHistory, setIsSessionActive
                 handleStartStop();
               }
             }}
-            className={`absolute w-20 h-20 md:w-40 md:h-40 breath-glow rounded-full z-[2] flex justify-center items-center text-[2.5rem] md:text-[3.5rem] font-light cursor-pointer ${isCooldown ? 'cooldown-active' : ''}`}
+            className={`absolute w-20 h-20 md:w-44 md:h-44 breath-glow rounded-full z-[2] flex justify-center items-center text-[2.5rem] md:text-[3.5rem] font-light cursor-pointer ${isCooldown ? 'cooldown-active' : ''}`}
             style={getCircleStyle()}
           >
             {countdown !== null ? countdown : (isActive ? <span ref={timeDisplayRef}>{timeLeft}</span> : '')}
           </div>
         </div>
 
-        <div className="flex flex-col items-center w-full max-w-xs mx-auto gap-4 md:gap-10 mb-2 md:mb-0">
+        <div className="flex flex-col items-center w-full max-w-xs mx-auto gap-4 md:gap-6 shrink-0">
           {/* Unified Vertical Stack - Space Reserved */}
-          <div className={`flex flex-col items-center text-center gap-2 transition-[opacity,visibility] duration-500 min-h-[120px] md:min-h-[160px] justify-center ${isActive ? 'opacity-100' : 'opacity-0 invisible'}`}>
+          <div className={`flex flex-col items-center text-center gap-2 transition-[opacity,visibility] duration-500 min-h-[100px] md:min-h-[120px] justify-center ${isActive ? 'opacity-100' : 'opacity-0 invisible'}`}>
             {/* 1. Phase Text */}
             <div className="text-[1.2rem] md:text-[1.8rem] font-thin text-text uppercase tracking-[0.6rem] md:tracking-[1rem] whitespace-nowrap mb-1">
               {currentPhase}

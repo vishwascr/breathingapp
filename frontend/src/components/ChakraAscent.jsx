@@ -5,9 +5,9 @@ import {
   Sparkles, 
   ChevronRight, ChevronLeft, PenTool, 
   Music, Clock,
-  HelpCircle, Footprints, Droplet
+  HelpCircle, Footprints, Droplet, Save
 } from 'lucide-react';
-import { Card, Button, Textarea } from './common';
+import { Card, Button, Textarea, Modal } from './common';
 
 const CHAKRAS = [
   {
@@ -231,6 +231,9 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
   const [sessionRating, setSessionRating] = useState(0);
   const [historySaved, setHistorySaved] = useState(false);
   const sessionStartTimeRef = useRef(null);
+  const [showSummary, setShowSummary] = useState(false);
+  const [currentNote, setCurrentNote] = useState('');
+  const [showNotesInput, setShowNotesInput] = useState(false);
 
   // Sync with global session state and initialize session start time pure-style inside effect
   useEffect(() => {
@@ -399,14 +402,17 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
     sessionStartTimeRef.current = Date.now();
   };
 
-  const handleSaveHistory = useCallback(async (ratingVal) => {
-    setSessionRating(ratingVal);
+  const handleSaveHistory = async () => {
+    if (sessionRating === 0) return;
     const duration = sessionStartTimeRef.current 
       ? Math.round((Date.now() - sessionStartTimeRef.current) / 1000) 
       : 300; // fallback 5 mins
 
-    // Format all answers into a clean readable string for notes
+    // Format all reflections into notes
     const formattedNotes = answers.map(ans => `${ans.chakra}: Q: "${ans.question}" -> A: "${ans.response}"`).join(' | ');
+    const finalNote = currentNote.trim() 
+      ? `${currentNote.trim()} | Reflections: ${formattedNotes}` 
+      : formattedNotes;
 
     try {
       const response = await fetch('/api/history', {
@@ -419,19 +425,20 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
           inhaleHold: 0,
           exhale: 6,
           exhaleHold: 0,
-          cycles: 7,
-          notes: formattedNotes,
+          cycles: chakraIndex + 1,
+          notes: finalNote,
           cooldownSeconds: 0,
-          rating: ratingVal
+          rating: sessionRating
         })
       });
       if (response.ok) {
-        setHistorySaved(true);
+        setShowSummary(false);
+        navigate('/history');
       }
     } catch (e) {
       console.error("Failed to save Chakra Ascent session to history:", e);
     }
-  }, [answers, sessionStartTimeRef]);
+  };
 
   const handleNextStep = async () => {
     const currentChakra = CHAKRAS[chakraIndex];
@@ -476,7 +483,8 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
           setStage('meditating');
         }, 2200);
       } else {
-        setStage('complete');
+        setShowSummary(true);
+        setStage('intro');
       }
     }
   };
@@ -595,7 +603,7 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
 
         {/* STAGE 2: MEDITATING */}
         {stage === 'meditating' && (
-          <div className="flex-1 flex flex-col items-center justify-center gap-4 md:gap-12 w-full max-w-5xl mx-auto min-h-0">
+          <div className="flex-1 flex flex-col items-center justify-between py-4 md:py-8 w-full max-w-5xl mx-auto min-h-0">
             
             {/* Navigation & Pulsing Breathing Ring Layout */}
             <div className="flex items-center justify-center gap-4 md:gap-12 w-full max-w-4xl min-h-0 select-none">
@@ -649,10 +657,10 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
             </div>
 
             {/* Inquiries and Input Stack matching Practice.jsx text stack */}
-            <div className="flex flex-col items-center w-full max-w-xl mx-auto gap-4 md:gap-8 mb-2 md:mb-0">
+            <div className="flex flex-col items-center w-full max-w-xl mx-auto gap-3 md:gap-5 mb-2 md:mb-0">
               
               {/* Unified Vertical Stack - Space Reserved */}
-              <div className="flex flex-col items-center text-center gap-2 min-h-[140px] md:min-h-[180px] justify-center">
+              <div className="flex flex-col items-center text-center gap-2 min-h-[110px] md:min-h-[140px] justify-center">
                 {/* Dynamic Breath Phase & Mantra */}
                 <div className="text-[1.2rem] md:text-[1.8rem] font-thin text-text uppercase tracking-[0.6rem] md:tracking-[1rem] whitespace-nowrap mb-1">
                   {countdownVal > 0 ? 'PREPARE' : `${currentPhase} — ${activeChakra.mantra}`}
@@ -682,21 +690,24 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
               </div>
 
               {/* Text reflection input */}
-              <div className="w-full max-w-md px-4">
+              <div className="w-full max-w-sm px-4">
                 <Textarea
                   value={responseText}
                   onChange={(e) => setResponseText(e.target.value)}
-                  placeholder="Type your reflection... (or leave blank to reflect in silence)"
-                  className="text-center placeholder:text-dim/20"
-                  rows={2}
+                  placeholder="Type your reflection (optional)"
+                  className="text-center placeholder:text-dim/20 py-2.5 px-4 text-xs md:text-sm"
+                  rows={1}
                 />
               </div>
 
               {/* Action Buttons: Reflect in Silence & End Session */}
-              <div className="flex items-center gap-3 w-full max-w-md px-4 justify-center">
+              <div className="flex items-center gap-3 w-full max-w-md px-4 justify-center mt-2 md:mt-6">
                 {responseText.trim() === '' && (
                   <Button
-                    onClick={() => setStage('complete')}
+                    onClick={() => {
+                      setShowSummary(true);
+                      setStage('intro');
+                    }}
                     variant="secondary"
                     size="none"
                     className="text-sm md:text-base tracking-widest shrink-0 border-rose-500/20 hover:border-rose-500/40 text-rose-400 hover:bg-rose-500/5 cursor-pointer font-light px-5 py-3.5"
@@ -749,266 +760,102 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
             </div>
           </div>
         )}
-
-        {/* STAGE 4: COMPLETE SUMMARY */}
-        {stage === 'complete' && (
-          <div className="w-full flex flex-col gap-8 md:gap-12 animate-fadeIn max-w-4xl mx-auto py-6">
-            
-            {/* Ascent Complete Header */}
-            <div className="text-center flex flex-col items-center gap-3">
-              <div className="w-16 h-16 rounded-full bg-accent/15 flex items-center justify-center animate-trophy-glow">
-                <CheckCircle2 className="text-accent w-8 h-8" />
-              </div>
-              <h1 className="text-3xl md:text-5xl font-thin tracking-widest text-text mt-2 font-extralight">Ascent Accomplished</h1>
-              <p className="text-sm md:text-base text-dim font-light max-w-lg mx-auto leading-relaxed">
-                You have traversed the seven gates. Your breathing is slow, your mind has gained altitude, and you stand as the clear observer of your impulses.
-              </p>
-            </div>
-
-            {!historySaved ? (
-              <Card variant="default" padding="md" className="text-center flex flex-col items-center gap-4 py-6 border border-accent/20 bg-accent/5 max-w-md mx-auto w-full">
-                <span className="text-[0.65rem] md:text-xs uppercase tracking-[0.2rem] text-dim font-medium">How was your session?</span>
-                <div className="flex items-center gap-2">
-                  {[1, 2, 3, 4, 5].map((num) => (
-                    <button 
-                      key={num}
-                      onClick={() => handleSaveHistory(num)}
-                      className={`transition-all duration-300 ${sessionRating >= num ? 'text-accent scale-110' : 'text-dim/40 hover:text-dim hover:scale-105'}`}
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill={sessionRating >= num ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                      </svg>
-                    </button>
-                  ))}
-                </div>
-                <p className="text-[0.65rem] text-dim/60 font-light">Rate your session to save this Ascent to your history log.</p>
-              </Card>
-            ) : (
-              <div className="text-center text-xs text-accent font-light tracking-widest animate-fadeIn py-4">
-                ✓ Chakra Ascent session saved to your history!
-              </div>
-            )}
-
-            {/* Current Self vs Superior Self Card */}
-            <Card variant="default" padding="md" className="flex flex-col gap-6">
-              <div className="border-b border-white/5 pb-3 flex justify-between items-center">
-                <h3 className="text-lg font-light tracking-tight text-text">Current Self vs Superior Self</h3>
-                <span className="text-[0.6rem] uppercase tracking-widest bg-accent/15 text-accent border border-accent/20 px-2 py-0.5 rounded-full font-bold">Dual Aspect reflection</span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Column 1: Current Impulse / Mind State */}
-                <div className="flex flex-col gap-3 bg-white/[0.01] border border-white/5 rounded-squircle-md p-5">
-                  <span className="text-[0.65rem] uppercase tracking-widest text-rose-400 font-bold">Current Self / The Impulse</span>
-                  <p className="text-xs font-light text-dim leading-relaxed">
-                    Feels the immediate push of cravings, overthinking, anxiety, or procrastination. Reacts to external triggers. Views impulses as part of identity.
-                  </p>
-                  
-                  <div className="mt-2 pt-3 border-t border-white/5">
-                    <span className="text-[0.6rem] uppercase tracking-widest text-dim/60 block mb-2 font-bold">Your session reflections:</span>
-                    <div className="max-h-[180px] overflow-y-auto pr-2 custom-scrollbar space-y-3">
-                      {answers.map((ans, idx) => (
-                        <div key={idx} className="text-[0.7rem] font-light border-b border-white/5 pb-2">
-                          <span className="text-accent block text-[0.6rem] uppercase tracking-widest font-semibold mb-0.5">{ans.chakra}</span>
-                          <p className="text-dim/80 mb-0.5 italic">Q: "{ans.question}"</p>
-                          <p className="text-text font-normal">A: "{ans.response}"</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Column 2: Superior Self */}
-                <div className="flex flex-col gap-3 bg-white/[0.02] border border-accent/15 rounded-squircle-md p-5">
-                  <span className="text-[0.65rem] uppercase tracking-widest text-accent font-bold">Superior Self / The Observer</span>
-                  <p className="text-xs font-light text-dim leading-relaxed">
-                    Watches the waves of impulse arise and fall without action. Decides intentionally. Recognizes: <em>"I am not my impulses. I am the observer."</em>
-                  </p>
-
-                  <div className="mt-2 pt-3 border-t border-white/5 flex flex-col gap-3">
-                    <span className="text-[0.65rem] uppercase tracking-widest text-accent font-semibold">Superior {name}'s Directives:</span>
-                    <ul className="text-[0.7rem] font-light text-text/80 space-y-2 pl-0 list-none m-0">
-                      <li className="flex items-start gap-2">
-                        <ChevronRight size={12} className="text-accent shrink-0 mt-0.5" />
-                        <span><strong>What would Superior {name} do next?</strong> Choose the proactive path, not the reactive loop.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <ChevronRight size={12} className="text-accent shrink-0 mt-0.5" />
-                        <span><strong>What action aligns with the person you want to become?</strong> Invest in actions that pay compound interest to your character.</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* ACTION CENTER */}
-            <Card variant="flat" padding="md" className="flex flex-col gap-4">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[0.65rem] uppercase tracking-widest text-accent font-bold">Action Center</span>
-                <h3 className="text-lg font-light tracking-tight text-text">Choose your next conscious action</h3>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                <button
-                  onClick={() => {
-                    setActiveAction(activeAction === 'timer' ? null : 'timer');
-                    setFocusTimer(1500);
-                    setTimerRunning(false);
-                  }}
-                  className={`flex flex-col items-center justify-center p-3 border rounded-squircle-sm text-center transition-all cursor-pointer ${
-                    activeAction === 'timer' ? 'bg-accent/15 border-accent text-accent' : 'bg-white/5 border-white/10 text-dim hover:text-text hover:bg-white/10'
-                  }`}
-                >
-                  <Clock className="mb-1" size={20} />
-                  <span className="text-[0.6rem] font-light uppercase tracking-widest">Focus</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveAction(activeAction === 'walk' ? null : 'walk')}
-                  className={`flex flex-col items-center justify-center p-3 border rounded-squircle-sm text-center transition-all cursor-pointer ${
-                    activeAction === 'walk' ? 'bg-accent/15 border-accent text-accent' : 'bg-white/5 border-white/10 text-dim hover:text-text hover:bg-white/10'
-                  }`}
-                >
-                  <Footprints className="mb-1" size={20} />
-                  <span className="text-[0.6rem] font-light uppercase tracking-widest">Walk</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveAction(activeAction === 'music' ? null : 'music')}
-                  className={`flex flex-col items-center justify-center p-3 border rounded-squircle-sm text-center transition-all cursor-pointer ${
-                    activeAction === 'music' ? 'bg-accent/15 border-accent text-accent' : 'bg-white/5 border-white/10 text-dim hover:text-text hover:bg-white/10'
-                  }`}
-                >
-                  <Music className="mb-1" size={20} />
-                  <span className="text-[0.6rem] font-light uppercase tracking-widest">Music</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveAction(activeAction === 'water' ? null : 'water')}
-                  className={`flex flex-col items-center justify-center p-3 border rounded-squircle-sm text-center transition-all cursor-pointer ${
-                    activeAction === 'water' ? 'bg-accent/15 border-accent text-accent' : 'bg-white/5 border-white/10 text-dim hover:text-text hover:bg-white/10'
-                  }`}
-                >
-                  <Droplet className="mb-1" size={20} />
-                  <span className="text-[0.6rem] font-light uppercase tracking-widest">Water</span>
-                </button>
-
-                <button
-                  onClick={handleStartAscent}
-                  className="flex flex-col items-center justify-center p-3 bg-white/5 border border-white/10 rounded-squircle-sm text-center transition-all cursor-pointer hover:bg-white/10 text-dim hover:text-text col-span-2 md:col-span-1"
-                >
-                  <RotateCcw className="mb-1" size={20} />
-                  <span className="text-[0.6rem] font-light uppercase tracking-widest">Restart</span>
-                </button>
-              </div>
-
-              {/* Action content panels */}
-              {activeAction && (
-                <div className="mt-2 p-5 bg-white/[0.02] border border-white/5 rounded-squircle-md animate-fadeIn">
-                  
-                  {activeAction === 'timer' && (
-                    <div className="flex flex-col items-center text-center gap-3">
-                      <span className="text-[0.65rem] uppercase tracking-widest text-accent font-semibold">Focus Session Timer (Pomodoro)</span>
-                      <h4 className="text-4xl md:text-5xl font-thin tracking-tighter text-text">
-                        {formatTimer(focusTimer)}
-                      </h4>
-                      <div className="flex gap-3">
-                        <Button
-                          onClick={() => setTimerRunning(!timerRunning)}
-                          variant="primary"
-                          size="none"
-                          rounded="sm"
-                          className="px-5 py-2 font-semibold text-xs text-bg"
-                        >
-                          {timerRunning ? 'Pause' : 'Start'}
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setTimerRunning(false);
-                            setFocusTimer(1500);
-                          }}
-                          variant="secondary"
-                          size="none"
-                          rounded="sm"
-                          className="px-5 py-2 text-xs"
-                        >
-                          Reset
-                        </Button>
-                      </div>
-                      <p className="text-[0.7rem] text-dim/60 font-light mt-1">Focus on a single, intentional task for 25 minutes. No multi-tasking, no checking notifications.</p>
-                    </div>
-                  )}
-
-                  {activeAction === 'walk' && (
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[0.65rem] uppercase tracking-widest text-accent font-semibold">Intentional Mindful Walking</span>
-                      <p className="text-xs font-light text-dim leading-relaxed">
-                        Step away from your screen. Step outside if possible. Walk slowly for 5 to 10 minutes.
-                      </p>
-                      <ul className="text-[0.7rem] font-light text-text/80 space-y-1.5 mt-2 list-none p-0">
-                        <li className="flex items-center gap-2">
-                          <ChevronRight size={12} className="text-accent" />
-                          <span>Notice the contact of the soles of your feet with the ground.</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <ChevronRight size={12} className="text-accent" />
-                          <span>Observe 3 things you can see, 2 you can hear, and 1 you can touch.</span>
-                        </li>
-                      </ul>
-                    </div>
-                  )}
-
-                  {activeAction === 'music' && (
-                    <div className="flex flex-col gap-1 text-center items-center py-2">
-                      <Music className="text-accent animate-pulse w-6 h-6 mb-1" />
-                      <span className="text-[0.65rem] uppercase tracking-widest text-accent font-semibold">Soundscape Grounding</span>
-                      <p className="text-xs font-light text-dim leading-relaxed max-w-md">
-                        Listen to slow-tempo, ambient, or classical music. Close your eyes and follow the flow of a single instrument. Let thoughts drift by like clouds.
-                      </p>
-                    </div>
-                  )}
-
-                  {activeAction === 'water' && (
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[0.65rem] uppercase tracking-widest text-accent font-semibold">Hydration Awareness Ritual</span>
-                      <p className="text-xs font-light text-dim leading-relaxed">
-                        Pour a glass of water. Drink it slowly and mindfully.
-                      </p>
-                      <ul className="text-[0.7rem] font-light text-text/80 space-y-1.5 mt-2 list-none p-0">
-                        <li className="flex items-center gap-2">
-                          <ChevronRight size={12} className="text-accent" />
-                          <span>Feel the coolness of the water as it touches your lips and moves down your throat.</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <ChevronRight size={12} className="text-accent" />
-                          <span>Contemplate how this simple nourishment cleanses and sustains your system.</span>
-                        </li>
-                      </ul>
-                    </div>
-                  )}
-                  
-                </div>
-              )}
-            </Card>
-
-            {/* Return to Dashboard */}
-            <div className="flex justify-center mt-2">
-              <Button
-                onClick={() => navigate('/')}
-                variant="secondary"
-                size="none"
-                rounded="full"
-                className="px-8 py-3 text-[0.65rem] tracking-widest font-light"
-              >
-                Return to Dashboard
-              </Button>
-            </div>
-            
-          </div>
-        )}
         
       </div>
+
+      {/* Session Complete Summary Modal */}
+      <Modal
+        isOpen={showSummary}
+        onClose={() => {
+          setShowSummary(false);
+          setStage('intro');
+        }}
+        maxWidth="sm"
+        zIndex="z-[110]"
+        backdropBlur="md"
+        backdropOpacity="bg-black/80"
+      >
+        <div className="flex flex-col items-center mb-6 md:mb-8 text-center">
+          <CheckCircle2 size={32} className="text-accent mb-3" />
+          <h2 className="text-xl md:text-3xl font-thin tracking-tight">Session Complete</h2>
+        </div>
+        
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mb-8 text-sm md:text-base font-light text-text/80 tracking-wide text-center">
+          <span>{sessionStartTimeRef.current ? Math.round((Date.now() - sessionStartTimeRef.current) / 1000) : 300}s</span>
+          <span className="opacity-20 text-[0.6rem]">•</span>
+          <span>Chakra Ascent</span>
+          <span className="opacity-20 text-[0.6rem]">•</span>
+          <span>7 Levels</span>
+          <span className="opacity-20 text-[0.6rem]">•</span>
+          <span>{chakraIndex + 1} Levels Completed</span>
+        </div>
+        
+        <div className="mb-6 flex flex-col items-center gap-3">
+          <span className="text-[0.65rem] md:text-xs uppercase tracking-[0.2rem] text-dim font-medium">How was your session?</span>
+          <div className="flex items-center gap-2">
+            {[1, 2, 3, 4, 5].map((num) => (
+              <button 
+                key={num}
+                onClick={() => setSessionRating(num)}
+                className={`transition-all duration-300 ${sessionRating >= num ? 'text-accent scale-110' : 'text-dim/40 hover:text-dim hover:scale-105'}`}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill={sessionRating >= num ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                </svg>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-8 flex flex-col items-center">
+          {!showNotesInput ? (
+            <Button 
+              onClick={() => setShowNotesInput(true)}
+              variant="secondary"
+              size="none"
+              rounded="full"
+              className="text-[0.65rem] md:text-xs tracking-[0.2rem] text-accent/60 hover:text-accent px-6 py-2.5"
+            >
+              + Add a note
+            </Button>
+          ) : (
+            <div className="w-full animate-fadeIn">
+              <Textarea 
+                autoFocus
+                value={currentNote}
+                onChange={(e) => setCurrentNote(e.target.value)}
+                placeholder="How do you feel?"
+                className="min-h-[80px] md:min-h-[100px]"
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <Button 
+            onClick={handleSaveHistory}
+            disabled={sessionRating === 0}
+            variant="primary"
+            size="none"
+            className="w-full py-4 font-medium"
+          >
+            <Save size={18} />
+            <span>Save Journey</span>
+          </Button>
+          <Button 
+            onClick={() => {
+              setShowSummary(false);
+              setStage('intro');
+            }} 
+            variant="secondary"
+            size="none"
+            className="w-full py-3 text-xs tracking-widest font-light"
+          >
+            Discard Session
+          </Button>
+        </div>
+      </Modal>
+
     </div>
   );
 }
