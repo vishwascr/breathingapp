@@ -35,7 +35,7 @@ function History({ history, hasMore, loadMore, onDelete }) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto py-8">
+    <div className="w-full max-w-7xl mx-auto py-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-12">
         <h1 className="text-4xl font-extralight tracking-tight">Past Journeys</h1>
         <div className="flex gap-3">

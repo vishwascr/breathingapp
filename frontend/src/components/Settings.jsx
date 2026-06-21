@@ -226,7 +226,7 @@ function Settings({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto py-8 px-4">
+    <div className="w-full max-w-7xl mx-auto py-8 px-4">
       <h1 className="text-4xl font-extralight mb-12 tracking-tight">Settings</h1>
       
       <div className="flex flex-col gap-10">

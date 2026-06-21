@@ -120,7 +120,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
             <ul className="flex flex-col gap-3 list-none p-0 m-0 w-full">
               <li>
                 <NavLink to="/" className={linkClass} onClick={(e) => handleNavClick(e, '/')} title={isCollapsed ? "Dashboard" : undefined}>
-                  <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-[22%] transition-all duration-300 border ${
+                  <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-squircle-md transition-all duration-300 border ${
                     isDashboardActive 
                       ? 'bg-accent text-bg border-accent/20 shadow-md shadow-accent/20' 
                       : 'bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20'
@@ -142,7 +142,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
                     onClick={handleBreatheClick}
                     title={isCollapsed ? "Breathing Techniques" : undefined}
                   >
-                    <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-[22%] transition-all duration-300 border ${
+                    <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-squircle-md transition-all duration-300 border ${
                       isBreatheActive 
                         ? 'bg-accent text-bg border-accent/20 shadow-md shadow-accent/20' 
                         : 'bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20'
@@ -160,7 +160,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
 
               <li>
                 <NavLink to="/history" className={linkClass} onClick={(e) => handleNavClick(e, '/history')} title={isCollapsed ? "History" : undefined}>
-                  <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-[22%] transition-all duration-300 border ${
+                  <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-squircle-md transition-all duration-300 border ${
                     isHistoryActive 
                       ? 'bg-accent text-bg border-accent/20 shadow-md shadow-accent/20' 
                       : 'bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20'
@@ -179,7 +179,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
 
           <div className="mt-auto pt-4 border-t border-white/5 flex flex-col gap-3">
             <NavLink to="/settings" className={linkClass} onClick={(e) => handleNavClick(e, '/settings')} title={isCollapsed ? "Settings" : undefined}>
-              <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-[22%] transition-all duration-300 border ${
+              <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-squircle-md transition-all duration-300 border ${
                 isSettingsActive 
                   ? 'bg-accent text-bg border-accent/20 shadow-md shadow-accent/20' 
                   : 'bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20'
@@ -196,7 +196,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
         </div>
       </div>      {/* Mobile Pill Navigation (iOS App Dock Style) */}
       <div 
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-[420px] h-20 bg-white/[0.08] border border-white/10 flex md:hidden flex-row items-center justify-around px-3 z-[100] rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-[420px] h-20 bg-white/[0.08] border border-white/10 flex md:hidden flex-row items-center justify-around px-3 z-[100] rounded-squircle-lg shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
         style={{
           backdropFilter: 'blur(30px)',
           WebkitBackdropFilter: 'blur(30px)',
@@ -207,7 +207,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
             <NavLink 
               to="/" 
               className={({ isActive }) => 
-                `p-4 rounded-2xl transition-all duration-300 ease-out flex items-center justify-center ${
+                `p-4 rounded-squircle-md transition-all duration-300 ease-out flex items-center justify-center ${
                   isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-110 font-medium' : 'text-white/50 hover:text-white active:scale-95'
                 }`
               }
@@ -219,7 +219,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
           {challengeActive && (
             <li className="flex-1 flex justify-center">
               <button 
-                className={`p-5 rounded-2xl transition-all duration-300 ease-out flex items-center justify-center breathe-techniques-btn-custom ${
+                className={`p-5 rounded-squircle-md transition-all duration-300 ease-out flex items-center justify-center breathe-techniques-btn-custom ${
                   isBreatheActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-110 font-medium' : 'text-white/50 hover:text-white active:scale-95'
                 }`}
                 onClick={handleBreatheClick}
@@ -234,7 +234,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
             <NavLink 
               to="/history" 
               className={({ isActive }) => 
-                `p-4 rounded-2xl transition-all duration-300 ease-out flex items-center justify-center ${
+                `p-4 rounded-squircle-md transition-all duration-300 ease-out flex items-center justify-center ${
                   isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-110 font-medium' : 'text-white/50 hover:text-white active:scale-95'
                 }`
               }
@@ -247,7 +247,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
             <NavLink 
               to="/settings" 
               className={({ isActive }) => 
-                `p-4 rounded-2xl transition-all duration-300 ease-out flex items-center justify-center ${
+                `p-4 rounded-squircle-md transition-all duration-300 ease-out flex items-center justify-center ${
                   isActive ? 'bg-accent text-bg shadow-[0_0_15px_var(--color-accent)] scale-110 font-medium' : 'text-white/50 hover:text-white active:scale-95'
                 }`
               }
