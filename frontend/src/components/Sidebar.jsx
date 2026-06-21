@@ -127,8 +127,8 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
                   }`}>
                     <LayoutDashboard size={22} />
                   </div>
-                  <span className={`transition-[opacity,max-width,margin] duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
-                    isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
+                  <span className={`transition-[opacity,max-width,margin] duration-300 ease-in-out overflow-hidden ${
+                    isCollapsed ? 'opacity-0 max-w-0 ml-0 whitespace-nowrap' : 'opacity-100 max-w-[170px] ml-4 whitespace-normal leading-tight'
                   }`}>
                     Dashboard
                   </span>
@@ -149,8 +149,8 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
                     }`}>
                       <Wind size={22} />
                     </div>
-                    <span className={`transition-[opacity,max-width,margin] duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
-                      isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
+                    <span className={`transition-[opacity,max-width,margin] duration-300 ease-in-out overflow-hidden ${
+                      isCollapsed ? 'opacity-0 max-w-0 ml-0 whitespace-nowrap' : 'opacity-100 max-w-[170px] ml-4 whitespace-normal leading-tight'
                     }`}>
                       Breathing Techniques
                     </span>
@@ -167,8 +167,8 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
                   }`}>
                     <HistoryIcon size={22} />
                   </div>
-                  <span className={`transition-[opacity,max-width,margin] duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
-                    isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
+                  <span className={`transition-[opacity,max-width,margin] duration-300 ease-in-out overflow-hidden ${
+                    isCollapsed ? 'opacity-0 max-w-0 ml-0 whitespace-nowrap' : 'opacity-100 max-w-[170px] ml-4 whitespace-normal leading-tight'
                   }`}>
                     History
                   </span>
@@ -186,8 +186,8 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
               }`}>
                 <Settings size={22} />
               </div>
-              <span className={`transition-[opacity,max-width,margin] duration-300 ease-in-out whitespace-nowrap overflow-hidden ${
-                isCollapsed ? 'opacity-0 max-w-0 ml-0' : 'opacity-100 max-w-[200px] ml-4'
+              <span className={`transition-[opacity,max-width,margin] duration-300 ease-in-out overflow-hidden ${
+                isCollapsed ? 'opacity-0 max-w-0 ml-0 whitespace-nowrap' : 'opacity-100 max-w-[170px] ml-4 whitespace-normal leading-tight'
               }`}>
                 Settings
               </span>

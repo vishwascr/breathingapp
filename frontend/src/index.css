@@ -20,6 +20,8 @@
   --radius-xl: var(--radius-squircle-lg);
   --radius-2xl: var(--radius-squircle-lg);
   --radius-3xl: var(--radius-squircle-lg);
+
+  --font-sans: var(--font-main);
 }
 
 :root {

@@ -35,6 +35,7 @@ const CssColor = z
       /^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(v) ||
       /^rgba?\(/.test(v) ||
       /^hsla?\(/.test(v) ||
+      /^color-mix\(/.test(v) ||
       /^(transparent|currentColor|inherit|initial|unset)$/i.test(v) ||
       /^[a-zA-Z]+$/.test(v), // named colour (too many to enumerate)
     { message: 'Expected a valid CSS color value' }

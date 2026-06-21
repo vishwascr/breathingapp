@@ -57,7 +57,7 @@ function ThemeRow({ entry, isActive, onSelect, onEdit, onExport, onRemove, isBui
         </div>
 
         {/* Name + badges */}
-        <div className="hidden sm:flex flex-col min-w-0">
+        <div className="hidden md:flex flex-col min-w-0 flex-1">
           <span className={`text-sm font-light tracking-wide truncate ${isActive ? 'text-bg' : 'text-text'}`}>
             {def.name}
           </span>
@@ -73,7 +73,7 @@ function ThemeRow({ entry, isActive, onSelect, onEdit, onExport, onRemove, isBui
               </span>
             )}
             {def.description && (
-              <span className={`text-[0.6rem] truncate max-w-[140px] ${isActive ? 'text-bg/50' : 'text-dim/50'}`}>
+              <span className={`text-[0.6rem] whitespace-normal ${isActive ? 'text-bg/50' : 'text-dim/50'}`}>
                 {def.description}
               </span>
             )}
@@ -86,7 +86,7 @@ function ThemeRow({ entry, isActive, onSelect, onEdit, onExport, onRemove, isBui
         {/* Edit / Customize */}
         <button
           onClick={() => onEdit(entry)}
-          className={`w-8 h-8 flex items-center justify-center rounded-squircle-sm transition-all cursor-pointer ${
+          className={`w-9 h-9 flex items-center justify-center rounded-squircle-md transition-all cursor-pointer ${
             isActive
               ? 'bg-bg/25 text-bg hover:bg-bg/40'
               : 'bg-white/5 border border-white/10 text-dim hover:bg-white/10 hover:text-accent'
@@ -94,13 +94,13 @@ function ThemeRow({ entry, isActive, onSelect, onEdit, onExport, onRemove, isBui
           title={`Customize "${def.name}"`}
           aria-label={`Edit ${def.name}`}
         >
-          <Sliders size={12} />
+          <Sliders size={14} />
         </button>
 
         {/* Export */}
         <button
           onClick={() => onExport(key)}
-          className={`w-8 h-8 flex items-center justify-center rounded-squircle-sm transition-all cursor-pointer ${
+          className={`w-9 h-9 flex items-center justify-center rounded-squircle-md transition-all cursor-pointer ${
             isActive
               ? 'bg-bg/25 text-bg hover:bg-bg/40'
               : 'bg-white/5 border border-white/10 text-dim hover:text-accent hover:bg-white/10'
@@ -108,14 +108,14 @@ function ThemeRow({ entry, isActive, onSelect, onEdit, onExport, onRemove, isBui
           title={`Export "${def.name}" as .theme`}
           aria-label={`Export ${def.name}`}
         >
-          <Download size={12} />
+          <Download size={14} />
         </button>
 
         {/* Remove (custom themes only) */}
         {!isBuiltin(key) && (
           <button
             onClick={() => onRemove(key)}
-            className={`w-8 h-8 flex items-center justify-center rounded-squircle-sm transition-all cursor-pointer ${
+            className={`w-9 h-9 flex items-center justify-center rounded-squircle-md transition-all cursor-pointer ${
               isActive
                 ? 'bg-red-500/20 text-bg hover:bg-red-500/30'
                 : 'bg-white/5 border border-white/10 text-dim hover:text-red-400 hover:bg-white/10'
@@ -123,7 +123,7 @@ function ThemeRow({ entry, isActive, onSelect, onEdit, onExport, onRemove, isBui
             title={`Remove "${def.name}"`}
             aria-label={`Remove ${def.name}`}
           >
-            <Trash2 size={12} />
+            <Trash2 size={14} />
           </button>
         )}
       </div>
