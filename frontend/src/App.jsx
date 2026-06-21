@@ -592,24 +592,34 @@ function App() {
                   key={key}
                   className="relative overflow-hidden group flat-card rounded-squircle-md h-[220px] flex flex-col justify-between p-6 cursor-pointer technique-grid-card"
                   onClick={() => {
-                    if (window.innerWidth < 768) {
-                      handleMethodChange(key);
-                      setIsMethodModalOpen(false);
-                    } else {
-                      setSelectedCard(key);
-                    }
+                    handleMethodChange(key);
+                    setIsMethodModalOpen(false);
+                    setSelectedCard(null);
                   }}
                 >
-                  {/* Card Top: Category & Tags */}
+                  {/* Card Top: Category & Tags + Info button */}
                   <div className="flex items-center justify-between w-full">
                     <span className="bg-accent/10 text-accent border border-accent/20 px-3 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase">
                       {method.category || 'Meditation'}
                     </span>
-                    {method.isNew && (
-                      <span className="text-[9px] bg-accent text-bg px-2 py-0.5 rounded-full font-bold tracking-widest leading-none">
-                        NEW
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {method.isNew && (
+                        <span className="text-[9px] bg-accent text-bg px-2 py-0.5 rounded-full font-bold tracking-widest leading-none">
+                          NEW
+                        </span>
+                      )}
+                      {/* Info button — opens expanded detail without starting session */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedCard(key);
+                        }}
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-text/30 hover:text-accent hover:bg-accent/10 border border-white/5 hover:border-accent/20 transition-all duration-200 cursor-pointer shrink-0"
+                        title="View details"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                      </button>
+                    </div>
                   </div>
                   
                   {/* Card Middle: Pulsing wind icon & Title */}

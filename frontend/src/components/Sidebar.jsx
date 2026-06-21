@@ -1,8 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Wind, History as HistoryIcon, Settings } from 'lucide-react';
+import { useTheme } from '../themes';
 
 function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethodModalOpen, challengeActive, isCollapsed, onExpand, onCollapse }) {
+  const { activeEntry } = useTheme();
+  const borderRadius = activeEntry?.definition?.typography?.borderRadius ?? 14;
+  // When collapsed AND borderRadius > 12, use a full circle instead of rounded-rectangle
+  const iconRoundClass = (isCollapsed && borderRadius > 12) ? 'rounded-full' : 'rounded-squircle-md';
   const location = useLocation();
 
   const hoverTimerRef = useRef(null);
@@ -120,7 +125,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
             <ul className="flex flex-col gap-3 list-none p-0 m-0 w-full">
               <li>
                 <NavLink to="/" className={linkClass} onClick={(e) => handleNavClick(e, '/')} title={isCollapsed ? "Dashboard" : undefined}>
-                  <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-squircle-md transition-all duration-300 border ${
+                  <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center ${iconRoundClass} transition-all duration-300 border ${
                     isDashboardActive 
                       ? 'bg-accent text-bg border-accent/20 shadow-md shadow-accent/20' 
                       : 'bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20'
@@ -142,7 +147,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
                     onClick={handleBreatheClick}
                     title={isCollapsed ? "Breathing Techniques" : undefined}
                   >
-                    <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-squircle-md transition-all duration-300 border ${
+                    <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center ${iconRoundClass} transition-all duration-300 border ${
                       isBreatheActive 
                         ? 'bg-accent text-bg border-accent/20 shadow-md shadow-accent/20' 
                         : 'bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20'
@@ -160,7 +165,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
 
               <li>
                 <NavLink to="/history" className={linkClass} onClick={(e) => handleNavClick(e, '/history')} title={isCollapsed ? "History" : undefined}>
-                  <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-squircle-md transition-all duration-300 border ${
+                  <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center ${iconRoundClass} transition-all duration-300 border ${
                     isHistoryActive 
                       ? 'bg-accent text-bg border-accent/20 shadow-md shadow-accent/20' 
                       : 'bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20'
@@ -179,7 +184,7 @@ function Sidebar({ isSessionActive, onNavigateAttempt, openMethodModal, isMethod
 
           <div className="mt-auto pt-4 border-t border-white/5 flex flex-col gap-3">
             <NavLink to="/settings" className={linkClass} onClick={(e) => handleNavClick(e, '/settings')} title={isCollapsed ? "Settings" : undefined}>
-              <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-squircle-md transition-all duration-300 border ${
+              <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center ${iconRoundClass} transition-all duration-300 border ${
                 isSettingsActive 
                   ? 'bg-accent text-bg border-accent/20 shadow-md shadow-accent/20' 
                   : 'bg-accent/5 border-accent/10 text-dim group-hover:bg-accent/15 group-hover:text-accent group-hover:border-accent/20'
