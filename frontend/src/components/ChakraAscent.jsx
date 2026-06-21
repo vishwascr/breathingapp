@@ -323,7 +323,7 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
     }, 1000);
 
     return () => clearInterval(breathTimerRef.current);
-  }, [stage, chakraIndex, universalMode, patternIndex]);
+  }, [stage, chakraIndex, universalMode, patternIndex, countdownVal]);
 
   // Focus Timer Logic (for the Post-Ascent Focus Session)
   useEffect(() => {

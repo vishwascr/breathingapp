@@ -17,8 +17,18 @@ const app = express();
 const PORT = process.env.PORT || 3005;
 
 // Middleware
+// Allow requests from any origin that comes through port 3002
+// (covers localhost, 127.0.0.1, and any LAN/network IP like 172.x.x.x)
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3002',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (curl, mobile apps, Postman)
+    if (!origin) return callback(null, true);
+    try {
+      const url = new URL(origin);
+      if (url.port === '3002') return callback(null, true);
+    } catch (_) { /* fall through */ }
+    callback(new Error(`CORS: origin ${origin} not allowed`));
+  },
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
