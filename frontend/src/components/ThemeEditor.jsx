@@ -69,15 +69,36 @@ const COLOR_GROUPS = [
 const FONT_WEIGHT_OPTIONS = [100, 200, 300, 400, 500, 600, 700, 800, 900];
 
 const FONT_PRESETS = [
-  'Inter, system-ui, sans-serif',
-  'JetBrains Mono, monospace',
+  'Inter, sans-serif',
   'Lato, sans-serif',
-  'Merriweather, serif',
   'Nunito, sans-serif',
-  'Playfair Display, serif',
   'Raleway, sans-serif',
-  'Roboto, sans-serif',
+  'Poppins, sans-serif',
+  'DM Sans, sans-serif',
+  'Quicksand, sans-serif',
+  'Jost, sans-serif',
+  'Hind, sans-serif',
+  'Playfair Display, serif',
+  'Lora, serif',
+  'Cormorant Garamond, serif',
+  'Libre Baskerville, serif',
+  'EB Garamond, serif',
+  'Merriweather, serif',
+  'Crimson Pro, serif',
+  'Source Serif 4, serif',
+  'Spectral, serif',
+  'DM Mono, monospace',
   'Source Code Pro, monospace',
+  'JetBrains Mono, monospace',
+  'Inconsolata, monospace',
+  'Space Mono, monospace',
+  'Josefin Slab, serif',
+  'Philosopher, sans-serif',
+  'Abril Fatface, serif',
+  'Cinzel, serif',
+  'Tenor Sans, sans-serif',
+  'Josefin Sans, sans-serif',
+  'Questrial, sans-serif',
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -529,18 +550,19 @@ export default function ThemeEditor({ isOpen, onClose, baseEntry, isBuiltin: isB
                   Font Family
                 </label>
                 <div className="relative">
-                  <input
-                    type="text"
-                    list="font-presets"
+                  <select
                     value={typography.fontFamily ?? ''}
-                    onChange={(e) => setTypoField('fontFamily', e.target.value)}
-                    className="w-full h-10 border border-white/20 rounded-squircle-sm px-3 text-sm text-text focus:outline-none focus:border-accent transition-all pr-8"
+                    onChange={(e) => setTypoField('fontFamily', e.target.value || undefined)}
+                    className="w-full h-10 border border-white/20 rounded-squircle-sm px-3 text-sm text-text focus:outline-none focus:border-accent transition-all appearance-none pr-8 cursor-pointer"
                     style={{ background: 'rgba(255,255,255,0.07)' }}
-                    placeholder="Inter, system-ui, sans-serif"
-                  />
-                  <datalist id="font-presets">
-                    {FONT_PRESETS.map((f) => <option key={f} value={f} />)}
-                  </datalist>
+                  >
+                    <option value="">— default —</option>
+                    {FONT_PRESETS.map((f) => (
+                      <option key={f} value={f}>
+                        {f.split(',')[0].trim()}
+                      </option>
+                    ))}
+                  </select>
                   <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-dim/50 pointer-events-none" />
                 </div>
               </div>
@@ -603,6 +625,58 @@ export default function ThemeEditor({ isOpen, onClose, baseEntry, isBuiltin: isB
                   <span className="text-[0.75rem] font-mono text-accent w-10 text-right">
                     {(parseFloat(typography.lineHeight) || 1.5).toFixed(2)}
                   </span>
+                </div>
+              </div>
+
+              {/* Corner Radius */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between items-center">
+                  <label className="text-[0.7rem] font-semibold uppercase tracking-widest text-text/60">
+                    Corner Roundedness
+                  </label>
+                  <span className="text-[0.75rem] font-mono text-accent">
+                    {typography.borderRadius !== undefined ? `${typography.borderRadius}px` : '16px (default)'}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={40}
+                  step={2}
+                  value={typography.borderRadius !== undefined ? typography.borderRadius : 16}
+                  onChange={(e) => setTypoField('borderRadius', parseInt(e.target.value))}
+                  className="w-full accent-accent h-1.5"
+                />
+              </div>
+
+              {/* Glow Toggle */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[0.7rem] font-semibold uppercase tracking-widest text-text/60">
+                  Glow Effect
+                </label>
+                <div className="flex bg-white/5 border border-white/10 rounded-squircle-sm p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setTypoField('glowEnabled', true)}
+                    className={`flex-1 py-1.5 text-xs rounded-squircle-sm transition-all cursor-pointer ${
+                      typography.glowEnabled !== false
+                        ? 'bg-accent text-bg font-medium'
+                        : 'text-text/60 hover:text-text hover:bg-white/5'
+                    }`}
+                  >
+                    Enabled
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTypoField('glowEnabled', false)}
+                    className={`flex-1 py-1.5 text-xs rounded-squircle-sm transition-all cursor-pointer ${
+                      typography.glowEnabled === false
+                        ? 'bg-accent text-bg font-medium'
+                        : 'text-text/60 hover:text-text hover:bg-white/5'
+                    }`}
+                  >
+                    Disabled
+                  </button>
                 </div>
               </div>
             </div>

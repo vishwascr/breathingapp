@@ -188,6 +188,35 @@ const COLOR_TOKEN_MAP = {
 };
 
 /**
+ * Dynamically loads a Google Font if it is not a standard web-safe system font.
+ *
+ * @param {string} fontFamily
+ */
+function loadGoogleFont(fontFamily) {
+  if (!fontFamily) return;
+  const primaryFont = fontFamily.split(',')[0].replace(/['"]/g, '').trim();
+  if (!primaryFont) return;
+
+  const systemFonts = new Set([
+    'sans-serif', 'serif', 'monospace', 'cursive', 'fantasy', 'system-ui', '-apple-system',
+    'blinkmacsystemfont', 'segoe ui', 'roboto', 'helvetica', 'arial', 'georgia', 'times new roman',
+    'times', 'courier new', 'courier', 'trebuchet ms', 'verdana', 'geneva', 'tahoma'
+  ]);
+
+  if (systemFonts.has(primaryFont.toLowerCase())) return;
+
+  const linkId = `gfont-${primaryFont.toLowerCase().replace(/\s+/g, '-')}`;
+  if (document.getElementById(linkId)) return;
+
+  const link = document.createElement('link');
+  link.id = linkId;
+  link.rel = 'stylesheet';
+  const familyParam = primaryFont.replace(/\s+/g, '+');
+  link.href = `https://fonts.googleapis.com/css2?family=${familyParam}:wght@300;400;500;600;700&display=swap`;
+  document.head.appendChild(link);
+}
+
+/**
  * Apply a theme's colors and typography to the document root.
  *
  * @param {import('./themeSchema.js').ThemeColors}     colors
@@ -206,7 +235,8 @@ export function applyThemeToDom(colors, typography) {
   // Typography (all optional)
   if (typography) {
     if (typography.fontFamily) {
-      root.style.setProperty('--font-family', typography.fontFamily);
+      root.style.setProperty('--font-main', typography.fontFamily);
+      loadGoogleFont(typography.fontFamily);
     }
     if (typography.baseFontSize) {
       root.style.setProperty('--font-size-base', typography.baseFontSize);
@@ -223,6 +253,30 @@ export function applyThemeToDom(colors, typography) {
     if (typography.lineHeight !== undefined) {
       root.style.setProperty('--line-height', String(typography.lineHeight));
     }
+
+    // Border Radius (sm = radius, md = radius * 1.5, lg = radius * 2.5)
+    if (typography.borderRadius !== undefined) {
+      root.style.setProperty('--radius-squircle-sm', `${typography.borderRadius}px`);
+      root.style.setProperty('--radius-squircle-md', `${typography.borderRadius * 1.5}px`);
+      root.style.setProperty('--radius-squircle-lg', `${typography.borderRadius * 2.5}px`);
+    } else {
+      root.style.setProperty('--radius-squircle-sm', '1rem');
+      root.style.setProperty('--radius-squircle-md', '1.5rem');
+      root.style.setProperty('--radius-squircle-lg', '2.5rem');
+    }
+
+    // Glow toggle
+    if (typography.glowEnabled !== undefined) {
+      root.style.setProperty('--glow-opacity', typography.glowEnabled ? '1' : '0');
+    } else {
+      root.style.setProperty('--glow-opacity', '1');
+    }
+  } else {
+    // Defaults when no typography is specified
+    root.style.setProperty('--radius-squircle-sm', '1rem');
+    root.style.setProperty('--radius-squircle-md', '1.5rem');
+    root.style.setProperty('--radius-squircle-lg', '2.5rem');
+    root.style.setProperty('--glow-opacity', '1');
   }
 
   // Meta theme-color for mobile browser chrome

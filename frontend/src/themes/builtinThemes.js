@@ -37,9 +37,11 @@ const RAW_BUILTIN_THEMES = {
       mobileNavBorder: 'rgba(255, 255, 255, 0.05)',
     },
     typography: {
-      fontFamily: 'Inter, system-ui, sans-serif',
+      fontFamily: 'Lora, serif',
       bodyWeight: 300,
       headingWeight: 200,
+      borderRadius: 16,
+      glowEnabled: false,
     },
   },
 
@@ -64,9 +66,11 @@ const RAW_BUILTIN_THEMES = {
       mobileNavBorder: 'rgba(255, 255, 255, 0.1)',
     },
     typography: {
-      fontFamily: 'Inter, system-ui, sans-serif',
+      fontFamily: 'Nunito, sans-serif',
       bodyWeight: 300,
       headingWeight: 200,
+      borderRadius: 24,
+      glowEnabled: true,
     },
   },
 
@@ -95,6 +99,8 @@ const RAW_BUILTIN_THEMES = {
       bodyWeight: 300,
       headingWeight: 200,
       headingLetterSpacing: '0.05em',
+      borderRadius: 4,
+      glowEnabled: true,
     },
   },
 
@@ -119,9 +125,11 @@ const RAW_BUILTIN_THEMES = {
       mobileNavBorder: 'rgba(229, 57, 53, 0.12)',
     },
     typography: {
-      fontFamily: 'Inter, system-ui, sans-serif',
+      fontFamily: 'Cinzel, serif',
       bodyWeight: 300,
       headingWeight: 200,
+      borderRadius: 8,
+      glowEnabled: true,
     },
   },
 };

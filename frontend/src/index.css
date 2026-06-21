@@ -9,9 +9,9 @@
   --color-secondary: var(--color-secondary);
   --color-dim: var(--color-dim);
   
-  --radius-squircle-lg: 2.5rem; /* 40px for containers */
-  --radius-squircle-md: 1.5rem; /* 24px for large buttons/items */
-  --radius-squircle-sm: 1rem;   /* 16px for small buttons/inputs */
+  --radius-squircle-lg: var(--radius-squircle-lg);
+  --radius-squircle-md: var(--radius-squircle-md);
+  --radius-squircle-sm: var(--radius-squircle-sm);
 }
 
 :root {
@@ -29,6 +29,14 @@
 
   --color-accent-soft: rgba(255, 255, 255, 0.1);
   --color-text-dim: var(--color-dim);
+
+  /* Corner Roundedness defaults */
+  --radius-squircle-lg: 2.5rem; /* 40px */
+  --radius-squircle-md: 1.5rem; /* 24px */
+  --radius-squircle-sm: 1rem;   /* 16px */
+
+  /* Glow toggle (1 = on, 0 = off) — controlled by the theme system */
+  --glow-opacity: 1;
   
   /* Glassmorphism Styles - Keeping for gradual migration */
   --glass-bg: rgba(255, 255, 255, 0.05);
@@ -94,10 +102,12 @@ html {
 
 @utility glow-accent {
   box-shadow: 0 0 20px 2px var(--color-accent);
+  opacity: var(--glow-opacity);
 }
 
 @utility glow-indicator {
   box-shadow: 0 0 20px 2px var(--color-indicator);
+  opacity: var(--glow-opacity);
 }
 
 /* Custom Scrollbars */

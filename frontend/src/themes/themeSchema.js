@@ -147,6 +147,25 @@ export const ThemeTypographyV1Schema = z
     lineHeight: z
       .union([z.number().positive(), z.string().min(1)])
       .optional(),
+
+    // ── Shape & effects ────────────────────────────────────────
+
+    /**
+     * Base border-radius in pixels (applied to the "sm" tier).
+     * The "md" and "lg" tiers are derived proportionally.
+     *   sm = borderRadius px
+     *   md = borderRadius * 1.5 px
+     *   lg = borderRadius * 2.5 px
+     * Range: 0 (sharp) – 40 (very round).
+     */
+    borderRadius: z.number().min(0).max(40).optional(),
+
+    /**
+     * Whether glow / bloom shadow effects are rendered.
+     * When false, `--glow-opacity` is set to 0 and all
+     * `::after` glow pseudo-elements become invisible.
+     */
+    glowEnabled: z.boolean().optional(),
   })
   .passthrough();
 
