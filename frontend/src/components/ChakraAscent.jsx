@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, CheckCircle2, RotateCcw, 
   Sparkles, 
-  ChevronRight, PenTool, 
+  ChevronRight, ChevronLeft, PenTool, 
   Music, Clock,
   HelpCircle, Footprints, Droplet
 } from 'lucide-react';
@@ -222,6 +222,7 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
   
   // State
   const [stage, setStage] = useState(initialStage); // 'intro' | 'meditating' | 'transition' | 'complete'
+  const [countdownVal, setCountdownVal] = useState(0);
   const [chakraIndex, setChakraIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [responseText, setResponseText] = useState('');
@@ -294,11 +295,11 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
 
   const scale = stage !== 'meditating' 
     ? 1.0 
-    : (currentPhase === 'Inhale' || currentPhase === 'Hold' ? 2.5 : (currentPhase === 'Natural' ? 1.5 : 1.0));
+    : (countdownVal > 0 ? 1.0 : (currentPhase === 'Inhale' || currentPhase === 'Hold' ? 2.5 : (currentPhase === 'Natural' ? 1.5 : 1.0)));
 
   // Breathing loop timer (chakra-specific dynamic counts and phases)
   useEffect(() => {
-    if (stage !== 'meditating') {
+    if (stage !== 'meditating' || countdownVal > 0) {
       if (breathTimerRef.current) clearInterval(breathTimerRef.current);
       return;
     }
@@ -341,12 +342,58 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
     return () => clearInterval(timerRef.current);
   }, [timerRunning]);
 
+  const navigateToChakra = useCallback((newIndex) => {
+    if (newIndex >= 0 && newIndex < CHAKRAS.length) {
+      setChakraIndex(newIndex);
+      setQuestionIndex(0);
+      setResponseText('');
+      setPatternIndex(0);
+      setCountdownVal(0); // Cancel countdown on manual transition
+    } else if (newIndex === CHAKRAS.length) {
+      setStage('complete');
+    }
+  }, []);
+
+  // Countdown Timer Logic (Integrated directly inside meditating stage)
+  useEffect(() => {
+    if (stage !== 'meditating' || countdownVal <= 0) return;
+
+    const timer = setTimeout(() => {
+      setCountdownVal(prev => prev - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [stage, countdownVal]);
+
+  // Keyboard navigation logic for chakras
+  useEffect(() => {
+    if (stage !== 'meditating') return;
+    const handleChakraKeys = (e) => {
+      if (
+        document.activeElement.tagName === 'INPUT' || 
+        document.activeElement.tagName === 'TEXTAREA'
+      ) {
+        return;
+      }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        navigateToChakra(chakraIndex - 1);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        navigateToChakra(chakraIndex + 1);
+      }
+    };
+    window.addEventListener('keydown', handleChakraKeys);
+    return () => window.removeEventListener('keydown', handleChakraKeys);
+  }, [stage, chakraIndex, navigateToChakra]);
+
   const handleStartAscent = () => {
     setAnswers([]);
     setChakraIndex(0);
     setQuestionIndex(0);
     setResponseText('');
     setStage('meditating');
+    setCountdownVal(3);
     setHistorySaved(false);
     setSessionRating(0);
     sessionStartTimeRef.current = Date.now();
@@ -550,25 +597,55 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
         {stage === 'meditating' && (
           <div className="flex-1 flex flex-col items-center justify-center gap-4 md:gap-12 w-full max-w-5xl mx-auto min-h-0">
             
-            {/* Pulsing Breathing Ring matching size/layout in Practice.jsx */}
-            <div className="relative w-[250px] h-[250px] md:w-[450px] md:h-[450px] flex justify-center items-center shrink-0">
-              {/* Core scale circle mirroring Practice.jsx exactly */}
-              <div 
-                className="absolute w-20 h-20 md:w-40 md:h-40 rounded-full flex flex-col justify-center items-center text-center font-extralight border border-white/10 z-10 bg-black/50 text-white"
-                style={{
-                  transform: `scale(${scale})`,
-                  transition: currentPhase === 'Natural' ? 'transform 4s ease-in-out' : `transform ${currentPhaseDuration}s ease-in-out`,
-                  boxShadow: `0 0 15px 2px ${activeChakra.colorClasses.glowColor}, 0 0 50px 8px ${activeChakra.colorClasses.glowColor}, inset 0 0 10px rgba(255, 255, 255, 0.1)`
-                }}
+            {/* Navigation & Pulsing Breathing Ring Layout */}
+            <div className="flex items-center justify-center gap-4 md:gap-12 w-full max-w-4xl min-h-0 select-none">
+              {/* Left Arrow Button */}
+              <button
+                onClick={() => navigateToChakra(chakraIndex - 1)}
+                disabled={chakraIndex === 0}
+                className={`p-2.5 md:p-3.5 rounded-full border transition-all cursor-pointer ${
+                  chakraIndex === 0 
+                    ? 'border-white/5 text-dim/15 cursor-not-allowed opacity-30' 
+                    : 'border-white/10 text-dim hover:text-text hover:bg-white/5 hover:border-white/20'
+                }`}
+                title="Previous Chakra (Left Arrow)"
               >
-                {currentPhase === 'Natural' ? (
-                  <Sparkles className={`w-8 h-8 md:w-12 md:h-12 ${activeChakra.colorClasses.accent} animate-pulse`} />
-                ) : (
-                  <span className="text-[2rem] md:text-[3.5rem] font-light leading-none animate-fadeIn">
-                    {secondsLeft}
-                  </span>
-                )}
+                <ChevronLeft size={20} className="md:w-6 md:h-6" />
+              </button>
+
+              {/* Pulsing Breathing Ring matching size/layout in Practice.jsx */}
+              <div className="relative w-[210px] h-[210px] md:w-[410px] md:h-[410px] flex justify-center items-center shrink-0">
+                {/* Core scale circle mirroring Practice.jsx exactly */}
+                <div 
+                  className="absolute w-20 h-20 md:w-40 md:h-40 rounded-full flex flex-col justify-center items-center text-center font-extralight border border-white/10 z-10 bg-black/50 text-white"
+                  style={{
+                    transform: `scale(${scale})`,
+                    transition: countdownVal > 0 ? 'transform 0.3s ease-out' : (currentPhase === 'Natural' ? 'transform 4s ease-in-out' : `transform ${currentPhaseDuration}s ease-in-out`),
+                    boxShadow: `0 0 15px 2px ${activeChakra.colorClasses.glowColor}, 0 0 50px 8px ${activeChakra.colorClasses.glowColor}, inset 0 0 10px rgba(255, 255, 255, 0.1)`
+                  }}
+                >
+                  {countdownVal > 0 ? (
+                    <span className="text-[2.5rem] md:text-[3.5rem] font-light leading-none animate-fadeIn text-white">
+                      {countdownVal}
+                    </span>
+                  ) : currentPhase === 'Natural' ? (
+                    <Sparkles className={`w-8 h-8 md:w-12 md:h-12 ${activeChakra.colorClasses.accent} animate-pulse`} />
+                  ) : (
+                    <span className="text-[2rem] md:text-[3.5rem] font-light leading-none animate-fadeIn">
+                      {secondsLeft}
+                    </span>
+                  )}
+                </div>
               </div>
+
+              {/* Right Arrow Button */}
+              <button
+                onClick={() => navigateToChakra(chakraIndex + 1)}
+                className="p-2.5 md:p-3.5 rounded-full border border-white/10 text-dim hover:text-text hover:bg-white/5 hover:border-white/20 transition-all cursor-pointer"
+                title={chakraIndex === 6 ? "Complete Ascent" : "Next Chakra (Right Arrow)"}
+              >
+                <ChevronRight size={20} className="md:w-6 md:h-6" />
+              </button>
             </div>
 
             {/* Inquiries and Input Stack matching Practice.jsx text stack */}
@@ -578,7 +655,7 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
               <div className="flex flex-col items-center text-center gap-2 min-h-[140px] md:min-h-[180px] justify-center">
                 {/* Dynamic Breath Phase & Mantra */}
                 <div className="text-[1.2rem] md:text-[1.8rem] font-thin text-text uppercase tracking-[0.6rem] md:tracking-[1rem] whitespace-nowrap mb-1">
-                  {currentPhase} — {activeChakra.mantra}
+                  {countdownVal > 0 ? 'PREPARE' : `${currentPhase} — ${activeChakra.mantra}`}
                 </div>
                 
                 {/* Optional humming notice for Throat Chakra Exhale */}
@@ -615,16 +692,28 @@ function ChakraAscent({ initialStage = 'intro', setIsSessionActive }) {
                 />
               </div>
 
-              {/* Action Button */}
-              <Button 
-                onClick={handleNextStep} 
-                variant="primary"
-                size="none"
-                className="text-base md:text-lg tracking-widest shrink-0"
-              >
-                <span>{responseText.trim() === '' ? 'Reflect in Silence' : 'Save & Continue'}</span>
-                <ChevronRight size={18} />
-              </Button>
+              {/* Action Buttons: Reflect in Silence & End Session */}
+              <div className="flex items-center gap-3 w-full max-w-md px-4 justify-center">
+                {responseText.trim() === '' && (
+                  <Button
+                    onClick={() => setStage('complete')}
+                    variant="secondary"
+                    size="none"
+                    className="text-sm md:text-base tracking-widest shrink-0 border-rose-500/20 hover:border-rose-500/40 text-rose-400 hover:bg-rose-500/5 cursor-pointer font-light px-5 py-3.5"
+                  >
+                    <span>End Session</span>
+                  </Button>
+                )}
+                <Button 
+                  onClick={handleNextStep} 
+                  variant="primary"
+                  size="none"
+                  className="text-sm md:text-base tracking-widest shrink-0 flex-1 py-3.5 cursor-pointer"
+                >
+                  <span>{responseText.trim() === '' ? 'Reflect in Silence' : 'Save & Continue'}</span>
+                  <ChevronRight size={18} />
+                </Button>
+              </div>
               
             </div>
           </div>

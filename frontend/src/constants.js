@@ -40,7 +40,6 @@ export const INITIAL_METHODS = {
     name: 'The Complete Breath',
     category: 'Vitality',
     pattern: [5, 3, 6, 0],
-    isNew: true,
     description: 'A foundational practice that fills the entire lungs. It involves a smooth sweep from the diaphragm to the collar-bone.',
     steps: [
       'Get into position: Stand or sit erect.',
@@ -62,7 +61,6 @@ export const INITIAL_METHODS = {
     name: 'Resonance Breathing',
     category: 'Balance',
     pattern: [5, 0, 5, 0],
-    isNew: true,
     description: 'Breathing at a rate of 5-6 breaths per minute to balance the autonomic nervous system and reduce anxiety.',
     steps: [
       'Inhale for 5 seconds.',
