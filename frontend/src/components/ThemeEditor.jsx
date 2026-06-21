@@ -56,6 +56,7 @@ const COLOR_GROUPS = [
 const FONT_WEIGHT_OPTIONS = [100, 200, 300, 400, 500, 600, 700, 800, 900];
 
 const FONT_PRESETS = [
+  'Helvetica, Arial, sans-serif',
   'Inter, sans-serif',
   'Lato, sans-serif',
   'Nunito, sans-serif',

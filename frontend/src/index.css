@@ -12,6 +12,14 @@
   --radius-squircle-lg: var(--radius-squircle-lg);
   --radius-squircle-md: var(--radius-squircle-md);
   --radius-squircle-sm: var(--radius-squircle-sm);
+
+  /* Map standard Tailwind border-radius to the theme's dynamic squircle properties */
+  --radius-sm: var(--radius-squircle-sm);
+  --radius-md: var(--radius-squircle-md);
+  --radius-lg: var(--radius-squircle-lg);
+  --radius-xl: var(--radius-squircle-lg);
+  --radius-2xl: var(--radius-squircle-lg);
+  --radius-3xl: var(--radius-squircle-lg);
 }
 
 :root {
