@@ -57,7 +57,7 @@ function ThemeRow({ entry, isActive, onSelect, onEdit, onExport, onRemove, isBui
         </div>
 
         {/* Name + badges */}
-        <div className="flex flex-col min-w-0">
+        <div className="hidden sm:flex flex-col min-w-0">
           <span className={`text-sm font-light tracking-wide truncate ${isActive ? 'text-bg' : 'text-text'}`}>
             {def.name}
           </span>
@@ -82,49 +82,48 @@ function ThemeRow({ entry, isActive, onSelect, onEdit, onExport, onRemove, isBui
       </button>
 
       {/* ── Action buttons ── */}
-      <div className="flex items-center gap-1 shrink-0">
+      <div className="flex items-center gap-1.5 shrink-0">
         {/* Edit / Customize */}
         <button
           onClick={() => onEdit(entry)}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[0.6rem] uppercase tracking-widest font-medium transition-all ${
+          className={`w-8 h-8 flex items-center justify-center rounded-squircle-sm transition-all cursor-pointer ${
             isActive
-              ? 'bg-bg/20 text-bg hover:bg-bg/30'
-              : 'bg-white/5 text-dim hover:bg-white/10 hover:text-accent'
+              ? 'bg-bg/25 text-bg hover:bg-bg/40'
+              : 'bg-white/5 border border-white/10 text-dim hover:bg-white/10 hover:text-accent'
           }`}
           title={`Customize "${def.name}"`}
           aria-label={`Edit ${def.name}`}
         >
-          <Sliders size={11} />
-          <span className="hidden sm:inline">Edit</span>
+          <Sliders size={12} />
         </button>
 
         {/* Export */}
         <button
           onClick={() => onExport(key)}
-          className={`p-2 rounded-full transition-all ${
+          className={`w-8 h-8 flex items-center justify-center rounded-squircle-sm transition-all cursor-pointer ${
             isActive
-              ? 'text-bg/60 hover:text-bg hover:bg-bg/10'
-              : 'text-dim hover:text-accent hover:bg-white/10'
+              ? 'bg-bg/25 text-bg hover:bg-bg/40'
+              : 'bg-white/5 border border-white/10 text-dim hover:text-accent hover:bg-white/10'
           }`}
           title={`Export "${def.name}" as .theme`}
           aria-label={`Export ${def.name}`}
         >
-          <Download size={14} />
+          <Download size={12} />
         </button>
 
         {/* Remove (custom themes only) */}
         {!isBuiltin(key) && (
           <button
             onClick={() => onRemove(key)}
-            className={`p-2 rounded-full transition-all ${
+            className={`w-8 h-8 flex items-center justify-center rounded-squircle-sm transition-all cursor-pointer ${
               isActive
-                ? 'text-bg/60 hover:text-red-300 hover:bg-red-500/20'
-                : 'text-dim hover:text-red-400 hover:bg-red-500/10'
+                ? 'bg-red-500/20 text-bg hover:bg-red-500/30'
+                : 'bg-white/5 border border-white/10 text-dim hover:text-red-400 hover:bg-white/10'
             }`}
             title={`Remove "${def.name}"`}
             aria-label={`Remove ${def.name}`}
           >
-            <Trash2 size={14} />
+            <Trash2 size={12} />
           </button>
         )}
       </div>

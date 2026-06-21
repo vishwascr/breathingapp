@@ -103,35 +103,6 @@ const RAW_BUILTIN_THEMES = {
       glowEnabled: true,
     },
   },
-
-  monster: {
-    name: 'Monster',
-    description: 'Bold red and amber — intense and focused.',
-    author: 'Project Unlearn',
-    colors: {
-      bg: '#0B0B0B',
-      accent: '#E53935',
-      indicator: '#FFB74D',
-      glass: '#141414',
-      text: '#FFFFFF',
-      secondary: '#222222',
-      dim: '#9E9E9E',
-      cooldown: '#FF6B35',
-      sidebarBg: 'rgba(20, 20, 20, 0.7)',
-      sidebarBlur: '20px',
-      sidebarBorder: 'rgba(229, 57, 53, 0.12)',
-      mobileNavBg: 'rgba(20, 20, 20, 0.7)',
-      mobileNavBlur: '24px',
-      mobileNavBorder: 'rgba(229, 57, 53, 0.12)',
-    },
-    typography: {
-      fontFamily: 'Cinzel, serif',
-      bodyWeight: 300,
-      headingWeight: 200,
-      borderRadius: 8,
-      glowEnabled: true,
-    },
-  },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
