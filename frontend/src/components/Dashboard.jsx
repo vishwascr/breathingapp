@@ -357,7 +357,7 @@ function Dashboard({ historyStats, methods, openMethodModal, challengeActive, ch
                 Loading Flow Graph...
               </Card>
             }>
-              <WeeklyGraph practicedDates={historyStats.practicedDates || {}} />
+              <WeeklyGraph practicedDates={historyStats.practicedDates || {}} challengeStartDate={challengeStartDate} />
             </Suspense>
 
             {/* Core Telemetry Metrics Grid */}
